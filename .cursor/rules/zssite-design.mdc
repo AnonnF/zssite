@@ -1,0 +1,49 @@
+---
+description: Use this rule for UI, UX, visual design, layout, typography, components, and styling work in ZSsite.
+alwaysApply: false
+---
+
+# ZSsite Design Rules
+
+Apply this rule when designing or implementing **any UI, UX, layout, typography, or styling** for ZSsite.
+
+## Required reading (in order)
+
+1. **`docs/design/visual-style.md`** — primary design spec (colors, type, panels, do-nots).
+2. **`docs/design/site-structure.md`** — page roles and component expectations.
+3. **`docs/skills/claude-code/`** — if any Claude Code design skill markdown exists here (e.g. `ui-ux-pro-max.md`, `awesome-design.md`, `frontend-design.md`), read as supplementary reference. If a skill conflicts with `visual-style.md`, **follow visual-style.md**.
+4. Subdirectory skills (e.g. `ui-ux-pro-max/SKILL.md`) may also be consulted when present.
+
+## Visual requirements (non-negotiable)
+
+- **Background:** beige / off-white (`#F5F0E8`–`#FAF7F2` range).
+- **Typography:** black primary text; bold geometric headings; thin black dividers.
+- **Layout:** modular information panels, editorial left-aligned structure, archive density where appropriate.
+- **Accents:** minimal — black borders, underlines, metadata labels; no blue-purple gradients.
+- **Decorations:** optional low-contrast stripes only; must not dominate.
+- **Chinese-first:** main readable content in Chinese; English for small labels / metadata (e.g. `PROJECT ARCHIVE`, `SYSTEMS`).
+
+## Component direction
+
+| Area | Direction |
+|------|-----------|
+| Header | Slim bar, 1px bottom border, text nav, beige solid background |
+| Hero | Large bold title + short subtitle; no video bg, no gradient CTA |
+| Project Card | Bordered panel or ruled list row; meta + tags; no large shadow / pill chips |
+| Footer | Minimal — copyright, links, top border |
+
+Details: see `visual-style.md` §6.
+
+## Avoid
+
+- Default **SaaS** or **shadcn** aesthetic (large rounded cards, muted gray surfaces, purple focus rings, glass blur).
+- Blue / purple gradients, glassmorphism, excessive box-shadow, neon cyberpunk.
+- Generic portfolio templates (centered hero + skill percentage bars + round avatar).
+- **ARC Raiders** brand assets: logo, characters, official art, official copy, pixel-level UI clone.
+
+## Implementation notes
+
+- Border radius: **0–4px** default (prefer 0 or 2px).
+- Shadows: avoid or use only for subtle elevation on interactive states — prefer border changes.
+- Use design tokens / CSS variables aligned with `visual-style.md` §9 when implementing.
+- Match existing component patterns before introducing new abstractions.

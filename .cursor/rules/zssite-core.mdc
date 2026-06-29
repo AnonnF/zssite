@@ -1,0 +1,39 @@
+---
+description: Core project identity and global rules for ZSsite.
+alwaysApply: true
+---
+
+# ZSsite Core Rules
+
+You are working on **ZSsite**, a Chinese-first personal website for **Zhan Shi / 施展**.
+
+## Project identity
+
+- **What it is:** A personal site + engineering project archive — not a SaaS landing page, not a game official site, not a generic portfolio template.
+- **First version:** Chinese-primary content and UI copy.
+- **Future:** Chinese / English language switching; structure URLs and content for i18n from the start.
+- **Future feature:** Project Analyzer — automated or semi-automated analysis of repos (GitHub / GitLab / local). Not in v1; reserve data fields and naming.
+
+## Visual direction (summary)
+
+- Beige + black, editorial, industrial, structured, archive-like.
+- Reference mood: ARC Raiders–inspired layout language (bold type, thin dividers, info panels) — **never** copy its logo, assets, copy, or exact graphics.
+- Full spec: `docs/design/visual-style.md`
+
+## Site structure
+
+- Read `docs/design/site-structure.md` before adding routes or pages.
+- v1 pages: Home, Projects, Project Detail, About, Contact.
+
+## Technical expectations
+
+- Stack: **React**, **Next.js**, **TypeScript** — keep code clean and maintainable.
+- **Data-driven content:** Project lists, metadata, and copy should live in `content/` or `data/` (JSON, MDX, TS), not hardcoded in components when translation or reuse is likely.
+- **Reusable components:** Sections, cards, labels, dividers, meta panels — avoid one-off page-specific styling sprawl.
+- **i18n-ready:** Even before EN is shipped, avoid embedding long Chinese strings directly in JSX when they belong in a dictionary or content file.
+
+## Do not
+
+- Build a generic SaaS template (gradient hero, pricing, testimonial carousel, glass cards).
+- Add pages or features not in the current scope without aligning with `site-structure.md`.
+- Implement Project Analyzer in v1 unless explicitly requested.

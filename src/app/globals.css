@@ -1,0 +1,34 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-bg: #f7f3ec;
+  --color-surface: #efebe3;
+  --color-text: #1a1a1a;
+  --color-muted: #5a5a5a;
+  --color-border: #1a1a1a;
+}
+
+@layer base {
+  html {
+    @apply scroll-smooth;
+  }
+
+  body {
+    @apply bg-bg text-text antialiased;
+    font-family: var(--font-body-sc), var(--font-body), sans-serif;
+  }
+}
+
+@layer utilities {
+  .stripe-bg {
+    background-image: repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 6px,
+      rgba(26, 26, 26, 0.04) 6px,
+      rgba(26, 26, 26, 0.04) 7px
+    );
+  }
+}
