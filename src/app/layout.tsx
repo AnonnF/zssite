@@ -31,6 +31,10 @@ const notoSansSC = Noto_Sans_SC({
 export const metadata: Metadata = {
   title: "ZSsite — 施展",
   description: "施展的个人网站与工程项目档案",
+  icons: {
+    icon: [{ url: "/images/zssiteIcon.png", type: "image/png" }],
+    apple: "/images/zssiteIcon.png",
+  },
 };
 
 export default function RootLayout({
