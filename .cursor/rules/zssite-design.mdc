@@ -16,7 +16,8 @@ Apply this rule when designing or implementing **any UI, UX, layout, typography,
 
 ## Visual requirements (non-negotiable)
 
-- **Background:** beige / off-white (`#F5F0E8`–`#FAF7F2` range).
+- **Background:** beige / off-white (`#FAF8F5` range).
+- **Accent:** brand yellow `#F1AA1C` — use sparingly for hover borders, metadata, tags, section marks; never as large-area fill.
 - **Typography:** black primary text; bold geometric headings; thin black dividers.
 - **Layout:** modular information panels, editorial left-aligned structure, archive density where appropriate.
 - **Accents:** minimal — black borders, underlines, metadata labels; no blue-purple gradients.

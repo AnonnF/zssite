@@ -9,11 +9,15 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        bg: "#F7F3EC",
-        surface: "#EFEBE3",
-        text: "#1A1A1A",
-        muted: "#5A5A5A",
-        border: "#1A1A1A",
+        bg: "var(--color-bg)",
+        surface: "var(--color-surface)",
+        text: "var(--color-text)",
+        muted: "var(--color-muted)",
+        border: "var(--color-border-strong)",
+        "border-soft": "var(--color-border)",
+        accent: "var(--color-accent)",
+        "accent-muted": "var(--color-accent-muted)",
+        card: "var(--color-card)",
       },
       fontFamily: {
         display: ["var(--font-display)", "sans-serif"],
@@ -33,6 +37,13 @@ const config: Config = {
       },
       spacing: {
         section: "5rem",
+      },
+      borderRadius: {
+        sm: "var(--radius-sm)",
+      },
+      boxShadow: {
+        card: "var(--shadow-card)",
+        "card-hover": "var(--shadow-card-hover)",
       },
     },
   },

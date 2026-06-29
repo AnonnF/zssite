@@ -3,11 +3,23 @@
 @tailwind utilities;
 
 :root {
-  --color-bg: #f7f3ec;
-  --color-surface: #efebe3;
-  --color-text: #1a1a1a;
-  --color-muted: #5a5a5a;
-  --color-border: #1a1a1a;
+  --color-bg: #faf8f5;
+  --color-surface: #f5f2ec;
+  --color-text: #111111;
+  --color-muted: #6f6a61;
+  --color-border: rgba(17, 17, 17, 0.12);
+  --color-border-strong: rgba(17, 17, 17, 0.24);
+  --color-accent: #f1aa1c;
+  --color-accent-muted: rgba(241, 170, 28, 0.14);
+  --color-card: rgba(255, 255, 255, 0.42);
+  --radius-sm: 2px;
+  --shadow-card: 0 1px 2px rgba(17, 17, 17, 0.04);
+  --shadow-card-hover: 0 6px 20px rgba(17, 17, 17, 0.07);
+  --transition-card: border-color 0.22s ease, box-shadow 0.22s ease,
+    transform 0.22s ease, background-color 0.22s ease;
+  --bg-grid: linear-gradient(to right, rgba(17, 17, 17, 0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(17, 17, 17, 0.035) 1px, transparent 1px);
+  --bg-noise: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
 }
 
 @layer base {
@@ -18,6 +30,74 @@
   body {
     @apply bg-bg text-text antialiased;
     font-family: var(--font-body-sc), var(--font-body), sans-serif;
+    background-image: var(--bg-grid), var(--bg-noise);
+    background-size: 32px 32px, auto;
+  }
+}
+
+@layer components {
+  .panel-card {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background-color: var(--color-card);
+    box-shadow: var(--shadow-card);
+    transition: var(--transition-card);
+  }
+
+  .panel-card-interactive:hover {
+    border-color: var(--color-accent);
+    box-shadow: var(--shadow-card-hover);
+    transform: translateY(-2px);
+  }
+
+  .accent-bar {
+    display: block;
+    width: 3px;
+    height: 1rem;
+    background-color: var(--color-accent);
+    border-radius: 1px;
+    flex-shrink: 0;
+  }
+
+  .accent-dot {
+    display: block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: var(--color-accent);
+    flex-shrink: 0;
+  }
+
+  .accent-mark-corner {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 8px;
+    height: 8px;
+    background-color: var(--color-accent);
+    border-radius: 0 0 0 var(--radius-sm);
+  }
+
+  .enter-indicator {
+    @apply inline-flex items-center gap-2 font-mono text-meta font-medium uppercase tracking-wider text-muted;
+    transition: color 0.2s ease, transform 0.2s ease;
+  }
+
+  .group:hover .enter-indicator,
+  .panel-card-interactive:hover .enter-indicator {
+    color: var(--color-accent);
+    transform: translateX(4px);
+  }
+
+  .section-heading-row {
+    @apply flex items-start gap-3;
+  }
+
+  .nav-link-active {
+    color: var(--color-text);
+    text-decoration: underline;
+    text-decoration-color: var(--color-accent);
+    text-underline-offset: 4px;
   }
 }
 
@@ -27,8 +107,21 @@
       -45deg,
       transparent,
       transparent 6px,
-      rgba(26, 26, 26, 0.04) 6px,
-      rgba(26, 26, 26, 0.04) 7px
+      rgba(17, 17, 17, 0.03) 6px,
+      rgba(17, 17, 17, 0.03) 7px
     );
+  }
+
+  .bg-grid-subtle {
+    --bg-grid: linear-gradient(
+        to right,
+        rgba(17, 17, 17, 0.04) 1px,
+        transparent 1px
+      ),
+      linear-gradient(to bottom, rgba(17, 17, 17, 0.04) 1px, transparent 1px);
+  }
+
+  .bg-noise-subtle {
+    --bg-noise: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
   }
 }
