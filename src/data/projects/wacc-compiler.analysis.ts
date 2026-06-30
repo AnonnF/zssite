@@ -301,4 +301,48 @@ sbt compile
       language: "scala",
     },
   },
+  pipeline: [
+    {
+      id: "source",
+      label: "Source Code",
+      path: "src",
+      language: "WACC",
+      role: "Input program written in WACC",
+    },
+    {
+      id: "lexer",
+      label: "Lexer",
+      path: "src/lexer",
+      language: "Scala",
+      role: "Converts source text into tokens",
+    },
+    {
+      id: "parser",
+      label: "Parser",
+      path: "src/parser",
+      language: "Scala",
+      role: "Builds the abstract syntax tree",
+    },
+    {
+      id: "ast",
+      label: "AST",
+      path: "src/ast",
+      language: "Scala",
+      role: "Shared intermediate representation for later stages",
+    },
+    {
+      id: "semantic",
+      label: "Semantic Checker",
+      path: "src/semantic",
+      language: "Scala",
+      role: "Validates types, scopes, and program rules",
+    },
+    {
+      id: "codegen",
+      label: "Codegen",
+      path: "src/codegen",
+      language: "Scala / ARM",
+      role: "Generates ARM assembly output",
+    },
+  ],
 };

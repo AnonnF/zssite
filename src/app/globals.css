@@ -236,6 +236,21 @@
     line-height: inherit;
     white-space: pre;
   }
+
+  .pipeline-node {
+    border-radius: var(--radius-sm);
+  }
+
+  .pipeline-node--active {
+    border-color: var(--color-accent);
+    background-color: var(--color-accent-muted);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-accent) 35%, transparent);
+  }
+
+  .pipeline-node--active:hover {
+    border-color: var(--color-accent);
+    background-color: var(--color-accent-muted);
+  }
 }
 
 @layer utilities {

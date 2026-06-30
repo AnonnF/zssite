@@ -1,9 +1,15 @@
-import type { ProjectAnalyzerData, ProjectAnalysisEntry, ProjectTreeNode } from "./types";
+import type {
+  ProjectAnalyzerData,
+  ProjectAnalysisEntry,
+  ProjectPipelineNode,
+  ProjectTreeNode,
+} from "./types";
 import { waccCompilerAnalysis } from "./wacc-compiler.analysis";
 
 export type {
   ProjectAnalyzerData,
   ProjectAnalysisEntry,
+  ProjectPipelineNode,
   ProjectTreeNode,
 } from "./types";
 
@@ -101,4 +107,23 @@ export function collectAllFolderPaths(nodes: ProjectTreeNode[]): string[] {
 
   walk(nodes);
   return paths;
+}
+
+export function resolveActivePipelineNodeId(
+  pipeline: ProjectPipelineNode[],
+  selectedPath: string
+): string | null {
+  let best: ProjectPipelineNode | null = null;
+
+  for (const node of pipeline) {
+    const matches =
+      selectedPath === node.path ||
+      (node.path !== "" && selectedPath.startsWith(`${node.path}/`));
+
+    if (matches && (!best || node.path.length > best.path.length)) {
+      best = node;
+    }
+  }
+
+  return best?.id ?? null;
 }

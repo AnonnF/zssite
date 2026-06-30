@@ -15,10 +15,20 @@ export type ProjectAnalysisEntry = {
   code?: string;
 };
 
+export type ProjectPipelineNode = {
+  id: string;
+  label: string;
+  path: string;
+  language: string;
+  role: string;
+  kind?: string;
+};
+
 export type ProjectAnalyzerData = {
   projectId: string;
   title: string;
   description: string;
   tree: ProjectTreeNode[];
   entries: Record<string, ProjectAnalysisEntry>;
+  pipeline?: ProjectPipelineNode[];
 };

@@ -14,6 +14,7 @@ import { FileTree } from "./FileTree";
 import { FileAnalysisPanel } from "./FileAnalysisPanel";
 import { CodePreview } from "./CodePreview";
 import { FolderOverview } from "./FolderOverview";
+import { ProjectArchitecture } from "./ProjectArchitecture";
 
 interface ProjectAnalyzerProps {
   data: ProjectAnalyzerData;
@@ -57,30 +58,45 @@ export function ProjectAnalyzer({
     setExpandedPaths(new Set([""]));
   }, []);
 
-  const handleNodeClick = useCallback((node: ProjectTreeNode) => {
-    const { path, type, children } = node;
-    const hasChildren = type === "folder" && (children?.length ?? 0) > 0;
+  const selectPath = useCallback(
+    (path: string, options?: { toggleFolder?: boolean }) => {
+      setSelectedPath(path);
 
-    setSelectedPath(path);
+      setExpandedPaths((prev) => {
+        const next = new Set(prev);
 
-    setExpandedPaths((prev) => {
-      const next = new Set(prev);
+        for (const ancestor of collectAncestorPaths(path)) {
+          next.add(ancestor);
+        }
 
-      for (const ancestor of collectAncestorPaths(path)) {
-        next.add(ancestor);
-      }
+        if (options?.toggleFolder) {
+          const node = findTreeNode(data.tree, path);
+          const hasChildren =
+            node?.type === "folder" && (node.children?.length ?? 0) > 0;
 
-      if (type === "folder" && hasChildren) {
-        if (next.has(path)) {
-          next.delete(path);
+          if (node?.type === "folder" && hasChildren) {
+            if (next.has(path)) {
+              next.delete(path);
+            } else {
+              next.add(path);
+            }
+          }
         } else {
           next.add(path);
         }
-      }
 
-      return next;
-    });
-  }, []);
+        return next;
+      });
+    },
+    [data.tree]
+  );
+
+  const handleNodeClick = useCallback(
+    (node: ProjectTreeNode) => {
+      selectPath(node.path, { toggleFolder: true });
+    },
+    [selectPath]
+  );
 
   return (
     <div className="panel-card overflow-hidden">
@@ -140,6 +156,14 @@ export function ProjectAnalyzer({
           </div>
         </div>
       </div>
+
+      {data.pipeline && data.pipeline.length > 0 && (
+        <ProjectArchitecture
+          pipeline={data.pipeline}
+          selectedPath={selectedPath}
+          onNodeClick={selectPath}
+        />
+      )}
     </div>
   );
 }
