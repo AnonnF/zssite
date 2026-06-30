@@ -68,7 +68,7 @@ export function getAnalysisEntry(
     path,
     type,
     title: name,
-    summary: "No detailed analysis available for this path yet.",
+    summary: "暂无该路径的详细分析。",
   };
 }
 

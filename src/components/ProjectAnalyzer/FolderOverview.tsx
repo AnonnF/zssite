@@ -69,7 +69,7 @@ export function FolderOverview({
                           {child.name}
                         </span>
                         <p className="mt-1 font-[family-name:var(--font-body-sc)] text-meta leading-relaxed text-muted">
-                          {blurb ?? "No description yet."}
+                          {blurb ?? "暂无说明。"}
                         </p>
                       </div>
                       <span className="shrink-0 border border-border-soft px-1.5 py-0.5 font-mono text-meta uppercase tracking-wider text-muted transition-colors group-hover:border-border-strong">
@@ -82,11 +82,11 @@ export function FolderOverview({
             })}
           </ul>
         ) : (
-          <p className="mt-4 font-mono text-meta text-muted">This folder is empty.</p>
+          <p className="mt-4 font-mono text-meta text-muted">此文件夹为空。</p>
         )}
 
         <p className="mt-6 border-t border-border-soft pt-4 font-mono text-meta uppercase tracking-wider text-muted">
-          Select an item below or in the file tree to explore further.
+          在下方或左侧文件树中选择一项以继续浏览。
         </p>
       </div>
     </section>
