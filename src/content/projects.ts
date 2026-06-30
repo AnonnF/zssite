@@ -42,7 +42,7 @@ export const projects: Project[] = [
     stack: ["Java", "ANTLR", "ARM"],
     tags: ["Compiler", "Systems"],
     ref: "REF-002",
-    analysis: { status: "none" },
+    analysis: { status: "ready", source: "local" },
   },
   {
     slug: "bridgetalk",

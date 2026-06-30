@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Project } from "@/content/projects";
 import { Tag } from "@/components/ui/Tag";
 import { Divider } from "@/components/ui/Divider";
@@ -6,12 +7,20 @@ interface ProjectCardProps {
   project: Project;
   index: number;
   detailComingSoon: string;
+  viewDetail: string;
 }
 
-export function ProjectCard({ project, index, detailComingSoon }: ProjectCardProps) {
+export function ProjectCard({
+  project,
+  index,
+  detailComingSoon,
+  viewDetail,
+}: ProjectCardProps) {
   const displayNumber = String(index + 1).padStart(2, "0");
+  const hasDetail = project.analysis?.status === "ready";
+  const footerLabel = hasDetail ? viewDetail : detailComingSoon;
 
-  return (
+  const card = (
     <article className="panel-card panel-card-interactive group relative overflow-hidden">
       <span className="accent-mark-corner opacity-0 transition-opacity group-hover:opacity-100" />
 
@@ -61,7 +70,7 @@ export function ProjectCard({ project, index, detailComingSoon }: ProjectCardPro
           </div>
 
           <div className="mt-6 flex items-center justify-between border-t border-border-soft pt-4">
-            <span className="enter-indicator">{detailComingSoon}</span>
+            <span className="enter-indicator">{footerLabel}</span>
             <span className="font-mono text-lg text-accent opacity-0 transition-all group-hover:opacity-100 group-hover:translate-x-1">
               →
             </span>
@@ -70,4 +79,14 @@ export function ProjectCard({ project, index, detailComingSoon }: ProjectCardPro
       </div>
     </article>
   );
+
+  if (hasDetail) {
+    return (
+      <Link href={`/projects/${project.slug}`} className="block">
+        {card}
+      </Link>
+    );
+  }
+
+  return card;
 }

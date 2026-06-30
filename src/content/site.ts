@@ -39,6 +39,12 @@ export interface SiteContent {
     label: string;
     description: string;
     detailComingSoon: string;
+    viewDetail: string;
+  };
+  projectDetail: {
+    backToProjects: string;
+    analyzerLabel: string;
+    analyzerUnavailable: string;
   };
   placeholders: {
     about: { label: string; title: string; message: string };
@@ -93,6 +99,12 @@ export const siteContent: SiteContent = {
     description:
       "大学阶段完成的工程项目、AI 应用与 Web 产品，记录技术决策、结构分析与能力成长。",
     detailComingSoon: "查看详情 →（即将推出）",
+    viewDetail: "查看详情 →",
+  },
+  projectDetail: {
+    backToProjects: "返回项目列表",
+    analyzerLabel: "PROJECT ANALYZER",
+    analyzerUnavailable: "该项目的结构分析尚未就绪。",
   },
   placeholders: {
     about: {

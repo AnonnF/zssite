@@ -4,7 +4,7 @@ import { SectionLabel } from "@/components/ui/SectionLabel";
 import { ProjectCard } from "@/components/projects/ProjectCard";
 
 export default function ProjectsPage() {
-  const { title, label, description, detailComingSoon } = siteContent.projectsPage;
+  const { title, label, description, detailComingSoon, viewDetail } = siteContent.projectsPage;
 
   return (
     <div className="mx-auto max-w-content px-6 py-section md:px-12 lg:px-16">
@@ -32,6 +32,7 @@ export default function ProjectsPage() {
             project={project}
             index={index}
             detailComingSoon={detailComingSoon}
+            viewDetail={viewDetail}
           />
         ))}
       </div>
