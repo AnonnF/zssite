@@ -465,4 +465,130 @@ sbt compile
       role: "生成 ARM 汇编输出",
     },
   ],
+  guidedTour: [
+    {
+      id: "overview",
+      label: "Overview",
+      path: "",
+      title: "Project Overview",
+      description:
+        "先从项目根目录理解整体结构和编译器的主要阶段，建立对 WACC Compiler 的全局认识。",
+    },
+    {
+      id: "lexer",
+      label: "Lexer",
+      path: "src/lexer",
+      title: "Lexical Analysis",
+      description:
+        "查看源代码如何被转换成 token stream，理解 parser 的输入是如何形成的。",
+    },
+    {
+      id: "parser",
+      label: "Parser",
+      path: "src/parser",
+      title: "Parsing Stage",
+      description:
+        "理解 Parser 如何根据语法规则构建 AST，以及前端语法分析的核心结构。",
+    },
+    {
+      id: "ast",
+      label: "AST",
+      path: "src/ast",
+      title: "AST Definitions",
+      description:
+        "查看 AST 的类型定义，理解 Parser 与 Semantic Checker 之间的中间表示边界。",
+    },
+    {
+      id: "semantic",
+      label: "Semantic",
+      path: "src/semantic",
+      title: "Semantic Checking",
+      description:
+        "查看类型检查、作用域检查和语义错误检测如何完成，理解静态分析阶段的设计。",
+    },
+    {
+      id: "codegen",
+      label: "Codegen",
+      path: "src/codegen",
+      title: "Code Generation",
+      description:
+        "理解 AST 如何被转换为目标平台的 ARM 汇编，关注栈帧、寄存器约定与运行时调用。",
+    },
+    {
+      id: "tests",
+      label: "Tests",
+      path: "tests",
+      title: "Testing Strategy",
+      description:
+        "最后查看测试结构，理解项目如何分阶段验证 compiler pipeline 的正确性。",
+      note: "建议对照 ParserTests 与 SemanticTests 理解各阶段的测试边界。",
+    },
+  ],
+  narrative: {
+    technicalDecisions: [
+      {
+        title: "为什么采用分阶段 compiler pipeline",
+        decision:
+          "将编译过程拆分为 Lexer、Parser、AST、Semantic Checker 和 Codegen。",
+        rationale:
+          "每个阶段都有明确的输入输出，错误更容易定位，模块也可以独立开发与测试。",
+        impact:
+          "提高了项目的可维护性，并让前端语法分析与后端代码生成之间的职责边界更清晰。",
+      },
+      {
+        title: "为什么把 AST 作为 Parser 和 Semantic Checker 之间的边界",
+        decision:
+          "用独立的 AST 模块承载程序结构，Parser 只负责构建，Semantic Checker 只负责校验。",
+        rationale:
+          "AST 作为稳定中间表示，可以隔离语法细节与语义规则，避免两阶段相互渗透。",
+        impact:
+          "后续扩展语义规则或替换 parser 实现时，不必重写整个编译器前端。",
+      },
+      {
+        title: "为什么把语义检查和代码生成分开",
+        decision:
+          "Semantic Checker 验证程序合法性，Codegen 只处理已通过检查的 AST。",
+        rationale:
+          "语义错误应在进入后端前被拦截，codegen 可以假设输入程序在类型层面合法。",
+        impact:
+          "降低了 Codegen 的复杂度，也让语义错误报告集中在一个阶段完成。",
+      },
+      {
+        title: "为什么需要独立的测试结构验证各阶段",
+        decision:
+          "为 Parser、Semantic 等阶段分别编写单元测试，而不是只做端到端测试。",
+        rationale:
+          "分阶段测试可以在 pipeline 早期捕获回归，定位失败位置比全链路测试更快。",
+        impact:
+          "重构单个模块时更有信心，也更容易向访客展示每个阶段的验证方式。",
+      },
+    ],
+    skills: [
+      {
+        title: "Compiler Pipeline Design",
+        description:
+          "通过 Lexer → Parser → AST → Semantic → Codegen 的分层结构，展示了对编译器整体流程的设计能力。",
+      },
+      {
+        title: "Scala / Functional-style Modelling",
+        description:
+          "使用 Scala 与 ADT 建模 AST 和编译阶段，体现了对函数式数据建模与模块组织的掌握。",
+      },
+      {
+        title: "AST and Semantic Analysis",
+        description:
+          "通过 AST 定义与 Semantic Checker，展示了处理程序结构、类型规则与作用域管理的能力。",
+      },
+      {
+        title: "ARM Assembly Code Generation",
+        description:
+          "通过 ARM 汇编输出与栈帧/寄存器约定，展示了对底层执行模型与代码生成细节的理解。",
+      },
+      {
+        title: "Testing and Debugging Complex Systems",
+        description:
+          "通过分阶段测试与诊断信息设计，展示了在复杂系统中定位问题、验证行为的工程能力。",
+      },
+    ],
+  },
 };

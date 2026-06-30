@@ -297,6 +297,34 @@
     display: inline-block;
     color: var(--color-muted);
   }
+
+  .guided-tour-step {
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    background: transparent;
+  }
+
+  .guided-tour-step:hover:not(.guided-tour-step--active) {
+    border-color: var(--color-border);
+    background-color: color-mix(in srgb, var(--color-surface) 50%, transparent);
+  }
+
+  .guided-tour-step--active {
+    border-color: var(--color-accent);
+    background-color: var(--color-accent-muted);
+    color: var(--color-text);
+  }
+
+  .tree-header-action:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+
+  .tree-header-action:disabled:hover {
+    border-color: transparent;
+    background: transparent;
+    color: var(--color-muted);
+  }
 }
 
 @layer utilities {

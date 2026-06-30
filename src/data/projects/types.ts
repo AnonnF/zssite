@@ -39,6 +39,32 @@ export type ProjectPipelineNode = {
   kind?: string;
 };
 
+export type ProjectGuidedTourStep = {
+  id: string;
+  label: string;
+  path: string;
+  title: string;
+  description: string;
+  note?: string;
+};
+
+export type ProjectTechnicalDecision = {
+  title: string;
+  decision: string;
+  rationale: string;
+  impact: string;
+};
+
+export type ProjectSkillHighlight = {
+  title: string;
+  description: string;
+};
+
+export type ProjectNarrative = {
+  technicalDecisions?: ProjectTechnicalDecision[];
+  skills?: ProjectSkillHighlight[];
+};
+
 export type ProjectAnalyzerData = {
   projectId: string;
   title: string;
@@ -46,4 +72,6 @@ export type ProjectAnalyzerData = {
   tree: ProjectTreeNode[];
   entries: Record<string, ProjectAnalysisEntry>;
   pipeline?: ProjectPipelineNode[];
+  guidedTour?: ProjectGuidedTourStep[];
+  narrative?: ProjectNarrative;
 };

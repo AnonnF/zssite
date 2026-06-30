@@ -9,12 +9,14 @@ import {
   findTreeNode,
   getAnalysisEntry,
   getDirectChildren,
+  resolveActiveTourStepIndex,
 } from "@/data/projects";
 import { FileTree } from "./FileTree";
 import { FileAnalysisPanel } from "./FileAnalysisPanel";
 import { CodePreview } from "./CodePreview";
 import { FolderOverview } from "./FolderOverview";
 import { ProjectArchitecture } from "./ProjectArchitecture";
+import { GuidedTour } from "./GuidedTour";
 
 interface ProjectAnalyzerProps {
   data: ProjectAnalyzerData;
@@ -25,13 +27,16 @@ export function ProjectAnalyzer({
   data,
   defaultPath = "src",
 }: ProjectAnalyzerProps) {
+  const resolvedDefaultPath = data.guidedTour?.[0]?.path ?? defaultPath;
+
   const initialExpanded = useMemo(
-    () => new Set(collectExpandedPathsFor(defaultPath)),
-    [defaultPath]
+    () => new Set(collectExpandedPathsFor(resolvedDefaultPath)),
+    [resolvedDefaultPath]
   );
 
-  const [selectedPath, setSelectedPath] = useState(defaultPath);
+  const [selectedPath, setSelectedPath] = useState(resolvedDefaultPath);
   const [expandedPaths, setExpandedPaths] = useState<Set<string>>(initialExpanded);
+  const [activeTourStep, setActiveTourStep] = useState(0);
 
   const selectedNode = useMemo(
     () => findTreeNode(data.tree, selectedPath),
@@ -67,6 +72,10 @@ export function ProjectAnalyzer({
     (path: string, options?: { toggleFolder?: boolean }) => {
       setSelectedPath(path);
 
+      if (data.guidedTour?.length) {
+        setActiveTourStep(resolveActiveTourStepIndex(data.guidedTour, path));
+      }
+
       setExpandedPaths((prev) => {
         const next = new Set(prev);
 
@@ -93,7 +102,16 @@ export function ProjectAnalyzer({
         return next;
       });
     },
-    [data.tree]
+    [data.tree, data.guidedTour]
+  );
+
+  const handleTourStepSelect = useCallback(
+    (index: number) => {
+      const step = data.guidedTour?.[index];
+      if (!step) return;
+      selectPath(step.path);
+    },
+    [data.guidedTour, selectPath]
   );
 
   const handleNodeClick = useCallback(
@@ -120,6 +138,14 @@ export function ProjectAnalyzer({
           {data.description}
         </p>
       </div>
+
+      {data.guidedTour && data.guidedTour.length > 0 && (
+        <GuidedTour
+          steps={data.guidedTour}
+          activeStepIndex={activeTourStep}
+          onStepSelect={handleTourStepSelect}
+        />
+      )}
 
       <div className="flex min-h-[32rem] flex-col lg:min-h-[36rem] lg:flex-row">
         <aside className="flex max-h-64 flex-col border-b border-border-soft bg-surface/30 lg:max-h-none lg:w-[35%] lg:border-b-0 lg:border-r">

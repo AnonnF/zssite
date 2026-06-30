@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getProjectBySlug, projects } from "@/content/projects";
-import { getProjectAnalyzerData, hasProjectAnalyzer } from "@/data/projects";
+import { getProjectAnalyzerData, hasProjectAnalyzer, hasNarrativeContent } from "@/data/projects";
 import { siteContent } from "@/content/site";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { Divider } from "@/components/ui/Divider";
 import { Tag } from "@/components/ui/Tag";
 import { ProjectAnalyzer } from "@/components/ProjectAnalyzer/ProjectAnalyzer";
+import { ProjectNarrative } from "@/components/ProjectAnalyzer/ProjectNarrative";
 
 interface ProjectDetailPageProps {
   params: Promise<{ slug: string }>;
@@ -90,7 +91,15 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
 
       <div className="mt-10 md:mt-12">
         {analyzerData ? (
-          <ProjectAnalyzer data={analyzerData} />
+          <>
+            {analyzerData.narrative && hasNarrativeContent(analyzerData.narrative) && (
+              <ProjectNarrative
+                narrative={analyzerData.narrative}
+                className="mb-8 md:mb-10"
+              />
+            )}
+            <ProjectAnalyzer data={analyzerData} />
+          </>
         ) : (
           <div className="panel-card p-6 md:p-8">
             <p className="font-[family-name:var(--font-body-sc)] text-body text-muted">

@@ -1,6 +1,8 @@
 import type {
   ProjectAnalyzerData,
   ProjectAnalysisEntry,
+  ProjectGuidedTourStep,
+  ProjectNarrative,
   ProjectPipelineNode,
   ProjectStructuredAnalysis,
   ProjectTreeNode,
@@ -10,8 +12,12 @@ import { waccCompilerAnalysis } from "./wacc-compiler.analysis";
 export type {
   ProjectAnalyzerData,
   ProjectAnalysisEntry,
+  ProjectGuidedTourStep,
+  ProjectNarrative,
   ProjectPipelineNode,
+  ProjectSkillHighlight,
   ProjectStructuredAnalysis,
+  ProjectTechnicalDecision,
   ProjectTreeNode,
 } from "./types";
 
@@ -148,4 +154,33 @@ export function getEntryBlurb(entry: ProjectAnalysisEntry): string | null {
   if (analysis?.role) return analysis.role;
   if (entry.summary) return entry.summary;
   return null;
+}
+
+export function resolveActiveTourStepIndex(
+  steps: ProjectGuidedTourStep[],
+  selectedPath: string
+): number {
+  let bestIndex = -1;
+  let bestPathLength = -1;
+
+  for (let i = 0; i < steps.length; i += 1) {
+    const step = steps[i];
+    const matches =
+      selectedPath === step.path ||
+      (step.path !== "" && selectedPath.startsWith(`${step.path}/`));
+
+    if (matches && step.path.length > bestPathLength) {
+      bestIndex = i;
+      bestPathLength = step.path.length;
+    }
+  }
+
+  return bestIndex >= 0 ? bestIndex : 0;
+}
+
+export function hasNarrativeContent(narrative: ProjectNarrative): boolean {
+  return (
+    (narrative.technicalDecisions?.length ?? 0) > 0 ||
+    (narrative.skills?.length ?? 0) > 0
+  );
 }
