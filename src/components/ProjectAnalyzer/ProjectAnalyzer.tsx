@@ -10,6 +10,7 @@ import {
   getAnalysisEntry,
   getDirectChildren,
   resolveActiveTourStepIndex,
+  PROJECT_ARCHITECTURE_ENABLED,
 } from "@/data/projects";
 import { FileTree } from "./FileTree";
 import { FileAnalysisPanel } from "./FileAnalysisPanel";
@@ -129,7 +130,7 @@ export function ProjectAnalyzer({
   );
 
   return (
-    <div className="panel-card overflow-hidden">
+    <div id="project-analyzer" className="panel-card scroll-mt-24 overflow-hidden">
       <div className="border-b border-border-soft px-4 py-3 md:px-5">
         <p className="font-mono text-meta uppercase tracking-wider text-muted">
           Project Analyzer
@@ -201,7 +202,9 @@ export function ProjectAnalyzer({
         </div>
       </div>
 
-      {data.pipeline && data.pipeline.length > 0 && (
+      {PROJECT_ARCHITECTURE_ENABLED &&
+        data.pipeline &&
+        data.pipeline.length > 0 && (
         <ProjectArchitecture
           pipeline={data.pipeline}
           selectedPath={selectedPath}

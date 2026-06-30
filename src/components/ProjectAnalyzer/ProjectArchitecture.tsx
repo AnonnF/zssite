@@ -51,7 +51,7 @@ export function ProjectArchitecture({
   if (pipeline.length === 0) return null;
 
   return (
-    <section className="border-t border-border-soft">
+    <section id="project-architecture" className="scroll-mt-24 border-t border-border-soft">
       <div className="flex items-start justify-between gap-3 px-4 py-3 md:px-5">
         <div>
           <p className="font-mono text-meta uppercase tracking-wider text-muted">

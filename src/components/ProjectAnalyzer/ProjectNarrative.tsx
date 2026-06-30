@@ -17,11 +17,11 @@ function DecisionItem({
   impact: string;
 }) {
   return (
-    <article className="narrative-item py-4 first:pt-0 last:pb-0">
+    <article className="narrative-item py-5 first:pt-0 last:pb-0">
       <h4 className="font-display text-body font-bold leading-snug text-text">
         {title}
       </h4>
-      <dl className="mt-3 space-y-2.5">
+      <dl className="mt-3 space-y-3">
         <div>
           <dt className="font-mono text-meta uppercase tracking-wider text-muted">
             Decision
@@ -53,7 +53,7 @@ function DecisionItem({
 
 function SkillItem({ title, description }: { title: string; description: string }) {
   return (
-    <article className="narrative-item py-4 first:pt-0 last:pb-0">
+    <article className="narrative-item py-5 first:pt-0 last:pb-0">
       <h4 className="font-display text-body font-bold leading-snug text-text">
         {title}
       </h4>
@@ -71,13 +71,16 @@ export function ProjectNarrative({ narrative, className = "" }: ProjectNarrative
   if (decisions.length === 0 && skills.length === 0) return null;
 
   return (
-    <div className={`grid gap-4 md:grid-cols-2 ${className}`}>
+    <div className={`flex flex-col gap-8 ${className}`}>
       {decisions.length > 0 && (
-        <section className="panel-card px-4 py-4 md:px-5 md:py-5">
+        <section
+          id="technical-decisions"
+          className="panel-card scroll-mt-24 px-4 py-5 md:px-6 md:py-6"
+        >
           <p className="font-mono text-meta uppercase tracking-wider text-muted">
             Technical Decisions
           </p>
-          <div className="mt-4 divide-y divide-border-soft">
+          <div className="mt-5 divide-y divide-border-soft">
             {decisions.map((item) => (
               <DecisionItem key={item.title} {...item} />
             ))}
@@ -86,11 +89,14 @@ export function ProjectNarrative({ narrative, className = "" }: ProjectNarrative
       )}
 
       {skills.length > 0 && (
-        <section className="panel-card px-4 py-4 md:px-5 md:py-5">
+        <section
+          id="skills-demonstrated"
+          className="panel-card scroll-mt-24 px-4 py-5 md:px-6 md:py-6"
+        >
           <p className="font-mono text-meta uppercase tracking-wider text-muted">
             Skills Demonstrated
           </p>
-          <div className="mt-4 divide-y divide-border-soft">
+          <div className="mt-5 divide-y divide-border-soft">
             {skills.map((item) => (
               <SkillItem key={item.title} {...item} />
             ))}

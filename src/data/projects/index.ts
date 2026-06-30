@@ -25,6 +25,9 @@ const analyzerRegistry: Record<string, ProjectAnalyzerData> = {
   "wacc-compiler": waccCompilerAnalysis,
 };
 
+/** Temporary: hide pipeline bar while Guided Tour covers the reading path. */
+export const PROJECT_ARCHITECTURE_ENABLED = false;
+
 export function getProjectAnalyzerData(
   projectId: string
 ): ProjectAnalyzerData | undefined {
@@ -179,8 +182,47 @@ export function resolveActiveTourStepIndex(
 }
 
 export function hasNarrativeContent(narrative: ProjectNarrative): boolean {
-  return (
-    (narrative.technicalDecisions?.length ?? 0) > 0 ||
-    (narrative.skills?.length ?? 0) > 0
-  );
+  return hasTechnicalDecisions(narrative) || hasSkills(narrative);
+}
+
+export function hasTechnicalDecisions(narrative: ProjectNarrative): boolean {
+  return (narrative.technicalDecisions?.length ?? 0) > 0;
+}
+
+export function hasSkills(narrative: ProjectNarrative): boolean {
+  return (narrative.skills?.length ?? 0) > 0;
+}
+
+export type ProjectDetailNavSection = {
+  id: string;
+  label: string;
+};
+
+export function buildProjectDetailNavSections(
+  analyzerData?: ProjectAnalyzerData
+): ProjectDetailNavSection[] {
+  const sections: ProjectDetailNavSection[] = [
+    { id: "project-overview", label: "Overview" },
+  ];
+
+  if (analyzerData) {
+    sections.push({ id: "project-analyzer", label: "Analyzer" });
+
+    if (
+      PROJECT_ARCHITECTURE_ENABLED &&
+      (analyzerData.pipeline?.length ?? 0) > 0
+    ) {
+      sections.push({ id: "project-architecture", label: "Architecture" });
+    }
+
+    if (analyzerData.narrative && hasTechnicalDecisions(analyzerData.narrative)) {
+      sections.push({ id: "technical-decisions", label: "Technical Decisions" });
+    }
+
+    if (analyzerData.narrative && hasSkills(analyzerData.narrative)) {
+      sections.push({ id: "skills-demonstrated", label: "Skills Demonstrated" });
+    }
+  }
+
+  return sections;
 }
