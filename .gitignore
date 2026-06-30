@@ -39,3 +39,6 @@ yarn-error.log*
 
 # local project code snapshots (analysis data lives in src/data/projects)
 /project-snapshots/
+
+# vscode
+.vscode/

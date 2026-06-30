@@ -44,6 +44,9 @@ export type ProjectAnalysisEntry = {
   code?: string;
   snippets?: ProjectCodeSnippet[];
   analysis?: ProjectStructuredAnalysis;
+  generated?: boolean;
+  sizeBytes?: number;
+  tooLarge?: boolean;
 };
 
 export type ProjectPipelineNode = {
@@ -90,4 +93,22 @@ export type ProjectAnalyzerData = {
   pipeline?: ProjectPipelineNode[];
   guidedTour?: ProjectGuidedTourStep[];
   narrative?: ProjectNarrative;
+};
+
+export type ProjectAnalyzerGeneratedMetadata = {
+  generatedAt: string;
+  source: "project-snapshots";
+  projectId: string;
+  rootDir: string;
+  fileCount: number;
+  folderCount: number;
+  includedFileCount: number;
+  skippedFileCount: number;
+};
+
+export type ProjectAnalyzerGeneratedData = {
+  projectId: string;
+  metadata: ProjectAnalyzerGeneratedMetadata;
+  tree: ProjectTreeNode[];
+  entries: Record<string, ProjectAnalysisEntry>;
 };

@@ -8,10 +8,14 @@ import type {
   ProjectTreeNode,
 } from "./types";
 import { waccCompilerAnalysis } from "./wacc-compiler.analysis";
+import { generatedRegistry } from "./generated/registry";
+import { mergeProjectAnalysis } from "./mergeProjectAnalysis";
 
 export type {
   ProjectAnalyzerData,
   ProjectAnalysisEntry,
+  ProjectAnalyzerGeneratedData,
+  ProjectAnalyzerGeneratedMetadata,
   ProjectCodeSnippet,
   ProjectCodeSnippetAnnotation,
   ProjectGuidedTourStep,
@@ -23,8 +27,13 @@ export type {
   ProjectTreeNode,
 } from "./types";
 
+function registerAnalyzer(manual: ProjectAnalyzerData): ProjectAnalyzerData {
+  const generated = generatedRegistry[manual.projectId];
+  return generated ? mergeProjectAnalysis(generated, manual) : manual;
+}
+
 const analyzerRegistry: Record<string, ProjectAnalyzerData> = {
-  "wacc-compiler": waccCompilerAnalysis,
+  "wacc-compiler": registerAnalyzer(waccCompilerAnalysis),
 };
 
 /** Temporary: hide pipeline bar while Guided Tour covers the reading path. */
@@ -237,3 +246,4 @@ export {
   getSearchResultDescription,
   searchProjectEntries,
 } from "./search";
+export { mergeProjectAnalysis } from "./mergeProjectAnalysis";
