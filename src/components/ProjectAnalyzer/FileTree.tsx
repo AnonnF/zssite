@@ -21,12 +21,11 @@ interface TreeNodeProps {
 }
 
 interface TreeRowProps {
-  label: string;
+  node: ProjectTreeNode;
   depth: number;
   isSelected: boolean;
-  node: Pick<ProjectTreeNode, "type" | "name" | "path">;
-  isExpanded?: boolean;
-  hasChildren?: boolean;
+  isExpanded: boolean;
+  hasChildren: boolean;
   onClick: () => void;
   labelClassName?: string;
 }
@@ -40,27 +39,19 @@ function TreeChevron({
   hasChildren: boolean;
   isExpanded: boolean;
 }) {
-  if (!isFolder || !hasChildren) {
-    return <span className="inline-block w-3 shrink-0" aria-hidden />;
-  }
-
   return (
-    <span
-      className="inline-flex w-3 shrink-0 items-center justify-center text-[10px] text-muted"
-      aria-hidden
-    >
-      {isExpanded ? "▾" : "▸"}
+    <span className="tree-chevron" aria-hidden>
+      {isFolder && hasChildren ? (isExpanded ? "▾" : "▸") : null}
     </span>
   );
 }
 
 function TreeRow({
-  label,
+  node,
   depth,
   isSelected,
-  node,
-  isExpanded = false,
-  hasChildren = false,
+  isExpanded,
+  hasChildren,
   onClick,
   labelClassName = "",
 }: TreeRowProps) {
@@ -70,11 +61,7 @@ function TreeRow({
     <button
       type="button"
       onClick={onClick}
-      className={`flex w-full items-center border-l-2 py-1.5 pr-2 text-left font-mono text-meta transition-colors ${
-        isSelected
-          ? "border-accent bg-accent-muted/50 text-text"
-          : "border-transparent text-muted hover:border-border-soft hover:bg-surface/60 hover:text-text"
-      }`}
+      className={`tree-item ${isSelected ? "tree-item--selected text-text" : "text-muted"}`}
       style={{ paddingLeft: `${depth * 12 + 8}px` }}
       aria-current={isSelected ? "true" : undefined}
     >
@@ -83,8 +70,8 @@ function TreeRow({
         hasChildren={hasChildren}
         isExpanded={isExpanded}
       />
-      <FileTreeIcon node={node} expanded={isExpanded} size={18} />
-      <span className={`ml-2 truncate ${labelClassName}`.trim()}>{label}</span>
+      <FileTreeIcon node={node} expanded={isExpanded} />
+      <span className={`tree-name ${labelClassName}`.trim()}>{node.name}</span>
     </button>
   );
 }
@@ -101,6 +88,7 @@ function TreeNode({
   const isSelected = selectedPath === node.path;
   const isExpanded = isFolder && expandedPaths.has(node.path);
   const hasChildren = isFolder && (node.children?.length ?? 0) > 0;
+  const isRoot = node.path === "";
 
   const handleClick = () => {
     onSelect(node.path);
@@ -112,13 +100,15 @@ function TreeNode({
   return (
     <div>
       <TreeRow
-        label={node.name}
+        node={node}
         depth={depth}
         isSelected={isSelected}
-        node={node}
         isExpanded={isExpanded}
         hasChildren={hasChildren}
         onClick={handleClick}
+        labelClassName={
+          isRoot ? "font-semibold uppercase tracking-wider" : undefined
+        }
       />
 
       {isFolder && isExpanded && hasChildren && (
@@ -140,12 +130,6 @@ function TreeNode({
   );
 }
 
-const ROOT_NODE: Pick<ProjectTreeNode, "type" | "name" | "path"> = {
-  type: "folder",
-  name: "root",
-  path: "",
-};
-
 export function FileTree({
   tree,
   selectedPath,
@@ -154,21 +138,13 @@ export function FileTree({
   onToggle,
 }: FileTreeProps) {
   return (
-    <nav aria-label="Project file tree" className="min-h-0 flex-1 overflow-y-auto">
-      <TreeRow
-        label="root"
-        depth={0}
-        isSelected={selectedPath === ""}
-        node={ROOT_NODE}
-        isExpanded={false}
-        hasChildren={tree.length > 0}
-        onClick={() => onSelect("")}
-        labelClassName="font-semibold uppercase tracking-wider"
-      />
-
+    <nav
+      aria-label="Project file tree"
+      className="project-analyzer-tree min-h-0 flex-1 overflow-y-auto"
+    >
       {tree.map((node) => (
         <TreeNode
-          key={node.path}
+          key={node.path || "root"}
           node={node}
           depth={0}
           selectedPath={selectedPath}

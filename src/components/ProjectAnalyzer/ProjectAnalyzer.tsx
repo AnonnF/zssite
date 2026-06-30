@@ -3,7 +3,7 @@
 import { useCallback, useMemo, useState } from "react";
 import type { ProjectAnalyzerData } from "@/data/projects/types";
 import {
-  collectAncestorPaths,
+  collectExpandedPathsFor,
   findTreeNode,
   getAnalysisEntry,
   getDirectChildren,
@@ -23,7 +23,7 @@ export function ProjectAnalyzer({
   defaultPath = "src",
 }: ProjectAnalyzerProps) {
   const initialExpanded = useMemo(
-    () => new Set(["", ...collectAncestorPaths(defaultPath)]),
+    () => new Set(collectExpandedPathsFor(defaultPath)),
     [defaultPath]
   );
 
@@ -64,8 +64,8 @@ export function ProjectAnalyzer({
       setSelectedPath(path);
       setExpandedPaths((prev) => {
         const next = new Set(prev);
-        for (const ancestor of collectAncestorPaths(path)) {
-          next.add(ancestor);
+        for (const expandedPath of collectExpandedPathsFor(path)) {
+          next.add(expandedPath);
         }
         return next;
       });

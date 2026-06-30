@@ -6,6 +6,8 @@ import { icons as materialIconThemeData } from "@iconify-json/material-icon-them
 import type { IconifyIcon } from "@iconify/types";
 import type { ProjectTreeNode } from "@/data/projects/types";
 
+export const TREE_ICON_SIZE = 20;
+
 const ICON_PREFIX = "material-icon-theme";
 
 const USED_ICON_NAMES = [
@@ -36,6 +38,7 @@ const FOLDER_NAME_ICONS: Record<
   string,
   { closed: MaterialIconName; open: MaterialIconName }
 > = {
+  root: { closed: "folder-base", open: "folder-base-open" },
   src: { closed: "folder-src", open: "folder-src-open" },
   tests: { closed: "folder-test", open: "folder-test-open" },
   test: { closed: "folder-test", open: "folder-test-open" },
@@ -80,15 +83,13 @@ function ensureIconCollection(): void {
   collectionRegistered = true;
 }
 
-export interface FileIconOptions {
+export interface TreeIconOptions {
   node: Pick<ProjectTreeNode, "type" | "name" | "path">;
-  expanded?: boolean;
+  expanded: boolean;
+  isRoot?: boolean;
 }
 
-function resolveFolderIconName(
-  name: string,
-  expanded: boolean
-): MaterialIconName {
+function resolveFolderIconName(name: string, expanded: boolean): MaterialIconName {
   const mapped = FOLDER_NAME_ICONS[name.toLowerCase()];
   if (mapped) {
     return expanded ? mapped.open : mapped.closed;
@@ -111,40 +112,46 @@ function resolveFileIconName(name: string): MaterialIconName {
   return EXTENSION_ICONS[extension] ?? FALLBACK_ICON;
 }
 
-export function resolveFileIconNameFromNode({
+export function getTreeIcon({
   node,
-  expanded = false,
-}: FileIconOptions): MaterialIconName {
-  if (node.type === "folder") {
-    return resolveFolderIconName(node.name, expanded);
+  expanded,
+}: TreeIconOptions): MaterialIconName {
+  if (node.type === "file") {
+    return resolveFileIconName(node.name);
   }
 
-  return resolveFileIconName(node.name);
+  return resolveFolderIconName(node.name, expanded);
 }
 
-export interface FileTreeIconProps extends FileIconOptions {
-  size?: number;
+export interface FileTreeIconProps {
+  node: Pick<ProjectTreeNode, "type" | "name" | "path">;
+  expanded: boolean;
   className?: string;
 }
 
 export function FileTreeIcon({
   node,
-  expanded = false,
-  size = 18,
+  expanded,
   className = "",
 }: FileTreeIconProps) {
   ensureIconCollection();
 
-  const iconName = resolveFileIconNameFromNode({ node, expanded });
+  const iconName = getTreeIcon({ node, expanded });
   const iconId = `${ICON_PREFIX}:${iconName}`;
 
   return (
-    <Icon
-      icon={iconId}
-      width={size}
-      height={size}
-      className={`shrink-0 opacity-95 ${className}`.trim()}
-      aria-hidden
-    />
+    <span className={`tree-icon ${className}`.trim()} aria-hidden>
+      <Icon
+        icon={iconId}
+        width={TREE_ICON_SIZE}
+        height={TREE_ICON_SIZE}
+        style={{
+          width: TREE_ICON_SIZE,
+          height: TREE_ICON_SIZE,
+          minWidth: TREE_ICON_SIZE,
+          minHeight: TREE_ICON_SIZE,
+        }}
+      />
+    </span>
   );
 }

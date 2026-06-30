@@ -39,7 +39,6 @@ export function getDirectChildren(
   tree: ProjectTreeNode[],
   path: string
 ): ProjectTreeNode[] {
-  if (path === "") return tree;
   const node = findTreeNode(tree, path);
   return node?.children ?? [];
 }
@@ -72,10 +71,18 @@ function inferTypeFromPath(path: string): "file" | "folder" {
 
 export function collectAncestorPaths(path: string): string[] {
   if (!path) return [];
-  const parts = path.split("/");
-  const ancestors: string[] = [];
-  for (let i = 0; i < parts.length - 1; i += 1) {
-    ancestors.push(parts.slice(0, i + 1).join("/"));
+
+  const segments = path.split("/");
+  const ancestors: string[] = [""];
+
+  for (let i = 1; i < segments.length; i += 1) {
+    ancestors.push(segments.slice(0, i).join("/"));
   }
+
   return ancestors;
+}
+
+export function collectExpandedPathsFor(path: string): string[] {
+  if (!path) return [""];
+  return [...collectAncestorPaths(path), path];
 }

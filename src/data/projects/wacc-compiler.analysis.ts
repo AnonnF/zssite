@@ -7,75 +7,94 @@ export const waccCompilerAnalysis: ProjectAnalyzerData = {
     "为 WACC 语言实现的完整编译器管线：词法分析、语法分析、语义检查与 ARM 汇编代码生成。",
   tree: [
     {
-      name: "README.md",
-      path: "README.md",
-      type: "file",
-    },
-    {
-      name: "src",
-      path: "src",
+      name: "ROOT",
+      path: "",
       type: "folder",
       children: [
         {
-          name: "lexer",
-          path: "src/lexer",
-          type: "folder",
-          children: [
-            { name: "Lexer.scala", path: "src/lexer/Lexer.scala", type: "file" },
-          ],
-        },
-        {
-          name: "parser",
-          path: "src/parser",
-          type: "folder",
-          children: [
-            { name: "Parser.scala", path: "src/parser/Parser.scala", type: "file" },
-          ],
-        },
-        {
-          name: "ast",
-          path: "src/ast",
-          type: "folder",
-          children: [
-            { name: "AST.scala", path: "src/ast/AST.scala", type: "file" },
-          ],
-        },
-        {
-          name: "semantic",
-          path: "src/semantic",
-          type: "folder",
-          children: [
-            {
-              name: "SemanticChecker.scala",
-              path: "src/semantic/SemanticChecker.scala",
-              type: "file",
-            },
-          ],
-        },
-        {
-          name: "codegen",
-          path: "src/codegen",
-          type: "folder",
-          children: [
-            {
-              name: "CodeGenerator.scala",
-              path: "src/codegen/CodeGenerator.scala",
-              type: "file",
-            },
-          ],
-        },
-      ],
-    },
-    {
-      name: "tests",
-      path: "tests",
-      type: "folder",
-      children: [
-        { name: "ParserTests.scala", path: "tests/ParserTests.scala", type: "file" },
-        {
-          name: "SemanticTests.scala",
-          path: "tests/SemanticTests.scala",
+          name: "README.md",
+          path: "README.md",
           type: "file",
+        },
+        {
+          name: "src",
+          path: "src",
+          type: "folder",
+          children: [
+            {
+              name: "lexer",
+              path: "src/lexer",
+              type: "folder",
+              children: [
+                {
+                  name: "Lexer.scala",
+                  path: "src/lexer/Lexer.scala",
+                  type: "file",
+                },
+              ],
+            },
+            {
+              name: "parser",
+              path: "src/parser",
+              type: "folder",
+              children: [
+                {
+                  name: "Parser.scala",
+                  path: "src/parser/Parser.scala",
+                  type: "file",
+                },
+              ],
+            },
+            {
+              name: "ast",
+              path: "src/ast",
+              type: "folder",
+              children: [
+                { name: "AST.scala", path: "src/ast/AST.scala", type: "file" },
+              ],
+            },
+            {
+              name: "semantic",
+              path: "src/semantic",
+              type: "folder",
+              children: [
+                {
+                  name: "SemanticChecker.scala",
+                  path: "src/semantic/SemanticChecker.scala",
+                  type: "file",
+                },
+              ],
+            },
+            {
+              name: "codegen",
+              path: "src/codegen",
+              type: "folder",
+              children: [
+                {
+                  name: "CodeGenerator.scala",
+                  path: "src/codegen/CodeGenerator.scala",
+                  type: "file",
+                },
+              ],
+            },
+          ],
+        },
+        {
+          name: "tests",
+          path: "tests",
+          type: "folder",
+          children: [
+            {
+              name: "ParserTests.scala",
+              path: "tests/ParserTests.scala",
+              type: "file",
+            },
+            {
+              name: "SemanticTests.scala",
+              path: "tests/SemanticTests.scala",
+              type: "file",
+            },
+          ],
         },
       ],
     },
