@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { siteContent } from "@/content/site";
@@ -13,9 +14,16 @@ export function Header() {
       <div className="mx-auto flex h-14 max-w-content items-center justify-between px-6 md:h-16 md:px-12 lg:px-16">
         <Link
           href="/"
-          className="group flex items-baseline gap-1 font-display text-lg font-bold tracking-tight md:text-xl"
+          className="group flex items-center gap-2 font-display text-lg font-bold tracking-tight md:text-xl"
         >
-          <span>{brand.primary}</span>
+          <Image
+            src={brand.logo}
+            alt={brand.logoAlt}
+            width={36}
+            height={36}
+            className="h-7 w-auto md:h-8"
+            priority
+          />
           <span className="font-mono text-meta font-medium text-muted transition-colors group-hover:text-accent">
             / {brand.secondary}
           </span>
