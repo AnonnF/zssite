@@ -36,4 +36,6 @@ yarn-error.log*
 
 # typescript
 *.tsbuildinfo
-next-env.d.ts
+
+# local project code snapshots (analysis data lives in src/data/projects)
+/project-snapshots/
