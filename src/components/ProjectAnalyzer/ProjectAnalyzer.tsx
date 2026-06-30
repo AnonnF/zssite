@@ -1,8 +1,9 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
-import type { ProjectAnalyzerData } from "@/data/projects/types";
+import type { ProjectAnalyzerData, ProjectTreeNode } from "@/data/projects/types";
 import {
+  collectAncestorPaths,
   collectExpandedPathsFor,
   findTreeNode,
   getAnalysisEntry,
@@ -47,31 +48,30 @@ export function ProjectAnalyzer({
 
   const isFolder = entry.type === "folder";
 
-  const handleToggle = useCallback((path: string) => {
+  const handleNodeClick = useCallback((node: ProjectTreeNode) => {
+    const { path, type, children } = node;
+    const hasChildren = type === "folder" && (children?.length ?? 0) > 0;
+
+    setSelectedPath(path);
+
     setExpandedPaths((prev) => {
       const next = new Set(prev);
-      if (next.has(path)) {
-        next.delete(path);
-      } else {
-        next.add(path);
+
+      for (const ancestor of collectAncestorPaths(path)) {
+        next.add(ancestor);
       }
+
+      if (type === "folder" && hasChildren) {
+        if (next.has(path)) {
+          next.delete(path);
+        } else {
+          next.add(path);
+        }
+      }
+
       return next;
     });
   }, []);
-
-  const handleSelect = useCallback(
-    (path: string) => {
-      setSelectedPath(path);
-      setExpandedPaths((prev) => {
-        const next = new Set(prev);
-        for (const expandedPath of collectExpandedPathsFor(path)) {
-          next.add(expandedPath);
-        }
-        return next;
-      });
-    },
-    []
-  );
 
   return (
     <div className="panel-card overflow-hidden">
@@ -95,8 +95,7 @@ export function ProjectAnalyzer({
             tree={data.tree}
             selectedPath={selectedPath}
             expandedPaths={expandedPaths}
-            onSelect={handleSelect}
-            onToggle={handleToggle}
+            onNodeClick={handleNodeClick}
           />
         </aside>
 

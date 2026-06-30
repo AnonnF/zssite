@@ -6,7 +6,7 @@ import { icons as materialIconThemeData } from "@iconify-json/material-icon-them
 import type { IconifyIcon } from "@iconify/types";
 import type { ProjectTreeNode } from "@/data/projects/types";
 
-export const TREE_ICON_SIZE = 20;
+export const TREE_ICON_SIZE = 25;
 
 const ICON_PREFIX = "material-icon-theme";
 
@@ -62,6 +62,22 @@ const EXTENSION_ICONS: Record<string, MaterialIconName> = {
 
 let collectionRegistered = false;
 
+const DEFAULT_FOLDER_VIEWBOX = 16;
+
+function normalizeTreeIcon(name: string, icon: IconifyIcon): IconifyIcon {
+  if (!name.startsWith("folder-")) {
+    return icon;
+  }
+
+  // Use each icon's native viewBox when provided (e.g. folder-components-open = 32).
+  // Most MIT folder icons (src, base, test, …) are drawn on a 16×16 canvas.
+  return {
+    ...icon,
+    width: icon.width ?? DEFAULT_FOLDER_VIEWBOX,
+    height: icon.height ?? DEFAULT_FOLDER_VIEWBOX,
+  };
+}
+
 function ensureIconCollection(): void {
   if (collectionRegistered) return;
 
@@ -70,14 +86,14 @@ function ensureIconCollection(): void {
 
   for (const name of USED_ICON_NAMES) {
     const icon = allIcons[name];
-    if (icon) partialIcons[name] = icon;
+    if (icon) partialIcons[name] = normalizeTreeIcon(name, icon);
   }
 
   addCollection({
     prefix: ICON_PREFIX,
     icons: partialIcons,
-    width: 32,
-    height: 32,
+    width: DEFAULT_FOLDER_VIEWBOX,
+    height: DEFAULT_FOLDER_VIEWBOX,
   });
 
   collectionRegistered = true;

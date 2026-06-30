@@ -7,8 +7,7 @@ interface FileTreeProps {
   tree: ProjectTreeNode[];
   selectedPath: string;
   expandedPaths: Set<string>;
-  onSelect: (path: string) => void;
-  onToggle: (path: string) => void;
+  onNodeClick: (node: ProjectTreeNode) => void;
 }
 
 interface TreeNodeProps {
@@ -16,8 +15,7 @@ interface TreeNodeProps {
   depth: number;
   selectedPath: string;
   expandedPaths: Set<string>;
-  onSelect: (path: string) => void;
-  onToggle: (path: string) => void;
+  onNodeClick: (node: ProjectTreeNode) => void;
 }
 
 interface TreeRowProps {
@@ -64,6 +62,7 @@ function TreeRow({
       className={`tree-item ${isSelected ? "tree-item--selected text-text" : "text-muted"}`}
       style={{ paddingLeft: `${depth * 12 + 8}px` }}
       aria-current={isSelected ? "true" : undefined}
+      aria-expanded={isFolder && hasChildren ? isExpanded : undefined}
     >
       <TreeChevron
         isFolder={isFolder}
@@ -81,21 +80,13 @@ function TreeNode({
   depth,
   selectedPath,
   expandedPaths,
-  onSelect,
-  onToggle,
+  onNodeClick,
 }: TreeNodeProps) {
   const isFolder = node.type === "folder";
   const isSelected = selectedPath === node.path;
   const isExpanded = isFolder && expandedPaths.has(node.path);
   const hasChildren = isFolder && (node.children?.length ?? 0) > 0;
   const isRoot = node.path === "";
-
-  const handleClick = () => {
-    onSelect(node.path);
-    if (isFolder && hasChildren) {
-      onToggle(node.path);
-    }
-  };
 
   return (
     <div>
@@ -105,7 +96,7 @@ function TreeNode({
         isSelected={isSelected}
         isExpanded={isExpanded}
         hasChildren={hasChildren}
-        onClick={handleClick}
+        onClick={() => onNodeClick(node)}
         labelClassName={
           isRoot ? "font-semibold uppercase tracking-wider" : undefined
         }
@@ -120,8 +111,7 @@ function TreeNode({
               depth={depth + 1}
               selectedPath={selectedPath}
               expandedPaths={expandedPaths}
-              onSelect={onSelect}
-              onToggle={onToggle}
+              onNodeClick={onNodeClick}
             />
           ))}
         </div>
@@ -134,8 +124,7 @@ export function FileTree({
   tree,
   selectedPath,
   expandedPaths,
-  onSelect,
-  onToggle,
+  onNodeClick,
 }: FileTreeProps) {
   return (
     <nav
@@ -149,8 +138,7 @@ export function FileTree({
           depth={0}
           selectedPath={selectedPath}
           expandedPaths={expandedPaths}
-          onSelect={onSelect}
-          onToggle={onToggle}
+          onNodeClick={onNodeClick}
         />
       ))}
     </nav>
