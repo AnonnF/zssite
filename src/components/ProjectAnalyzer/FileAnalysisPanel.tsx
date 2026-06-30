@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 import type { ProjectAnalysisEntry } from "@/data/projects/types";
 import { hasStructuredAnalysis } from "@/data/projects";
-import { SectionLabel } from "@/components/ui/SectionLabel";
 
 interface FileAnalysisPanelProps {
   entry: ProjectAnalysisEntry;
@@ -196,12 +195,13 @@ export function FileAnalysisPanel({ entry, onPathSelect }: FileAnalysisPanelProp
 
   return (
     <section className="flex h-full min-h-0 flex-col">
-      <div className="flex flex-wrap items-start justify-between gap-3 border-b border-border-soft px-4 py-3 md:px-5 md:py-4">
-        <div className="min-w-0 flex-1">
-          <SectionLabel>ANALYSIS</SectionLabel>
-          <h3 className="mt-2 font-display text-h3 font-bold tracking-tight text-text">
-            {entry.title}
-          </h3>
+      <div className="analyzer-pane-header">
+        <div className="analyzer-pane-header__lead">
+          <span className="accent-bar mt-0.5" aria-hidden="true" />
+          <div className="min-w-0">
+            <span className="analyzer-pane-header__label">Analysis</span>
+            <h3 className="analyzer-pane-header__title">{entry.title}</h3>
+          </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {entry.language && (

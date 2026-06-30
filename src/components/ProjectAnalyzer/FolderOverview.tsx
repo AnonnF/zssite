@@ -21,11 +21,14 @@ export function FolderOverview({
 
   return (
     <section className="flex h-full min-h-0 flex-col">
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border-soft bg-surface/40 px-4 py-2.5 md:px-5">
-        <span className="font-mono text-meta uppercase tracking-wider text-muted">
-          Folder Overview
+      <div className="analyzer-pane-header">
+        <div className="analyzer-pane-header__lead">
+          <span className="accent-bar mt-0.5" aria-hidden="true" />
+          <span className="analyzer-pane-header__label">Folder Overview</span>
+        </div>
+        <span className="analyzer-pane-header__meta max-w-[12rem] truncate md:max-w-xs">
+          {path || "/"}
         </span>
-        <span className="font-mono text-meta text-muted">{path || "/"}</span>
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 md:px-5 md:py-5">

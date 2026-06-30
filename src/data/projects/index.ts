@@ -226,3 +226,12 @@ export function buildProjectDetailNavSections(
 
   return sections;
 }
+
+export type { ProjectSearchIndexItem, ProjectSearchResult } from "./search";
+export {
+  buildSearchIndex,
+  countSearchMatches,
+  flattenTree,
+  getSearchResultDescription,
+  searchProjectEntries,
+} from "./search";

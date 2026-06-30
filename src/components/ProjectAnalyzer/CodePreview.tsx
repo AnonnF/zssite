@@ -48,11 +48,12 @@ export function CodePreview({ entry }: CodePreviewProps) {
 
   return (
     <section className="flex h-full min-h-0 flex-col">
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border-soft bg-surface/40 px-4 py-2.5 md:px-5">
-        <span className="font-mono text-meta uppercase tracking-wider text-muted">
-          Code Preview
-        </span>
-        <div className="flex flex-wrap items-center gap-2 font-mono text-meta text-muted">
+      <div className="analyzer-pane-header">
+        <div className="analyzer-pane-header__lead">
+          <span className="accent-bar mt-0.5" aria-hidden="true" />
+          <span className="analyzer-pane-header__label">Code Preview</span>
+        </div>
+        <div className="analyzer-pane-header__meta">
           {displayLanguage && (
             <span className="border border-border-soft px-1.5 py-0.5 uppercase tracking-wider">
               {displayLanguage}

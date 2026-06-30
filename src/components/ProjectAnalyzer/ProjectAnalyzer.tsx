@@ -13,6 +13,7 @@ import {
   PROJECT_ARCHITECTURE_ENABLED,
 } from "@/data/projects";
 import { FileTree } from "./FileTree";
+import { FileTreeSearch } from "./FileTreeSearch";
 import { FileAnalysisPanel } from "./FileAnalysisPanel";
 import { CodePreview } from "./CodePreview";
 import { FolderOverview } from "./FolderOverview";
@@ -129,6 +130,13 @@ export function ProjectAnalyzer({
     [selectPath]
   );
 
+  const handleSearchResultSelect = useCallback(
+    (path: string) => {
+      selectPath(path);
+    },
+    [selectPath]
+  );
+
   return (
     <div id="project-analyzer" className="panel-card scroll-mt-24 overflow-hidden">
       <div className="border-b border-border-soft px-4 py-3 md:px-5">
@@ -148,12 +156,13 @@ export function ProjectAnalyzer({
         />
       )}
 
-      <div className="flex min-h-[32rem] flex-col lg:min-h-[36rem] lg:flex-row">
-        <aside className="flex max-h-64 flex-col border-b border-border-soft bg-surface/30 lg:max-h-none lg:w-[35%] lg:border-b-0 lg:border-r">
-          <div className="flex items-center justify-between gap-2 border-b border-border-soft px-4 py-2.5">
-            <span className="font-mono text-meta uppercase tracking-wider text-muted">
-              File Tree
-            </span>
+      <div className="analyzer-workspace min-h-[32rem] lg:min-h-[36rem]">
+        <aside className="analyzer-pane analyzer-pane--tree flex max-h-64 flex-col lg:max-h-none lg:w-[35%] lg:min-h-0">
+          <div className="analyzer-pane-header">
+            <div className="analyzer-pane-header__lead">
+              <span className="accent-bar mt-0.5" aria-hidden="true" />
+              <span className="analyzer-pane-header__label">File Tree</span>
+            </div>
             <div className="tree-header-actions">
               <button
                 type="button"
@@ -173,6 +182,11 @@ export function ProjectAnalyzer({
               </button>
             </div>
           </div>
+          <FileTreeSearch
+            data={data}
+            selectedPath={selectedPath}
+            onResultSelect={handleSearchResultSelect}
+          />
           <FileTree
             tree={data.tree}
             selectedPath={selectedPath}
@@ -181,12 +195,12 @@ export function ProjectAnalyzer({
           />
         </aside>
 
-        <div className="flex min-h-0 flex-1 flex-col lg:w-[65%]">
-          <div className="min-h-[12rem] flex-1 border-b border-border-soft lg:min-h-0 lg:max-h-[45%]">
+        <div className="flex min-h-0 flex-1 flex-col gap-3 lg:w-[65%]">
+          <div className="analyzer-pane min-h-[12rem] flex-1 lg:min-h-0 lg:max-h-[45%]">
             <FileAnalysisPanel entry={entry} onPathSelect={selectPath} />
           </div>
 
-          <div className="min-h-[14rem] flex-1 lg:min-h-0">
+          <div className="analyzer-pane min-h-[14rem] flex-1 lg:min-h-0">
             {isFolder ? (
               <FolderOverview
                 path={selectedPath}
