@@ -3,6 +3,7 @@
 import { useCallback, useMemo, useState } from "react";
 import type { ProjectAnalyzerData, ProjectTreeNode } from "@/data/projects/types";
 import {
+  collectAllFolderPaths,
   collectAncestorPaths,
   collectExpandedPathsFor,
   findTreeNode,
@@ -48,6 +49,14 @@ export function ProjectAnalyzer({
 
   const isFolder = entry.type === "folder";
 
+  const handleExpandAll = useCallback(() => {
+    setExpandedPaths(new Set(collectAllFolderPaths(data.tree)));
+  }, [data.tree]);
+
+  const handleCollapseAll = useCallback(() => {
+    setExpandedPaths(new Set([""]));
+  }, []);
+
   const handleNodeClick = useCallback((node: ProjectTreeNode) => {
     const { path, type, children } = node;
     const hasChildren = type === "folder" && (children?.length ?? 0) > 0;
@@ -86,10 +95,28 @@ export function ProjectAnalyzer({
 
       <div className="flex min-h-[32rem] flex-col lg:min-h-[36rem] lg:flex-row">
         <aside className="flex max-h-64 flex-col border-b border-border-soft bg-surface/30 lg:max-h-none lg:w-[35%] lg:border-b-0 lg:border-r">
-          <div className="border-b border-border-soft px-4 py-2.5">
+          <div className="flex items-center justify-between gap-2 border-b border-border-soft px-4 py-2.5">
             <span className="font-mono text-meta uppercase tracking-wider text-muted">
               File Tree
             </span>
+            <div className="tree-header-actions">
+              <button
+                type="button"
+                className="tree-header-action"
+                aria-label="Expand all folders"
+                onClick={handleExpandAll}
+              >
+                Expand
+              </button>
+              <button
+                type="button"
+                className="tree-header-action"
+                aria-label="Collapse all folders"
+                onClick={handleCollapseAll}
+              >
+                Collapse
+              </button>
+            </div>
           </div>
           <FileTree
             tree={data.tree}

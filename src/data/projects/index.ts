@@ -86,3 +86,19 @@ export function collectExpandedPathsFor(path: string): string[] {
   if (!path) return [""];
   return [...collectAncestorPaths(path), path];
 }
+
+export function collectAllFolderPaths(nodes: ProjectTreeNode[]): string[] {
+  const paths: string[] = [];
+
+  function walk(nodeList: ProjectTreeNode[]) {
+    for (const node of nodeList) {
+      if (node.type === "folder" && (node.children?.length ?? 0) > 0) {
+        paths.push(node.path);
+        walk(node.children!);
+      }
+    }
+  }
+
+  walk(nodes);
+  return paths;
+}
