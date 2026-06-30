@@ -170,6 +170,22 @@ export const waccCompilerAnalysis: ProjectAnalyzerData = {
       title: "README.md",
       summary: "项目说明文档，包含构建方式、运行示例与编译器管线概览。",
       language: "markdown",
+      code: `# WACC Compiler
+
+A multi-stage compiler for the WACC language.
+
+## Pipeline
+
+1. Lexer
+2. Parser
+3. Semantic analysis
+4. Code generation (ARM)
+
+\`\`\`bash
+sbt compile
+./wacc-compiler program.wacc
+\`\`\`
+`,
     },
     "src/lexer/Lexer.scala": {
       path: "src/lexer/Lexer.scala",

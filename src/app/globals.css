@@ -169,6 +169,39 @@
     text-overflow: ellipsis;
     white-space: nowrap;
   }
+
+  .code-preview-line-number {
+    font-family: var(--font-mono), monospace;
+    font-size: 0.8125rem;
+    line-height: 1.625;
+    color: rgba(232, 228, 220, 0.35);
+    min-width: 2ch;
+  }
+
+  .code-preview-plain {
+    margin: 0;
+    font-family: var(--font-mono), monospace;
+    font-size: 0.8125rem;
+    line-height: 1.625;
+    color: #e8e4dc;
+    white-space: pre;
+  }
+
+  .code-preview-shiki pre {
+    margin: 0;
+    padding: 0 !important;
+    background: transparent !important;
+    font-family: var(--font-mono), monospace;
+    font-size: 0.8125rem;
+    line-height: 1.625;
+  }
+
+  .code-preview-shiki code {
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+    white-space: pre;
+  }
 }
 
 @layer utilities {
