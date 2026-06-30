@@ -5,6 +5,21 @@ export type ProjectTreeNode = {
   children?: ProjectTreeNode[];
 };
 
+export type ProjectCodeSnippetAnnotation = {
+  line: number;
+  note: string;
+};
+
+export type ProjectCodeSnippet = {
+  id: string;
+  title: string;
+  startLine?: number;
+  endLine?: number;
+  reason?: string;
+  code: string;
+  annotations?: ProjectCodeSnippetAnnotation[];
+};
+
 export type ProjectStructuredAnalysis = {
   purpose?: string;
   responsibilities?: string[];
@@ -27,6 +42,7 @@ export type ProjectAnalysisEntry = {
   fixed?: boolean;
   language?: string;
   code?: string;
+  snippets?: ProjectCodeSnippet[];
   analysis?: ProjectStructuredAnalysis;
 };
 

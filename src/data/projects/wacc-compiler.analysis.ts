@@ -297,6 +297,79 @@ sbt compile
         relatedModules: ["Lexer", "AST", "Semantic Checker"],
         relatedPaths: ["src/lexer", "src/ast", "src/semantic"],
       },
+      snippets: [
+        {
+          id: "parser-entry",
+          title: "Parser entry point",
+          startLine: 1,
+          endLine: 5,
+          reason:
+            "这段代码展示了 parser 如何接收源码字符串，并通过 `fully` 包装后的 program parser 启动完整程序级语法解析。",
+          code: `object Parser {
+  def parse(input: String): Result[String, Program] =
+    progParser.parse(input)
+
+  private val progParser = fully(program)`,
+          annotations: [
+            {
+              line: 2,
+              note: "对外暴露的唯一 parse 入口，返回 Result 以便上层区分语法错误与成功 AST。",
+            },
+            {
+              line: 5,
+              note: "`fully` 保证输入被完整消费，避免部分解析后静默成功。",
+            },
+          ],
+        },
+        {
+          id: "ast-construction",
+          title: "AST construction flow",
+          startLine: 7,
+          endLine: 8,
+          reason:
+            "program parser 按 WACC 语法顺序组合 import、函数声明与 main body，最终映射为 Program AST 根节点。",
+          code: `  private lazy val program: Parsley[Program] =
+  (many(importDecl) ~> many(func) ~> Stmts(Nil)).map(Program.apply)`,
+          annotations: [
+            {
+              line: 7,
+              note: "lazy 延迟构建 parser 图，避免规则之间的 forward reference 问题。",
+            },
+            {
+              line: 8,
+              note: "解析顺序与 WACC 顶层结构一致：imports → functions → statements。",
+            },
+          ],
+        },
+        {
+          id: "syntax-precedence",
+          title: "Syntax error handling",
+          startLine: 10,
+          endLine: 18,
+          reason:
+            "表达式 parser 通过 precedence 组合子声明运算符优先级；Parsley 会在不匹配时给出语法级诊断位置。",
+          code: `  private lazy val expr: Parsley[Expr] = precedence(
+    atomic(parens),
+    intLiteral,
+    identifier,
+    boolean
+  )(
+    Ops(Prefix)("!" as Not, "-" as Neg),
+    Ops(InfixL)("*" as Mul, "/" as Div, "%" as Mod),
+    Ops(InfixL)("+" as Add, "-" as Sub)
+  )`,
+          annotations: [
+            {
+              line: 10,
+              note: "precedence 将原子项与各级运算符分层，减少手工处理结合性的样板代码。",
+            },
+            {
+              line: 16,
+              note: "Prefix / InfixL 分层定义一元与左结合二元运算，贴近 WACC 表达式语义。",
+            },
+          ],
+        },
+      ],
       code: `object Parser {
   def parse(input: String): Result[String, Program] =
     progParser.parse(input)
@@ -343,6 +416,74 @@ sbt compile
         relatedModules: ["Parser", "AST", "Codegen"],
         relatedPaths: ["src/parser", "src/ast", "src/codegen"],
       },
+      snippets: [
+        {
+          id: "semantic-entry",
+          title: "Type checking entry",
+          startLine: 1,
+          endLine: 4,
+          reason:
+            "通过 extension method 为 Program AST 提供 `checkTypes`，语义阶段从这里进入私有 check 实现。",
+          code: `object SemanticChecker {
+  extension (ast: Program) {
+    def checkTypes(): Result[List[Diagnostic], Unit] =
+      SemanticChecker.check(ast)
+  }`,
+          annotations: [
+            {
+              line: 2,
+              note: "extension 让调用方写成 `program.checkTypes()`，与 parser 入口风格一致。",
+            },
+            {
+              line: 3,
+              note: "Result 聚合 Diagnostic 列表，编译器主程序可统一格式化错误输出。",
+            },
+          ],
+        },
+        {
+          id: "scope-validation",
+          title: "Scope validation",
+          startLine: 6,
+          endLine: 8,
+          reason:
+            "check 先构建全局函数环境，再遍历 main body；变量与函数的作用域规则在 traverse 过程中 enforced。",
+          code: `  private def check(program: Program): Result[List[Diagnostic], Unit] = {
+    val env = buildGlobalEnv(program.funcs)
+    program.body.traverse(checkStmt(_, env)) match {`,
+          annotations: [
+            {
+              line: 7,
+              note: "buildGlobalEnv 收集函数签名，作为后续语句检查的顶层符号表。",
+            },
+            {
+              line: 8,
+              note: "traverse 携带 env 递归检查语句，未定义标识符在此阶段被捕获。",
+            },
+          ],
+        },
+        {
+          id: "error-reporting",
+          title: "Error accumulation / reporting",
+          startLine: 9,
+          endLine: 11,
+          reason:
+            "语义错误通过 Left(diags) 批量返回，而不是遇错即停，便于一次展示多个类型/作用域问题。",
+          code: `      case Left(diags)  => Failure(diags)
+      case Right(_)     => Success(())
+    }
+  }`,
+          annotations: [
+            {
+              line: 9,
+              note: "Left 分支收集已产生的 Diagnostic，供 CLI 统一打印行号与消息。",
+            },
+            {
+              line: 10,
+              note: "仅当 body 全部通过检查才返回 Success，保证 codegen 输入语义正确。",
+            },
+          ],
+        },
+      ],
       code: `object SemanticChecker {
   extension (ast: Program) {
     def checkTypes(): Result[List[Diagnostic], Unit] =
@@ -384,6 +525,80 @@ sbt compile
         relatedPaths: ["src/semantic", "src/ast"],
         notes: ["输出为可直接链接的纯文本 ARM 汇编。"],
       },
+      snippets: [
+        {
+          id: "codegen-entry",
+          title: "Code generation entry",
+          startLine: 1,
+          endLine: 8,
+          reason:
+            "generate 串联 runtime imports、各函数体与 main，将已通过语义检查的 Program 降成可链接的 ARM 汇编文本。",
+          code: `object CodeGenerator {
+  def generate(program: Program): String = {
+    val state = CodeGenState.fresh
+    val header = emitRuntimeImports()
+    val funcs  = program.funcs.map(emitFunc(_, state))
+    val main   = emitMain(program.body, state)
+    (header ++ funcs :+ main).mkString("\\n")
+  }`,
+          annotations: [
+            {
+              line: 2,
+              note: "CodeGenState 在整次生成过程中追踪标签、临时寄存器与栈偏移。",
+            },
+            {
+              line: 7,
+              note: "header + funcs + main 的顺序保证运行时符号先于用户代码出现。",
+            },
+          ],
+        },
+        {
+          id: "stack-frame",
+          title: "Stack frame / register handling",
+          startLine: 10,
+          endLine: 15,
+          reason:
+            "emitMain 遵循 AAPCS64 约定：入栈保存 fp/lr，建立栈帧后再生成 main body 指令。",
+          code: `  private def emitMain(stmts: Stmts, state: CodeGenState): String =
+    s"""|  .text
+        |  .global main
+        |main:
+        |  stp fp, lr, [sp, #-16]!
+        |  mov fp, sp
+        |\${emitStmts(stmts, state)}`,
+          annotations: [
+            {
+              line: 13,
+              note: "stp 在栈上保存 frame pointer 与 link register，为函数返回做准备。",
+            },
+            {
+              line: 14,
+              note: "mov fp, sp 建立当前栈帧基址，局部变量与 spill 相对 fp 寻址。",
+            },
+          ],
+        },
+        {
+          id: "arm-emission",
+          title: "ARM instruction emission",
+          startLine: 16,
+          endLine: 19,
+          reason:
+            "main 尾声恢复 callee-saved 寄存器并以 x0=0 返回，与 WACC main 无返回值约定一致。",
+          code: `        |  mov x0, #0
+        |  ldp fp, lr, [sp], #16
+        |  ret""".stripMargin`,
+          annotations: [
+            {
+              line: 17,
+              note: "WACC main 视为返回 0，mov x0, #0 写入 ARM 返回值寄存器。",
+            },
+            {
+              line: 18,
+              note: "ldp 与入口 stp 对称，恢复 fp/lr 并释放 16 字节栈空间。",
+            },
+          ],
+        },
+      ],
       code: `object CodeGenerator {
   def generate(program: Program): String = {
     val state = CodeGenState.fresh

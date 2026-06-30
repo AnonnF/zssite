@@ -12,6 +12,8 @@ import { waccCompilerAnalysis } from "./wacc-compiler.analysis";
 export type {
   ProjectAnalyzerData,
   ProjectAnalysisEntry,
+  ProjectCodeSnippet,
+  ProjectCodeSnippetAnnotation,
   ProjectGuidedTourStep,
   ProjectNarrative,
   ProjectPipelineNode,
