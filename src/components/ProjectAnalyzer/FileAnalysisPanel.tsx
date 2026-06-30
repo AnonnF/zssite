@@ -194,7 +194,7 @@ export function FileAnalysisPanel({ entry, onPathSelect }: FileAnalysisPanelProp
   const reviewStatus = entry.analysis?.reviewStatus;
 
   return (
-    <section className="flex h-full min-h-0 flex-col">
+    <section className="file-analysis-panel flex min-h-0 flex-col">
       <div className="analyzer-pane-header">
         <div className="analyzer-pane-header__lead">
           <span className="accent-bar mt-0.5" aria-hidden="true" />
@@ -225,7 +225,7 @@ export function FileAnalysisPanel({ entry, onPathSelect }: FileAnalysisPanelProp
         </div>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 md:px-5 md:py-5">
+      <div className="file-analysis-panel__body min-h-0 overflow-y-auto px-4 py-4 md:px-5 md:py-5">
         <p className="mb-4 font-mono text-meta text-muted">
           <span className="uppercase tracking-wider">Path</span>
           <span className="mx-2 text-border">/</span>

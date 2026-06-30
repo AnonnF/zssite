@@ -197,12 +197,12 @@ export function ProjectAnalyzer({
           />
         </aside>
 
-        <div className="flex min-h-0 flex-1 flex-col gap-3 lg:w-[65%]">
-          <div className="analyzer-pane min-h-[12rem] flex-1 lg:min-h-0 lg:max-h-[45%]">
+        <div className="analyzer-pane-stack min-h-0 flex-1 lg:w-[65%]">
+          <div className="analyzer-pane analyzer-pane--analysis">
             <FileAnalysisPanel entry={entry} onPathSelect={selectPath} />
           </div>
 
-          <div className="analyzer-pane min-h-[14rem] flex-1 lg:min-h-0">
+          <div className="analyzer-pane analyzer-pane--detail">
             {isFolder ? (
               <FolderOverview
                 path={selectedPath}
