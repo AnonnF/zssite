@@ -1,6 +1,7 @@
 "use client";
 
 import type { ProjectTreeNode } from "@/data/projects/types";
+import { FileTreeIcon } from "./getFileIcon";
 
 interface FileTreeProps {
   tree: ProjectTreeNode[];
@@ -17,6 +18,75 @@ interface TreeNodeProps {
   expandedPaths: Set<string>;
   onSelect: (path: string) => void;
   onToggle: (path: string) => void;
+}
+
+interface TreeRowProps {
+  label: string;
+  depth: number;
+  isSelected: boolean;
+  node: Pick<ProjectTreeNode, "type" | "name" | "path">;
+  isExpanded?: boolean;
+  hasChildren?: boolean;
+  onClick: () => void;
+  labelClassName?: string;
+}
+
+function TreeChevron({
+  isFolder,
+  hasChildren,
+  isExpanded,
+}: {
+  isFolder: boolean;
+  hasChildren: boolean;
+  isExpanded: boolean;
+}) {
+  if (!isFolder || !hasChildren) {
+    return <span className="inline-block w-3 shrink-0" aria-hidden />;
+  }
+
+  return (
+    <span
+      className="inline-flex w-3 shrink-0 items-center justify-center text-[10px] text-muted"
+      aria-hidden
+    >
+      {isExpanded ? "▾" : "▸"}
+    </span>
+  );
+}
+
+function TreeRow({
+  label,
+  depth,
+  isSelected,
+  node,
+  isExpanded = false,
+  hasChildren = false,
+  onClick,
+  labelClassName = "",
+}: TreeRowProps) {
+  const isFolder = node.type === "folder";
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`flex w-full items-center border-l-2 py-1.5 pr-2 text-left font-mono text-meta transition-colors ${
+        isSelected
+          ? "border-accent bg-accent-muted/50 text-text"
+          : "border-transparent text-muted hover:border-border-soft hover:bg-surface/60 hover:text-text"
+      }`}
+      style={{ paddingLeft: `${depth * 12 + 8}px` }}
+      aria-current={isSelected ? "true" : undefined}
+    >
+      <TreeChevron
+        isFolder={isFolder}
+        hasChildren={hasChildren}
+        isExpanded={isExpanded}
+      />
+      <FileTreeIcon node={node} expanded={isExpanded} size={18} />
+      <span className={`ml-2 truncate ${labelClassName}`.trim()}>{label}</span>
+    </button>
+  );
 }
 
 function TreeNode({
@@ -41,28 +111,15 @@ function TreeNode({
 
   return (
     <div>
-      <button
-        type="button"
+      <TreeRow
+        label={node.name}
+        depth={depth}
+        isSelected={isSelected}
+        node={node}
+        isExpanded={isExpanded}
+        hasChildren={hasChildren}
         onClick={handleClick}
-        className={`flex w-full items-center gap-1.5 border-l-2 py-1.5 pr-2 text-left font-mono text-meta transition-colors ${
-          isSelected
-            ? "border-accent bg-accent-muted/50 text-text"
-            : "border-transparent text-muted hover:border-border-soft hover:bg-surface/60 hover:text-text"
-        }`}
-        style={{ paddingLeft: `${depth * 12 + 8}px` }}
-        aria-current={isSelected ? "true" : undefined}
-      >
-        {isFolder ? (
-          <span className="w-3 shrink-0 text-center text-[10px] text-accent" aria-hidden>
-            {hasChildren ? (isExpanded ? "▾" : "▸") : "·"}
-          </span>
-        ) : (
-          <span className="w-3 shrink-0 text-center text-[10px] text-muted/60" aria-hidden>
-            ·
-          </span>
-        )}
-        <span className="truncate">{node.name}</span>
-      </button>
+      />
 
       {isFolder && isExpanded && hasChildren && (
         <div>
@@ -83,6 +140,12 @@ function TreeNode({
   );
 }
 
+const ROOT_NODE: Pick<ProjectTreeNode, "type" | "name" | "path"> = {
+  type: "folder",
+  name: "root",
+  path: "",
+};
+
 export function FileTree({
   tree,
   selectedPath,
@@ -92,21 +155,16 @@ export function FileTree({
 }: FileTreeProps) {
   return (
     <nav aria-label="Project file tree" className="min-h-0 flex-1 overflow-y-auto">
-      <button
-        type="button"
+      <TreeRow
+        label="root"
+        depth={0}
+        isSelected={selectedPath === ""}
+        node={ROOT_NODE}
+        isExpanded={false}
+        hasChildren={tree.length > 0}
         onClick={() => onSelect("")}
-        className={`mb-1 flex w-full items-center gap-1.5 border-l-2 py-1.5 pl-2 pr-2 text-left font-mono text-meta transition-colors ${
-          selectedPath === ""
-            ? "border-accent bg-accent-muted/50 text-text"
-            : "border-transparent text-muted hover:border-border-soft hover:bg-surface/60 hover:text-text"
-        }`}
-        aria-current={selectedPath === "" ? "true" : undefined}
-      >
-        <span className="w-3 shrink-0 text-center text-[10px] text-accent" aria-hidden>
-          ▸
-        </span>
-        <span className="truncate font-semibold uppercase tracking-wider">root</span>
-      </button>
+        labelClassName="font-semibold uppercase tracking-wider"
+      />
 
       {tree.map((node) => (
         <TreeNode
