@@ -43,6 +43,11 @@ export function ProjectAnalyzer({
     [data, selectedPath, selectedNode]
   );
 
+  const getEntry = useCallback(
+    (path: string) => getAnalysisEntry(data, path, findTreeNode(data.tree, path)),
+    [data]
+  );
+
   const directChildren = useMemo(
     () => getDirectChildren(data.tree, selectedPath),
     [data.tree, selectedPath]
@@ -98,6 +103,13 @@ export function ProjectAnalyzer({
     [selectPath]
   );
 
+  const handleOverviewItemClick = useCallback(
+    (node: ProjectTreeNode) => {
+      selectPath(node.path);
+    },
+    [selectPath]
+  );
+
   return (
     <div className="panel-card overflow-hidden">
       <div className="border-b border-border-soft px-4 py-3 md:px-5">
@@ -144,12 +156,18 @@ export function ProjectAnalyzer({
 
         <div className="flex min-h-0 flex-1 flex-col lg:w-[65%]">
           <div className="min-h-[12rem] flex-1 border-b border-border-soft lg:min-h-0 lg:max-h-[45%]">
-            <FileAnalysisPanel entry={entry} />
+            <FileAnalysisPanel entry={entry} onPathSelect={selectPath} />
           </div>
 
           <div className="min-h-[14rem] flex-1 lg:min-h-0">
             {isFolder ? (
-              <FolderOverview path={selectedPath} items={directChildren} />
+              <FolderOverview
+                path={selectedPath}
+                items={directChildren}
+                selectedPath={selectedPath}
+                getEntry={getEntry}
+                onItemClick={handleOverviewItemClick}
+              />
             ) : (
               <CodePreview entry={entry} />
             )}

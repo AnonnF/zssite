@@ -5,6 +5,20 @@ export type ProjectTreeNode = {
   children?: ProjectTreeNode[];
 };
 
+export type ProjectStructuredAnalysis = {
+  purpose?: string;
+  responsibilities?: string[];
+  input?: string;
+  output?: string;
+  role?: string;
+  keyLogic?: string[];
+  relatedModules?: string[];
+  relatedPaths?: string[];
+  usedBy?: string[];
+  notes?: string[];
+  reviewStatus?: "draft" | "reviewed" | "verified";
+};
+
 export type ProjectAnalysisEntry = {
   path: string;
   type: "file" | "folder";
@@ -13,6 +27,7 @@ export type ProjectAnalysisEntry = {
   fixed?: boolean;
   language?: string;
   code?: string;
+  analysis?: ProjectStructuredAnalysis;
 };
 
 export type ProjectPipelineNode = {

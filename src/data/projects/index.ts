@@ -2,6 +2,7 @@ import type {
   ProjectAnalyzerData,
   ProjectAnalysisEntry,
   ProjectPipelineNode,
+  ProjectStructuredAnalysis,
   ProjectTreeNode,
 } from "./types";
 import { waccCompilerAnalysis } from "./wacc-compiler.analysis";
@@ -10,6 +11,7 @@ export type {
   ProjectAnalyzerData,
   ProjectAnalysisEntry,
   ProjectPipelineNode,
+  ProjectStructuredAnalysis,
   ProjectTreeNode,
 } from "./types";
 
@@ -126,4 +128,24 @@ export function resolveActivePipelineNodeId(
   }
 
   return best?.id ?? null;
+}
+
+function hasAnalysisContent(analysis: ProjectStructuredAnalysis): boolean {
+  return Object.entries(analysis).some(([key, value]) => {
+    if (key === "reviewStatus") return false;
+    if (Array.isArray(value)) return value.length > 0;
+    return Boolean(value);
+  });
+}
+
+export function hasStructuredAnalysis(entry: ProjectAnalysisEntry): boolean {
+  return Boolean(entry.analysis && hasAnalysisContent(entry.analysis));
+}
+
+export function getEntryBlurb(entry: ProjectAnalysisEntry): string | null {
+  const { analysis } = entry;
+  if (analysis?.purpose) return analysis.purpose;
+  if (analysis?.role) return analysis.role;
+  if (entry.summary) return entry.summary;
+  return null;
 }

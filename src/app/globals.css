@@ -251,6 +251,52 @@
     border-color: var(--color-accent);
     background-color: var(--color-accent-muted);
   }
+
+  .folder-overview-item {
+    display: block;
+    border-left: 2px solid transparent;
+    padding-left: 0.5rem;
+    padding-right: 0.25rem;
+    transition:
+      border-color 0.2s ease,
+      background-color 0.2s ease;
+  }
+
+  .folder-overview-item:hover {
+    border-left-color: var(--color-border);
+    background-color: color-mix(in srgb, var(--color-surface) 50%, transparent);
+  }
+
+  .folder-overview-item--selected {
+    border-left-color: var(--color-accent);
+    background-color: var(--color-accent-muted);
+  }
+
+  .folder-overview-tag {
+    border: 1px solid var(--color-border);
+    background-color: color-mix(in srgb, var(--color-bg) 60%, transparent);
+    padding: 0.125rem 0.5rem;
+    font-family: var(--font-mono), monospace;
+    font-size: 0.625rem;
+    line-height: 1.4;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-text);
+    transition:
+      border-color 0.15s ease,
+      background-color 0.15s ease,
+      color 0.15s ease;
+  }
+
+  button.folder-overview-tag:hover {
+    border-color: var(--color-accent);
+    background-color: var(--color-accent-muted);
+  }
+
+  .folder-overview-tag--static {
+    display: inline-block;
+    color: var(--color-muted);
+  }
 }
 
 @layer utilities {

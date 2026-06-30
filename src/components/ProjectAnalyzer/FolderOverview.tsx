@@ -1,11 +1,21 @@
-import type { ProjectTreeNode } from "@/data/projects/types";
+import type { ProjectAnalysisEntry, ProjectTreeNode } from "@/data/projects/types";
+import { getEntryBlurb } from "@/data/projects";
 
 interface FolderOverviewProps {
   path: string;
   items: ProjectTreeNode[];
+  selectedPath: string;
+  getEntry: (path: string) => ProjectAnalysisEntry;
+  onItemClick: (node: ProjectTreeNode) => void;
 }
 
-export function FolderOverview({ path, items }: FolderOverviewProps) {
+export function FolderOverview({
+  path,
+  items,
+  selectedPath,
+  getEntry,
+  onItemClick,
+}: FolderOverviewProps) {
   const folderCount = items.filter((c) => c.type === "folder").length;
   const fileCount = items.filter((c) => c.type === "file").length;
 
@@ -15,9 +25,7 @@ export function FolderOverview({ path, items }: FolderOverviewProps) {
         <span className="font-mono text-meta uppercase tracking-wider text-muted">
           Folder Overview
         </span>
-        <span className="font-mono text-meta text-muted">
-          {path || "/"}
-        </span>
+        <span className="font-mono text-meta text-muted">{path || "/"}</span>
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 md:px-5 md:py-5">
@@ -42,26 +50,43 @@ export function FolderOverview({ path, items }: FolderOverviewProps) {
 
         {items.length > 0 ? (
           <ul className="mt-4 divide-y divide-border-soft">
-            {items.map((child) => (
-              <li
-                key={child.path}
-                className="flex items-center justify-between gap-3 py-2.5"
-              >
-                <span className="font-mono text-body text-text">{child.name}</span>
-                <span className="shrink-0 border border-border-soft px-1.5 py-0.5 font-mono text-meta uppercase tracking-wider text-muted">
-                  {child.type}
-                </span>
-              </li>
-            ))}
+            {items.map((child) => {
+              const blurb = getEntryBlurb(getEntry(child.path));
+              const isSelected = selectedPath === child.path;
+
+              return (
+                <li key={child.path}>
+                  <button
+                    type="button"
+                    className={`folder-overview-item group w-full py-3 text-left ${
+                      isSelected ? "folder-overview-item--selected" : ""
+                    }`}
+                    onClick={() => onItemClick(child)}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0 flex-1">
+                        <span className="font-mono text-body text-text transition-colors group-hover:text-text">
+                          {child.name}
+                        </span>
+                        <p className="mt-1 font-[family-name:var(--font-body-sc)] text-meta leading-relaxed text-muted">
+                          {blurb ?? "No description yet."}
+                        </p>
+                      </div>
+                      <span className="shrink-0 border border-border-soft px-1.5 py-0.5 font-mono text-meta uppercase tracking-wider text-muted transition-colors group-hover:border-border-strong">
+                        {child.type}
+                      </span>
+                    </div>
+                  </button>
+                </li>
+              );
+            })}
           </ul>
         ) : (
-          <p className="mt-4 font-mono text-meta text-muted">
-            This folder is empty.
-          </p>
+          <p className="mt-4 font-mono text-meta text-muted">This folder is empty.</p>
         )}
 
         <p className="mt-6 border-t border-border-soft pt-4 font-mono text-meta uppercase tracking-wider text-muted">
-          Select a file in the tree to view its code preview.
+          Select an item below or in the file tree to explore further.
         </p>
       </div>
     </section>

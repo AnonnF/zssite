@@ -107,6 +107,22 @@ export const waccCompilerAnalysis: ProjectAnalyzerData = {
       summary:
         "WACC 编译器项目根目录。采用经典多阶段编译器架构：前端负责词法与语法分析，中端构建 AST 并执行语义检查，后端生成 ARM 汇编。",
       fixed: true,
+      analysis: {
+        purpose:
+          "Top-level entry for the WACC compiler — organizes source, tests, and project documentation.",
+        responsibilities: [
+          "Hosts the multi-stage compiler source tree under src/",
+          "Separates implementation from test fixtures",
+          "Provides project-level documentation and build entry points",
+        ],
+        input: "WACC source programs and compiler configuration",
+        output: "Compiled ARM assembly and diagnostic messages",
+        relatedModules: ["Source Tree", "Test Suite", "Docs"],
+        relatedPaths: ["src", "tests", "README.md"],
+        notes: [
+          "Pipeline stages live under src/ and follow a classic compiler layout.",
+        ],
+      },
     },
     src: {
       path: "src",
@@ -115,6 +131,25 @@ export const waccCompilerAnalysis: ProjectAnalyzerData = {
       summary:
         "编译器核心源码目录，按编译阶段划分为 lexer、parser、ast、semantic、codegen 五个模块，各模块职责单一、边界清晰。",
       fixed: true,
+      analysis: {
+        purpose:
+          "Contains all compiler implementation modules arranged by compilation phase.",
+        responsibilities: [
+          "Groups frontend, middle-end, and backend stages into isolated folders",
+          "Keeps module boundaries explicit for navigation and testing",
+          "Serves as the main exploration entry for compiler architecture",
+        ],
+        input: "Organized Scala sources for each compiler phase",
+        output: "Phase-specific modules consumed sequentially by the pipeline",
+        relatedModules: ["Lexer", "Parser", "AST", "Semantic Checker", "Codegen"],
+        relatedPaths: [
+          "src/lexer",
+          "src/parser",
+          "src/ast",
+          "src/semantic",
+          "src/codegen",
+        ],
+      },
     },
     "src/lexer": {
       path: "src/lexer",
@@ -123,6 +158,18 @@ export const waccCompilerAnalysis: ProjectAnalyzerData = {
       summary:
         "词法分析模块，将 WACC 源字符流切分为 token 序列。基于 Parsley 组合子库实现，为后续 parser 提供稳定的输入接口。",
       fixed: true,
+      analysis: {
+        purpose: "Tokenizes WACC source text into a stream of typed lexical units.",
+        responsibilities: [
+          "Recognizes keywords, identifiers, literals, and operators",
+          "Normalizes whitespace and comment handling",
+          "Exposes a stable token interface for the parser",
+        ],
+        input: "Raw WACC source characters",
+        output: "Token stream",
+        relatedModules: ["Parser", "Source Tree"],
+        relatedPaths: ["src/parser", "src/lexer/Lexer.scala"],
+      },
     },
     "src/parser": {
       path: "src/parser",
@@ -131,6 +178,18 @@ export const waccCompilerAnalysis: ProjectAnalyzerData = {
       summary:
         "语法分析模块，负责将 token 流转换为抽象语法树（AST）。采用递归下降与运算符优先级解析，是前后端之间的核心桥梁。",
       fixed: true,
+      analysis: {
+        purpose: "Converts token streams into an abstract syntax tree.",
+        responsibilities: [
+          "Defines grammar-level parsing flow",
+          "Builds AST nodes from tokens",
+          "Bridges lexer output and semantic analysis",
+        ],
+        input: "Token stream",
+        output: "AST",
+        relatedModules: ["Lexer", "AST", "Semantic Checker"],
+        relatedPaths: ["src/lexer", "src/ast", "src/parser/Parser.scala"],
+      },
     },
     "src/ast": {
       path: "src/ast",
@@ -147,6 +206,19 @@ export const waccCompilerAnalysis: ProjectAnalyzerData = {
       summary:
         "语义分析模块，在 AST 上执行类型检查、作用域解析与名称绑定。捕获静态错误，确保进入代码生成阶段的程序在类型层面合法。",
       fixed: true,
+      analysis: {
+        purpose:
+          "Validates program meaning on the AST before code generation.",
+        responsibilities: [
+          "Performs type checking and scope resolution",
+          "Resolves names and enforces WACC typing rules",
+          "Reports static errors that block codegen",
+        ],
+        input: "AST from parser",
+        output: "Type-checked AST or diagnostic list",
+        relatedModules: ["Parser", "AST", "Codegen"],
+        relatedPaths: ["src/ast", "src/codegen", "src/semantic/SemanticChecker.scala"],
+      },
     },
     "src/codegen": {
       path: "src/codegen",
@@ -155,6 +227,19 @@ export const waccCompilerAnalysis: ProjectAnalyzerData = {
       summary:
         "代码生成模块，将类型正确的 AST 降低为 ARM 汇编。处理寄存器分配、栈帧布局、控制流跳转与运行时内建函数调用。",
       fixed: true,
+      analysis: {
+        purpose: "Lowers a type-correct AST into ARM assembly output.",
+        responsibilities: [
+          "Emits instruction sequences for expressions and control flow",
+          "Manages stack frames and register conventions",
+          "Integrates runtime helpers and built-in calls",
+        ],
+        input: "Type-checked AST",
+        output: "ARM assembly text",
+        relatedModules: ["Semantic Checker", "AST"],
+        relatedPaths: ["src/semantic", "src/codegen/CodeGenerator.scala"],
+        notes: ["Final stage of the compiler pipeline."],
+      },
     },
     tests: {
       path: "tests",
@@ -201,6 +286,17 @@ sbt compile
       summary:
         "语法分析主文件，包含程序、语句、表达式与类型声明的解析规则，负责构建完整 AST。",
       language: "scala",
+      analysis: {
+        role: "Main parser implementation for WACC programs.",
+        keyLogic: [
+          "Coordinates grammar rules via Parsley parser combinators",
+          "Produces AST representation from token input",
+          "Handles syntax-level failures with parser diagnostics",
+        ],
+        usedBy: ["Compiler driver", "Parser tests"],
+        relatedModules: ["Lexer", "AST", "Semantic Checker"],
+        relatedPaths: ["src/lexer", "src/ast", "src/semantic"],
+      },
       code: `object Parser {
   def parse(input: String): Result[String, Program] =
     progParser.parse(input)
@@ -236,6 +332,17 @@ sbt compile
       summary:
         "类型检查器主入口，遍历 AST 并维护变量与函数环境，报告类型不匹配与未定义标识符错误。",
       language: "scala",
+      analysis: {
+        role: "Entry point for static semantic validation of WACC programs.",
+        keyLogic: [
+          "Builds global function and variable environments",
+          "Walks AST nodes to enforce typing and scope rules",
+          "Aggregates diagnostics for type and name errors",
+        ],
+        usedBy: ["Compiler driver", "Semantic tests"],
+        relatedModules: ["Parser", "AST", "Codegen"],
+        relatedPaths: ["src/parser", "src/ast", "src/codegen"],
+      },
       code: `object SemanticChecker {
   extension (ast: Program) {
     def checkTypes(): Result[List[Diagnostic], Unit] =
@@ -265,6 +372,18 @@ sbt compile
       summary:
         "ARM 汇编代码生成器，将类型检查后的 AST 翻译为可执行的汇编指令序列，处理栈帧与寄存器约定。",
       language: "scala",
+      analysis: {
+        role: "Generates ARM assembly from a validated WACC AST.",
+        keyLogic: [
+          "Emits runtime imports and function bodies",
+          "Lowers statements and expressions to ARM instructions",
+          "Manages stack setup/teardown for main and functions",
+        ],
+        usedBy: ["Compiler driver"],
+        relatedModules: ["Semantic Checker", "AST"],
+        relatedPaths: ["src/semantic", "src/ast"],
+        notes: ["Output is plain-text ARM assembly ready for linking."],
+      },
       code: `object CodeGenerator {
   def generate(program: Program): String = {
     val state = CodeGenState.fresh
