@@ -10,7 +10,8 @@ export interface FooterLink {
 
 export interface SiteContent {
   brand: {
-    primary: string;
+    logo: string;
+    logoAlt: string;
     secondary: string;
   };
   nav: NavItem[];
@@ -47,7 +48,8 @@ export interface SiteContent {
 
 export const siteContent: SiteContent = {
   brand: {
-    primary: "ZS",
+    logo: "/images/zssite-zs-logo-transparent-cropped.png",
+    logoAlt: "ZS",
     secondary: "SITE",
   },
   nav: [
