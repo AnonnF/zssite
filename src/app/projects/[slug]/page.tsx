@@ -53,7 +53,11 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
   const { backToProjects, analyzerLabel } = siteContent.projectDetail;
 
   return (
-    <div className="mx-auto max-w-content px-6 py-section md:px-12 lg:px-16">
+    <div
+      className={`mx-auto px-6 py-section md:px-12 lg:px-16 ${
+        showNav ? "max-w-content-wide" : "max-w-content"
+      }`}
+    >
       <Link
         href="/projects"
         className="enter-indicator text-muted transition-colors hover:text-accent"
@@ -69,8 +73,8 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
         />
       )}
 
-      <div className={showNav ? "lg:flex lg:items-start lg:gap-10" : undefined}>
-        <div className="min-w-0 flex-1">
+      <div className={showNav ? "project-detail-body" : undefined}>
+        <div className="project-detail-main min-w-0">
           <header
             id="project-overview"
             className="scroll-mt-24 mt-6 border-b border-border-soft pb-8 md:pb-10"
@@ -133,11 +137,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
         </div>
 
         {showNav && (
-          <ProjectDetailNav
-            sections={navSections}
-            variant="desktop"
-            className="hidden lg:block"
-          />
+          <ProjectDetailNav sections={navSections} variant="desktop" />
         )}
       </div>
     </div>

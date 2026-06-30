@@ -139,13 +139,15 @@ export function ProjectAnalyzer({
 
   return (
     <div id="project-analyzer" className="panel-card scroll-mt-24 overflow-hidden">
-      <div className="border-b border-border-soft px-4 py-3 md:px-5">
+      <div className="analyzer-card-header border-b border-border-soft px-4 py-2 md:px-5">
         <p className="font-mono text-meta uppercase tracking-wider text-muted">
           Project Analyzer
         </p>
-        <p className="mt-1 font-[family-name:var(--font-body-sc)] text-body text-muted">
-          {data.description}
-        </p>
+        {data.description ? (
+          <p className="analyzer-card-header__desc mt-0.5 font-[family-name:var(--font-body-sc)] text-muted">
+            {data.description}
+          </p>
+        ) : null}
       </div>
 
       {data.guidedTour && data.guidedTour.length > 0 && (

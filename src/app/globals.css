@@ -300,19 +300,101 @@
 
   .guided-tour-step {
     border: 1px solid transparent;
+    border-left-width: 2px;
     border-radius: var(--radius-sm);
     background: transparent;
   }
 
   .guided-tour-step:hover:not(.guided-tour-step--active) {
     border-color: var(--color-border);
-    background-color: color-mix(in srgb, var(--color-surface) 50%, transparent);
+    border-left-color: var(--color-border);
+    background-color: color-mix(in srgb, var(--color-surface) 35%, transparent);
   }
 
   .guided-tour-step--active {
-    border-color: var(--color-accent);
-    background-color: var(--color-accent-muted);
+    border-color: var(--color-border);
+    border-left-color: var(--color-accent);
+    background-color: color-mix(in srgb, var(--color-surface) 30%, transparent);
     color: var(--color-text);
+  }
+
+  .guided-tour__subtitle {
+    font-size: 0.625rem;
+    letter-spacing: 0.04em;
+    text-transform: none;
+    color: color-mix(in srgb, var(--color-muted) 85%, transparent);
+  }
+
+  .guided-tour-detail__title {
+    font-size: 0.875rem;
+    line-height: 1.35;
+  }
+
+  .guided-tour-detail__desc {
+    font-size: 0.8125rem;
+    line-height: 1.55;
+  }
+
+  .analyzer-card-header__desc {
+    font-size: 0.8125rem;
+    line-height: 1.5;
+  }
+
+  @media (min-width: 1280px) {
+    .project-detail-body {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 9.5rem;
+      gap: 2.5rem;
+      align-items: start;
+    }
+  }
+
+  .project-detail-nav-desktop {
+    display: none;
+  }
+
+  @media (min-width: 1280px) {
+    .project-detail-nav-desktop {
+      display: block;
+      position: sticky;
+      top: 6rem;
+      width: 9.5rem;
+      flex-shrink: 0;
+      padding-top: 0.25rem;
+    }
+  }
+
+  .project-detail-nav-desktop__label {
+    font-family: var(--font-mono), monospace;
+    font-size: 0.5625rem;
+    line-height: 1.4;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--color-muted) 90%, transparent);
+  }
+
+  .project-detail-nav-desktop__list {
+    margin-top: 0.625rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+  }
+
+  .page-nav-link--desktop {
+    padding: 0.3125rem 0.5rem 0.3125rem 0.625rem;
+    font-size: 0.5625rem;
+    line-height: 1.45;
+    letter-spacing: 0.05em;
+  }
+
+  .page-nav-link--desktop.page-nav-link--active {
+    border-left-color: var(--color-accent);
+    background-color: color-mix(in srgb, var(--color-surface) 35%, transparent);
+    color: var(--color-text);
+  }
+
+  .page-nav-link--desktop:hover {
+    background-color: color-mix(in srgb, var(--color-surface) 25%, transparent);
   }
 
   .tree-header-action:disabled {
@@ -350,8 +432,11 @@
 
   .page-nav-link--active {
     border-left-color: var(--color-accent);
-    background-color: var(--color-accent-muted);
     color: var(--color-text);
+  }
+
+  .page-nav-link:not(.page-nav-link--desktop).page-nav-link--active {
+    background-color: var(--color-accent-muted);
   }
 
   .page-nav-link--mobile {

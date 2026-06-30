@@ -11,12 +11,12 @@ interface GuidedTourProps {
 function StepArrow() {
   return (
     <div
-      className="flex shrink-0 items-center self-center px-1 text-muted"
+      className="flex shrink-0 items-center self-center px-0.5 text-muted/70"
       aria-hidden="true"
     >
       <svg
-        width="16"
-        height="10"
+        width="12"
+        height="8"
         viewBox="0 0 20 12"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
@@ -41,16 +41,12 @@ export function GuidedTour({ steps, activeStepIndex, onStepSelect }: GuidedTourP
   const canGoNext = activeStepIndex < steps.length - 1;
 
   return (
-    <section className="border-b border-border-soft bg-surface/20 px-4 py-4 md:px-5">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <p className="font-mono text-meta uppercase tracking-wider text-muted">
-            Guided Tour
-          </p>
-          <p className="mt-1 font-[family-name:var(--font-body-sc)] text-body text-muted">
-            Recommended reading path
-          </p>
-        </div>
+    <section className="guided-tour border-b border-border-soft px-4 py-2.5 md:px-5">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="font-mono text-meta uppercase tracking-wider text-muted">
+          Guided Tour
+          <span className="guided-tour__subtitle"> · Reading path</span>
+        </p>
         <div className="tree-header-actions">
           <button
             type="button"
@@ -73,13 +69,13 @@ export function GuidedTour({ steps, activeStepIndex, onStepSelect }: GuidedTourP
         </div>
       </div>
 
-      <div className="mt-4 overflow-x-auto pb-1">
+      <div className="mt-2 overflow-x-auto pb-0.5">
         <div className="flex min-w-min items-center">
           {steps.map((step, index) => (
             <div key={step.id} className="flex items-center">
               <button
                 type="button"
-                className={`guided-tour-step shrink-0 px-3 py-1.5 font-mono text-meta uppercase tracking-wider transition-colors duration-200 ${
+                className={`guided-tour-step shrink-0 px-2 py-1 font-mono text-meta uppercase tracking-wider transition-colors duration-200 ${
                   index === activeStepIndex
                     ? "guided-tour-step--active"
                     : "text-muted hover:text-text"
@@ -95,13 +91,15 @@ export function GuidedTour({ steps, activeStepIndex, onStepSelect }: GuidedTourP
         </div>
       </div>
 
-      <div className="mt-4 border border-border-soft bg-bg/40 px-4 py-3">
-        <p className="font-display text-body font-bold text-text">{activeStep.title}</p>
-        <p className="mt-2 font-[family-name:var(--font-body-sc)] text-body leading-relaxed text-muted">
+      <div className="guided-tour-detail mt-2 border-t border-border-soft/80 pt-2">
+        <p className="guided-tour-detail__title font-display font-bold text-text">
+          {activeStep.title}
+        </p>
+        <p className="guided-tour-detail__desc mt-1 font-[family-name:var(--font-body-sc)] leading-relaxed text-muted">
           {activeStep.description}
         </p>
         {activeStep.note && (
-          <p className="mt-2 font-mono text-meta leading-relaxed text-muted">
+          <p className="mt-1 font-mono text-meta leading-relaxed text-muted/90">
             {activeStep.note}
           </p>
         )}

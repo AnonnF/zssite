@@ -3,8 +3,7 @@ import type { ProjectAnalyzerData } from "./types";
 export const waccCompilerAnalysis: ProjectAnalyzerData = {
   projectId: "wacc-compiler",
   title: "WACC Compiler",
-  description:
-    "为 WACC 语言实现的完整编译器管线：词法分析、语法分析、语义检查与 ARM 汇编代码生成。",
+  description: "词法 → 语法 → 语义 → ARM 代码生成的完整编译器管线。",
   tree: [
     {
       name: "ROOT",

@@ -60,9 +60,9 @@ export function ProjectDetailNav({
     return (
       <nav
         aria-label="Page sections"
-        className={`page-nav-mobile sticky top-14 z-10 -mx-6 border-b border-border-soft bg-bg/95 px-6 py-2.5 backdrop-blur-sm md:-mx-12 md:px-12 lg:hidden ${className}`}
+        className={`page-nav-mobile sticky top-14 z-10 -mx-6 border-b border-border-soft bg-bg/95 px-6 py-2 backdrop-blur-sm md:-mx-12 md:px-12 xl:hidden ${className}`}
       >
-        <div className="flex gap-1 overflow-x-auto pb-0.5">
+        <div className="flex gap-0.5 overflow-x-auto pb-0.5">
           {sections.map((section) => (
             <button
               key={section.id}
@@ -83,17 +83,15 @@ export function ProjectDetailNav({
   return (
     <nav
       aria-label="Page sections"
-      className={`sticky top-24 w-36 shrink-0 ${className}`}
+      className={`project-detail-nav-desktop ${className}`}
     >
-      <p className="font-mono text-meta uppercase tracking-wider text-muted">
-        On this page
-      </p>
-      <ul className="mt-3 space-y-1">
+      <p className="project-detail-nav-desktop__label">On this page</p>
+      <ul className="project-detail-nav-desktop__list">
         {sections.map((section) => (
           <li key={section.id}>
             <button
               type="button"
-              className={`page-nav-link w-full text-left ${
+              className={`page-nav-link page-nav-link--desktop w-full text-left ${
                 activeId === section.id ? "page-nav-link--active" : ""
               }`}
               onClick={() => handleClick(section.id)}
