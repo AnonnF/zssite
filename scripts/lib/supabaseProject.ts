@@ -35,6 +35,22 @@ export async function getLatestSnapshotForProject(
   projectId: string
 ): Promise<SupabaseSnapshotRecord | null> {
   const supabase = getSupabaseAdmin();
+
+  const { data: activeSnapshot, error: activeError } = await supabase
+    .from("repo_snapshots")
+    .select("id, project_id, commit_sha, imported_at")
+    .eq("project_id", projectId)
+    .eq("active", true)
+    .maybeSingle();
+
+  if (activeError) {
+    throw new Error(`Failed to load active snapshot: ${activeError.message}`);
+  }
+
+  if (activeSnapshot) {
+    return activeSnapshot;
+  }
+
   const { data, error } = await supabase
     .from("repo_snapshots")
     .select("id, project_id, commit_sha, imported_at")

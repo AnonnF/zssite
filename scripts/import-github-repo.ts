@@ -17,12 +17,20 @@ import {
   sortDownloadPaths,
   type ImportTreeClassification,
 } from "./lib/import-tree-filter.js";
+import {
+  cleanupStuckImportJobs,
+  markImportJobStatus,
+  removeTmpDir,
+} from "./lib/importJobCleanup.js";
 import { loadScannerConfig } from "./lib/project-analysis/config.js";
 import { resolveLanguageFromPath } from "./lib/project-analysis/language.js";
 import {
   getRepoRoot,
+  getSnapshotBackupRoot,
   getSnapshotRelativePath,
   getSnapshotRoot,
+  getSnapshotTmpRelativePath,
+  getSnapshotTmpRoot,
 } from "./lib/paths.js";
 import { getSupabaseAdmin } from "./lib/supabaseAdmin.js";
 import type { ProjectTemplateId } from "../src/data/projects/types.js";
@@ -35,6 +43,7 @@ type CliOptions = {
   templateId?: ProjectTemplateId;
   title?: string;
   dryRun: boolean;
+  force: boolean;
 };
 
 type FileRecord = {
@@ -58,9 +67,21 @@ type ImportSummary = {
   downloadSkippedSecrets: number;
   treeTruncated: boolean;
   candidatePaths: string[];
+  tmpPath?: string;
+};
+
+type ImportRuntimeContext = {
+  jobId: string | null;
+  tmpRelativePath: string | null;
+  aborting: boolean;
 };
 
 const repoRoot = getRepoRoot();
+const runtimeContext: ImportRuntimeContext = {
+  jobId: null,
+  tmpRelativePath: null,
+  aborting: false,
+};
 
 function printUsage(): void {
   console.log(`Usage:
@@ -71,6 +92,7 @@ Options:
   --branch              Branch name (default: repo default branch)
   --templateId          Project template id
   --title               Project title
+  --force               Re-import even if snapshot for commit already exists
   --dry-run             Preview import without writing Supabase or snapshots
 
 Examples:
@@ -122,6 +144,7 @@ function parseArgs(argv: string[]): CliOptions {
     templateId,
     title: readFlagValue(args, "--title"),
     dryRun: flags.has("--dry-run"),
+    force: flags.has("--force"),
   };
 }
 
@@ -129,6 +152,50 @@ function readFlagValue(args: string[], flag: string): string | undefined {
   const index = args.indexOf(flag);
   if (index === -1) return undefined;
   return args[index + 1];
+}
+
+function registerSignalHandlers(): void {
+  const handleAbort = async (signal: NodeJS.Signals) => {
+    if (runtimeContext.aborting) {
+      return;
+    }
+    runtimeContext.aborting = true;
+
+    console.error(`\nImport interrupted by ${signal}. Cleaning up...`);
+
+    if (runtimeContext.tmpRelativePath) {
+      try {
+        removeTmpDir(runtimeContext.tmpRelativePath);
+      } catch (error) {
+        console.error(
+          error instanceof Error ? error.message : String(error)
+        );
+      }
+    }
+
+    if (runtimeContext.jobId) {
+      try {
+        await markImportJobStatus(
+          runtimeContext.jobId,
+          "aborted",
+          `Import aborted by ${signal}.`
+        );
+      } catch (error) {
+        console.error(
+          error instanceof Error ? error.message : String(error)
+        );
+      }
+    }
+
+    process.exit(130);
+  };
+
+  process.once("SIGINT", () => {
+    void handleAbort("SIGINT");
+  });
+  process.once("SIGTERM", () => {
+    void handleAbort("SIGTERM");
+  });
 }
 
 function buildFileRecords(
@@ -211,21 +278,21 @@ function buildFileRecords(
 async function downloadSnapshotFiles(
   metadata: GitHubRepoMetadata,
   options: CliOptions,
+  jobId: string,
   downloadQueue: string[],
   classifications: ImportTreeClassification[]
 ): Promise<Pick<
   ImportSummary,
-  "downloaded" | "downloadSkippedTooLarge" | "downloadSkippedSecrets"
+  "downloaded" | "downloadSkippedTooLarge" | "downloadSkippedSecrets" | "tmpPath"
 >> {
-  const snapshotRoot = getSnapshotRoot(repoRoot, options.projectId);
+  const snapshotRoot = getSnapshotTmpRoot(repoRoot, options.projectId, jobId);
+  const tmpRelativePath = getSnapshotTmpRelativePath(options.projectId, jobId);
+  runtimeContext.tmpRelativePath = tmpRelativePath;
+
+  fs.mkdirSync(snapshotRoot, { recursive: true });
+
   const scannerConfig = loadScannerConfig(repoRoot, options.projectId);
   const maxFileSizeBytes = scannerConfig.maxFileSizeKb * 1024;
-
-  if (fs.existsSync(snapshotRoot)) {
-    console.warn(
-      `Warning: snapshot directory already exists at ${getSnapshotRelativePath(options.projectId)}; new files will be merged/overwritten.`
-    );
-  }
 
   let downloaded = 0;
   let downloadSkippedTooLarge = 0;
@@ -269,7 +336,36 @@ async function downloadSnapshotFiles(
     }
   }
 
-  return { downloaded, downloadSkippedTooLarge, downloadSkippedSecrets };
+  return {
+    downloaded,
+    downloadSkippedTooLarge,
+    downloadSkippedSecrets,
+    tmpPath: tmpRelativePath,
+  };
+}
+
+function promoteSnapshotTmpDir(projectId: string, jobId: string): void {
+  const tmpRoot = getSnapshotTmpRoot(repoRoot, projectId, jobId);
+  const finalRoot = getSnapshotRoot(repoRoot, projectId);
+
+  if (!fs.existsSync(tmpRoot)) {
+    throw new Error(`Tmp snapshot missing at ${getSnapshotTmpRelativePath(projectId, jobId)}`);
+  }
+
+  if (fs.existsSync(finalRoot)) {
+    const backupRoot = getSnapshotBackupRoot(
+      repoRoot,
+      projectId,
+      Date.now().toString()
+    );
+    fs.mkdirSync(path.dirname(backupRoot), { recursive: true });
+    fs.renameSync(finalRoot, backupRoot);
+  } else {
+    fs.mkdirSync(path.dirname(finalRoot), { recursive: true });
+  }
+
+  fs.renameSync(tmpRoot, finalRoot);
+  runtimeContext.tmpRelativePath = null;
 }
 
 function printDryRunSummary(summary: ImportSummary, repoUrl: string): void {
@@ -301,10 +397,17 @@ function printSuccessSummary(options: {
   projectId: string;
   supabaseProjectId: string;
   snapshotId: string;
+  reusedExisting?: boolean;
 }): void {
-  const { summary, projectId, supabaseProjectId, snapshotId } = options;
+  const { summary, projectId, supabaseProjectId, snapshotId, reusedExisting } =
+    options;
 
-  console.log(`Imported GitHub repo: ${summary.owner}/${summary.repo}`);
+  if (reusedExisting) {
+    console.log("Snapshot for this commit already exists.");
+  } else {
+    console.log(`Imported GitHub repo: ${summary.owner}/${summary.repo}`);
+  }
+
   console.log(`Project slug: ${projectId}`);
   console.log(`Default branch: ${summary.defaultBranch}`);
   console.log(`Commit: ${summary.commitSha}`);
@@ -317,185 +420,291 @@ function printSuccessSummary(options: {
   console.log(`Snapshot id: ${snapshotId}`);
   console.log("Next steps:");
   console.log(`  npm run generate:analysis -- ${projectId}`);
-  console.log(`  npm run generate:ai-analysis -- ${projectId} --dry-run`);
+  console.log(`  npm run generate:ai-analysis -- ${projectId}`);
 }
 
-async function persistToSupabase(
+async function createImportJob(
   options: CliOptions,
-  summary: ImportSummary,
-  metadata: GitHubRepoMetadata,
-  fetchMeta: Awaited<ReturnType<typeof fetchGitHubRepoMetadata>>,
-  fileRecords: FileRecord[]
-): Promise<{ projectId: string; snapshotId: string }> {
+  repoUrl: string
+): Promise<string> {
   const supabase = getSupabaseAdmin();
-  const repoUrl = metadata.htmlUrl;
-  const title = options.title ?? `${metadata.owner}/${metadata.repo}`;
+  const startedAt = new Date().toISOString();
 
-  const { data: jobInsert, error: jobInsertError } = await supabase
+  const { data, error } = await supabase
     .from("import_jobs")
     .insert({
       repo_url: repoUrl,
       project_slug: options.projectId,
-      status: "pending",
+      status: "running",
+      started_at: startedAt,
     })
     .select("id")
     .single();
 
-  if (jobInsertError || !jobInsert) {
-    throw new Error(`Failed to create import job: ${jobInsertError?.message ?? "unknown error"}`);
+  if (error || !data) {
+    throw new Error(
+      `Failed to create import job: ${error?.message ?? "unknown error"}`
+    );
   }
 
-  const jobId = jobInsert.id as string;
+  const jobId = data.id as string;
+  runtimeContext.jobId = jobId;
+  return jobId;
+}
+
+async function upsertProjectRecord(
+  options: CliOptions,
+  metadata: GitHubRepoMetadata,
+  jobId: string
+): Promise<string> {
+  const supabase = getSupabaseAdmin();
+  const repoUrl = metadata.htmlUrl;
+  const title = options.title ?? `${metadata.owner}/${metadata.repo}`;
+
+  const { data: projectRow, error: projectError } = await supabase
+    .from("projects")
+    .upsert(
+      {
+        slug: options.projectId,
+        title,
+        description: metadata.description,
+        repo_url: repoUrl,
+        github_owner: metadata.owner,
+        github_repo: metadata.repo,
+        default_branch: metadata.defaultBranch,
+        template_id: options.templateId ?? null,
+        status: "imported",
+      },
+      { onConflict: "slug" }
+    )
+    .select("id")
+    .single();
+
+  if (projectError || !projectRow) {
+    throw new Error(
+      `Failed to upsert project: ${projectError?.message ?? "unknown error"}`
+    );
+  }
+
+  const supabaseProjectId = projectRow.id as string;
 
   await supabase
     .from("import_jobs")
+    .update({ project_id: supabaseProjectId })
+    .eq("id", jobId);
+
+  return supabaseProjectId;
+}
+
+async function findExistingSnapshot(
+  supabaseProjectId: string,
+  commitSha: string
+): Promise<{ id: string; active: boolean } | null> {
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await supabase
+    .from("repo_snapshots")
+    .select("id, active")
+    .eq("project_id", supabaseProjectId)
+    .eq("commit_sha", commitSha)
+    .eq("snapshot_status", "imported")
+    .order("imported_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(`Failed to query existing snapshot: ${error.message}`);
+  }
+
+  return data ? { id: data.id as string, active: Boolean(data.active) } : null;
+}
+
+async function activateSnapshot(
+  supabaseProjectId: string,
+  snapshotId: string
+): Promise<void> {
+  const supabase = getSupabaseAdmin();
+
+  const { error: deactivateError } = await supabase
+    .from("repo_snapshots")
+    .update({ active: false })
+    .eq("project_id", supabaseProjectId);
+
+  if (deactivateError) {
+    throw new Error(`Failed to deactivate old snapshots: ${deactivateError.message}`);
+  }
+
+  const { error: activateError } = await supabase
+    .from("repo_snapshots")
+    .update({ active: true })
+    .eq("id", snapshotId);
+
+  if (activateError) {
+    throw new Error(`Failed to activate snapshot: ${activateError.message}`);
+  }
+}
+
+async function completeImportJob(
+  jobId: string,
+  summary: ImportSummary,
+  supabaseProjectId: string,
+  snapshotId: string
+): Promise<void> {
+  const supabase = getSupabaseAdmin();
+
+  const { error } = await supabase
+    .from("import_jobs")
     .update({
-      status: "running",
-      started_at: new Date().toISOString(),
+      status: "completed",
+      finished_at: new Date().toISOString(),
+      summary: {
+        ...summary,
+        snapshotPath: getSnapshotRelativePath(summary.projectId),
+        supabaseProjectId,
+        snapshotId,
+      },
     })
     .eq("id", jobId);
 
-  try {
-    const { data: projectRow, error: projectError } = await supabase
-      .from("projects")
-      .upsert(
-        {
-          slug: options.projectId,
-          title,
-          description: metadata.description,
-          repo_url: repoUrl,
-          github_owner: metadata.owner,
-          github_repo: metadata.repo,
-          default_branch: metadata.defaultBranch,
-          template_id: options.templateId ?? null,
-          status: "imported",
-        },
-        { onConflict: "slug" }
-      )
-      .select("id")
-      .single();
-
-    if (projectError || !projectRow) {
-      throw new Error(
-        `Failed to upsert project: ${projectError?.message ?? "unknown error"}`
-      );
-    }
-
-    const supabaseProjectId = projectRow.id as string;
-
-    await supabase
-      .from("import_jobs")
-      .update({ project_id: supabaseProjectId })
-      .eq("id", jobId);
-
-    const snapshotMetadata = {
-      treeTruncated: metadata.treeTruncated,
-      rateLimitRemaining: fetchMeta.rateLimitRemaining,
-      rateLimitLimit: fetchMeta.rateLimitLimit,
-      foldersIncluded: summary.foldersIncluded,
-      candidates: summary.candidates,
-      downloaded: summary.downloaded,
-      downloadSkippedTooLarge: summary.downloadSkippedTooLarge,
-      downloadSkippedSecrets: summary.downloadSkippedSecrets,
-    };
-
-    const { data: snapshotRow, error: snapshotError } = await supabase
-      .from("repo_snapshots")
-      .insert({
-        project_id: supabaseProjectId,
-        source: "github",
-        repo_url: repoUrl,
-        branch: metadata.defaultBranch,
-        commit_sha: metadata.latestCommitSha,
-        tree_sha: metadata.treeSha,
-        file_count: summary.filesInTree,
-        included_file_count: summary.filesIncluded + summary.foldersIncluded,
-        skipped_file_count: summary.filesSkipped,
-        snapshot_status: "imported",
-        metadata: snapshotMetadata,
-      })
-      .select("id")
-      .single();
-
-    if (snapshotError || !snapshotRow) {
-      throw new Error(
-        `Failed to create repo snapshot: ${snapshotError?.message ?? "unknown error"}`
-      );
-    }
-
-    const snapshotId = snapshotRow.id as string;
-
-    const rows = fileRecords.map(({ item, scoring }) => ({
-      project_id: supabaseProjectId,
-      snapshot_id: snapshotId,
-      path: item.path,
-      name: item.name,
-      type: item.type,
-      language: item.type === "file" ? resolveLanguageFromPath(item.path) : null,
-      size_bytes: item.sizeBytes ?? null,
-      github_blob_sha: item.githubBlobSha ?? null,
-      github_url:
-        item.type === "file"
-          ? buildGitHubBlobUrl(
-              metadata.owner,
-              metadata.repo,
-              metadata.latestCommitSha,
-              item.path
-            )
-          : null,
-      raw_url:
-        item.type === "file"
-          ? buildRawGitHubUrl(
-              metadata.owner,
-              metadata.repo,
-              metadata.latestCommitSha,
-              item.path
-            )
-          : null,
-      is_too_large: item.isTooLarge,
-      is_binary: item.isBinary,
-      is_candidate: scoring.isCandidate,
-      score: scoring.score,
-      score_reasons: scoring.reasons,
-      review_status: "generated",
-      metadata: item.skippedReason ? { skippedReason: item.skippedReason } : {},
-    }));
-
-    const chunkSize = 500;
-    for (let i = 0; i < rows.length; i += chunkSize) {
-      const chunk = rows.slice(i, i + chunkSize);
-      const { error: filesError } = await supabase.from("project_files").insert(chunk);
-      if (filesError) {
-        throw new Error(`Failed to insert project_files: ${filesError.message}`);
-      }
-    }
-
-    await supabase
-      .from("import_jobs")
-      .update({
-        status: "completed",
-        finished_at: new Date().toISOString(),
-        summary: {
-          ...summary,
-          snapshotPath: getSnapshotRelativePath(options.projectId),
-          supabaseProjectId,
-          snapshotId,
-        },
-      })
-      .eq("id", jobId);
-
-    return { projectId: supabaseProjectId, snapshotId };
-  } catch (error) {
-    await supabase
-      .from("import_jobs")
-      .update({
-        status: "failed",
-        finished_at: new Date().toISOString(),
-        error_message: error instanceof Error ? error.message : String(error),
-      })
-      .eq("id", jobId);
-    throw error;
+  if (error) {
+    throw new Error(`Failed to complete import job: ${error.message}`);
   }
+}
+
+async function failImportJob(jobId: string, errorMessage: string): Promise<void> {
+  const supabase = getSupabaseAdmin();
+  await supabase
+    .from("import_jobs")
+    .update({
+      status: "failed",
+      finished_at: new Date().toISOString(),
+      error_message: errorMessage,
+    })
+    .eq("id", jobId);
+}
+
+async function persistSnapshotToSupabase(options: {
+  cliOptions: CliOptions;
+  summary: ImportSummary;
+  metadata: GitHubRepoMetadata;
+  fetchMeta: Awaited<ReturnType<typeof fetchGitHubRepoMetadata>>;
+  fileRecords: FileRecord[];
+  jobId: string;
+  supabaseProjectId: string;
+}): Promise<string> {
+  const supabase = getSupabaseAdmin();
+  const { cliOptions, summary, metadata, fetchMeta, fileRecords, jobId, supabaseProjectId } =
+    options;
+  const repoUrl = metadata.htmlUrl;
+
+  const snapshotMetadata = {
+    treeTruncated: metadata.treeTruncated,
+    rateLimitRemaining: fetchMeta.rateLimitRemaining,
+    rateLimitLimit: fetchMeta.rateLimitLimit,
+    foldersIncluded: summary.foldersIncluded,
+    candidates: summary.candidates,
+    downloaded: summary.downloaded,
+    downloadSkippedTooLarge: summary.downloadSkippedTooLarge,
+    downloadSkippedSecrets: summary.downloadSkippedSecrets,
+    tmpPath: summary.tmpPath,
+  };
+
+  const { data: snapshotRow, error: snapshotError } = await supabase
+    .from("repo_snapshots")
+    .insert({
+      project_id: supabaseProjectId,
+      source: "github",
+      repo_url: repoUrl,
+      branch: metadata.defaultBranch,
+      commit_sha: metadata.latestCommitSha,
+      tree_sha: metadata.treeSha,
+      file_count: summary.filesInTree,
+      included_file_count: summary.filesIncluded + summary.foldersIncluded,
+      skipped_file_count: summary.filesSkipped,
+      snapshot_status: "imported",
+      metadata: snapshotMetadata,
+      active: false,
+      job_id: jobId,
+    })
+    .select("id")
+    .single();
+
+  if (snapshotError || !snapshotRow) {
+    throw new Error(
+      `Failed to create repo snapshot: ${snapshotError?.message ?? "unknown error"}`
+    );
+  }
+
+  const snapshotId = snapshotRow.id as string;
+
+  const rows = fileRecords.map(({ item, scoring }) => ({
+    project_id: supabaseProjectId,
+    snapshot_id: snapshotId,
+    path: item.path,
+    name: item.name,
+    type: item.type,
+    language: item.type === "file" ? resolveLanguageFromPath(item.path) : null,
+    size_bytes: item.sizeBytes ?? null,
+    github_blob_sha: item.githubBlobSha ?? null,
+    github_url:
+      item.type === "file"
+        ? buildGitHubBlobUrl(
+            metadata.owner,
+            metadata.repo,
+            metadata.latestCommitSha,
+            item.path
+          )
+        : null,
+    raw_url:
+      item.type === "file"
+        ? buildRawGitHubUrl(
+            metadata.owner,
+            metadata.repo,
+            metadata.latestCommitSha,
+            item.path
+          )
+        : null,
+    is_too_large: item.isTooLarge,
+    is_binary: item.isBinary,
+    is_candidate: scoring.isCandidate,
+    score: scoring.score,
+    score_reasons: scoring.reasons,
+    review_status: "generated",
+    metadata: item.skippedReason ? { skippedReason: item.skippedReason } : {},
+  }));
+
+  const chunkSize = 500;
+  for (let i = 0; i < rows.length; i += chunkSize) {
+    const chunk = rows.slice(i, i + chunkSize);
+    const { error: filesError } = await supabase.from("project_files").insert(chunk);
+    if (filesError) {
+      throw new Error(`Failed to insert project_files: ${filesError.message}`);
+    }
+  }
+
+  return snapshotId;
+}
+
+async function reuseExistingSnapshot(options: {
+  summary: ImportSummary;
+  projectId: string;
+  supabaseProjectId: string;
+  snapshotId: string;
+  jobId: string;
+}): Promise<void> {
+  await activateSnapshot(options.supabaseProjectId, options.snapshotId);
+  await completeImportJob(
+    options.jobId,
+    options.summary,
+    options.supabaseProjectId,
+    options.snapshotId
+  );
+  printSuccessSummary({
+    summary: options.summary,
+    projectId: options.projectId,
+    supabaseProjectId: options.supabaseProjectId,
+    snapshotId: options.snapshotId,
+    reusedExisting: true,
+  });
 }
 
 async function main(): Promise<void> {
@@ -503,6 +712,7 @@ async function main(): Promise<void> {
 
   if (!options.dryRun) {
     getSupabaseAdmin();
+    registerSignalHandlers();
   }
 
   warnIfNoGitHubToken();
@@ -519,33 +729,88 @@ async function main(): Promise<void> {
     return;
   }
 
+  let jobId: string | null = null;
+
   try {
+    const stuck = await cleanupStuckImportJobs({
+      projectSlug: options.projectId,
+      apply: true,
+    });
+    if (stuck.stuckJobs.length > 0) {
+      console.log(
+        `Cleaned up ${stuck.stuckJobs.length} stuck import job(s) for ${options.projectId}.`
+      );
+    }
+
+    jobId = await createImportJob(options, parsed.htmlUrl);
+    const supabaseProjectId = await upsertProjectRecord(options, metadata, jobId);
+
+    const existingSnapshot = await findExistingSnapshot(
+      supabaseProjectId,
+      metadata.latestCommitSha
+    );
+
+    if (existingSnapshot && !options.force) {
+      await reuseExistingSnapshot({
+        summary,
+        projectId: options.projectId,
+        supabaseProjectId,
+        snapshotId: existingSnapshot.id,
+        jobId,
+      });
+      return;
+    }
+
     const downloadStats = await downloadSnapshotFiles(
       metadata,
       options,
+      jobId,
       downloadQueue,
       fileRecords.map((record) => record.item)
     );
     summary.downloaded = downloadStats.downloaded;
     summary.downloadSkippedTooLarge = downloadStats.downloadSkippedTooLarge;
     summary.downloadSkippedSecrets = downloadStats.downloadSkippedSecrets;
+    summary.tmpPath = downloadStats.tmpPath;
 
-    const persisted = await persistToSupabase(
-      options,
+    const snapshotId = await persistSnapshotToSupabase({
+      cliOptions: options,
       summary,
       metadata,
-      fetchResult,
-      fileRecords
-    );
+      fetchMeta: fetchResult,
+      fileRecords,
+      jobId,
+      supabaseProjectId,
+    });
+
+    promoteSnapshotTmpDir(options.projectId, jobId);
+    await activateSnapshot(supabaseProjectId, snapshotId);
+    await completeImportJob(jobId, summary, supabaseProjectId, snapshotId);
 
     printSuccessSummary({
       summary,
       projectId: options.projectId,
-      supabaseProjectId: persisted.projectId,
-      snapshotId: persisted.snapshotId,
+      supabaseProjectId,
+      snapshotId,
     });
   } catch (error) {
-    console.error(error instanceof Error ? error.message : String(error));
+    const message = error instanceof Error ? error.message : String(error);
+
+    if (runtimeContext.tmpRelativePath) {
+      try {
+        removeTmpDir(runtimeContext.tmpRelativePath);
+      } catch (cleanupError) {
+        console.error(
+          cleanupError instanceof Error ? cleanupError.message : String(cleanupError)
+        );
+      }
+    }
+
+    if (jobId) {
+      await failImportJob(jobId, message);
+    }
+
+    console.error(message);
     process.exit(1);
   }
 }

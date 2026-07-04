@@ -8,26 +8,7 @@ import type {
   ProjectStructuredAnalysis,
   ProjectTreeNode,
 } from "./types";
-import { getProjectBySlug } from "@/content/projects";
-import { aiDraftRegistry } from "./ai-drafts";
-import { applyPublicationReview } from "./applyPublicationReview";
-import { createAnalyzerDataFromAiDraft } from "./mergeAiDraftAnalysis";
-import { generatedRegistry } from "./generated/registry";
-import { highlightedRegistry } from "./highlighted/registry";
-import { manualRegistry } from "./manual/registry";
-import {
-  getProjectPublicationFlags,
-  projectPublicationFlags,
-  type ProjectPublicationFlag,
-} from "./projectPublicationFlags";
-import {
-  applyTemplateDefaults,
-  applyTemplateEntryHints,
-  resolveProjectAnalyzerData,
-} from "./applyProjectTemplate";
-import { mergeHighlightData } from "./mergeHighlightData";
-import { GENERATED_REVIEW } from "./reviewMeta";
-import { getProjectTemplate } from "./templates";
+import { buildAnalyzerRegistry } from "./buildAnalyzerData";
 
 export type {
   ProjectAnalyzerData,
@@ -71,114 +52,14 @@ export {
 export { applyPublicationReview, reviewFromPublicationFlags } from "./applyPublicationReview";
 export { createAnalyzerDataFromAiDraft } from "./mergeAiDraftAnalysis";
 export { aiDraftRegistry, getAiDraft } from "./ai-drafts";
+export {
+  buildAnalyzerDataForProject,
+  buildAnalyzerRegistry,
+  inferAnalyzerSource,
+  listEnabledAnalyzerProjectIds,
+} from "./buildAnalyzerData";
 
-function resolveGeneratedOnly(
-  projectId: string,
-  flags: ProjectPublicationFlag
-): ProjectAnalyzerData | undefined {
-  const generated = generatedRegistry[projectId];
-  if (!generated) {
-    return undefined;
-  }
-
-  const contentProject = getProjectBySlug(projectId);
-  const entries = Object.fromEntries(
-    Object.entries(generated.entries).map(([path, entry]) => [
-      path,
-      { ...entry, review: entry.review ?? GENERATED_REVIEW },
-    ])
-  );
-
-  let data: ProjectAnalyzerData = {
-    projectId,
-    title: contentProject?.title ?? projectId,
-    description: contentProject?.summary ?? "",
-    tree: generated.tree,
-    entries,
-  };
-
-  if (flags.templateId) {
-    const template = getProjectTemplate(flags.templateId);
-    if (template) {
-      const shell: ProjectManualAnalysisData = {
-        ...data,
-        templateId: flags.templateId,
-      };
-      data = applyTemplateDefaults(shell, template);
-      data = applyTemplateEntryHints(data, template);
-    }
-  }
-
-  return data;
-}
-
-function resolveDraftAnalyzerData(
-  projectId: string,
-  flags: ProjectPublicationFlag
-): ProjectAnalyzerData | undefined {
-  const generated = generatedRegistry[projectId];
-  const aiDraft = aiDraftRegistry[projectId];
-  if (!generated || !aiDraft) {
-    return undefined;
-  }
-
-  const contentProject = getProjectBySlug(projectId);
-  let data = createAnalyzerDataFromAiDraft(generated, aiDraft, {
-    title: contentProject?.title ?? projectId,
-    description: aiDraft.projectAnalysis.overview ?? contentProject?.summary,
-    templateId: flags.templateId,
-  });
-
-  if (flags.templateId) {
-    const template = getProjectTemplate(flags.templateId);
-    if (template) {
-      const shell: ProjectManualAnalysisData = {
-        ...data,
-        templateId: flags.templateId,
-      };
-      data = applyTemplateDefaults(shell, template);
-      data = applyTemplateEntryHints(data, template);
-    }
-  }
-
-  return data;
-}
-
-function buildAnalyzerData(
-  projectId: string,
-  flags: ProjectPublicationFlag
-): ProjectAnalyzerData | undefined {
-  const manual = manualRegistry[projectId];
-  const generated = generatedRegistry[projectId];
-  const highlights = highlightedRegistry[projectId];
-
-  let data: ProjectAnalyzerData | undefined;
-
-  if (manual) {
-    data = resolveProjectAnalyzerData(manual, generated);
-  } else if (aiDraftRegistry[projectId] && generated) {
-    data = resolveDraftAnalyzerData(projectId, flags);
-  } else {
-    data = resolveGeneratedOnly(projectId, flags);
-  }
-
-  if (!data) {
-    return undefined;
-  }
-
-  data = applyPublicationReview(data, flags);
-  return mergeHighlightData(data, highlights);
-}
-
-const analyzerRegistry: Record<string, ProjectAnalyzerData> = Object.fromEntries(
-  Object.entries(projectPublicationFlags)
-    .filter(([, flags]) => flags.enabled)
-    .map(([projectId, flags]) => {
-      const data = buildAnalyzerData(projectId, flags);
-      return data ? ([projectId, data] as const) : null;
-    })
-    .filter((entry): entry is readonly [string, ProjectAnalyzerData] => entry !== null)
-);
+const analyzerRegistry: Record<string, ProjectAnalyzerData> = buildAnalyzerRegistry();
 
 /** Temporary: hide pipeline bar while Guided Tour covers the reading path. */
 export const PROJECT_ARCHITECTURE_ENABLED = false;

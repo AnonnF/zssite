@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo, useState } from "react";
 import type { ProjectTemplateId } from "@/data/projects/types";
-import { buildAnalyzerCliCommands } from "@/lib/github/buildAnalyzerCommands";
+import { buildAnalyzerCommandPreview } from "@/lib/github/buildAnalyzerCommands";
 import {
   inferProjectIdFromRepoName,
   tryParseGitHubRepoInput,
@@ -86,11 +86,12 @@ export function GitHubAnalyzerBar() {
 
     setError(null);
     setCommandPreview(
-      buildAnalyzerCliCommands({
+      buildAnalyzerCommandPreview({
         owner: parsed.owner,
         repo: parsed.repo,
         projectId,
         templateId,
+        preferAnalyzeGithub: true,
       })
     );
     setCopyState("idle");
