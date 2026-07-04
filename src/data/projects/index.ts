@@ -10,7 +10,9 @@ import type {
 } from "./types";
 import { waccCompilerAnalysis } from "./wacc-compiler.analysis";
 import { generatedRegistry } from "./generated/registry";
+import { highlightedRegistry } from "./highlighted/registry";
 import { resolveProjectAnalyzerData } from "./applyProjectTemplate";
+import { mergeHighlightData } from "./mergeHighlightData";
 
 export type {
   ProjectAnalyzerData,
@@ -49,7 +51,9 @@ export type { AiDraft, AiDraftEntry, AiDraftProjectAnalysis } from "./ai-draft-t
 
 function registerAnalyzer(manual: ProjectManualAnalysisData): ProjectAnalyzerData {
   const generated = generatedRegistry[manual.projectId];
-  return resolveProjectAnalyzerData(manual, generated);
+  const resolved = resolveProjectAnalyzerData(manual, generated);
+  const highlights = highlightedRegistry[manual.projectId];
+  return mergeHighlightData(resolved, highlights);
 }
 
 const analyzerRegistry: Record<string, ProjectAnalyzerData> = {

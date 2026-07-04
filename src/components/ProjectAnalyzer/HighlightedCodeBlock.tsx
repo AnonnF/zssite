@@ -8,6 +8,8 @@ interface HighlightedCodeBlockProps {
   language: string;
   startLine?: number;
   className?: string;
+  /** Pre-rendered HTML from build-time Shiki (trusted local project data). */
+  prebuiltHighlightedHtml?: string;
 }
 
 export function HighlightedCodeBlock({
@@ -15,6 +17,7 @@ export function HighlightedCodeBlock({
   language,
   startLine = 1,
   className = "",
+  prebuiltHighlightedHtml,
 }: HighlightedCodeBlockProps) {
   const trimmedCode = code.trim();
   const lines = useMemo(
@@ -22,31 +25,41 @@ export function HighlightedCodeBlock({
     [trimmedCode]
   );
 
-  const [highlightedHtml, setHighlightedHtml] = useState<string | null>(null);
+  const [runtimeHighlightedHtml, setRuntimeHighlightedHtml] = useState<
+    string | null
+  >(null);
+
+  const usePrebuilt = Boolean(prebuiltHighlightedHtml?.trim());
 
   useEffect(() => {
+    if (usePrebuilt) return;
+
     if (!trimmedCode) {
-      setHighlightedHtml(null);
+      setRuntimeHighlightedHtml(null);
       return;
     }
 
     let cancelled = false;
-    setHighlightedHtml(null);
+    setRuntimeHighlightedHtml(null);
 
     highlightCode(trimmedCode, language)
       .then((html) => {
-        if (!cancelled) setHighlightedHtml(html);
+        if (!cancelled) setRuntimeHighlightedHtml(html);
       })
       .catch(() => {
-        if (!cancelled) setHighlightedHtml(null);
+        if (!cancelled) setRuntimeHighlightedHtml(null);
       });
 
     return () => {
       cancelled = true;
     };
-  }, [trimmedCode, language]);
+  }, [trimmedCode, language, usePrebuilt]);
 
   if (!trimmedCode) return null;
+
+  const highlightedHtml = usePrebuilt
+    ? prebuiltHighlightedHtml!
+    : runtimeHighlightedHtml;
 
   return (
     <div className={`code-preview-body inline-flex min-w-full ${className}`}>
@@ -65,7 +78,7 @@ export function HighlightedCodeBlock({
         {highlightedHtml ? (
           <div
             className="code-preview-shiki"
-            // Safe: only renders static project analysis mock data from the repo.
+            // Safe: only renders build-time Shiki output from local project data.
             dangerouslySetInnerHTML={{ __html: highlightedHtml }}
           />
         ) : (

@@ -42,6 +42,7 @@ export type ProjectCodeSnippet = {
   code: string;
   annotations?: ProjectCodeSnippetAnnotation[];
   review?: ReviewMeta;
+  highlightedHtml?: string;
 };
 
 export type ProjectStructuredAnalysis = {
@@ -72,6 +73,7 @@ export type ProjectAnalysisEntry = {
   sizeBytes?: number;
   tooLarge?: boolean;
   review?: ReviewMeta;
+  highlightedHtml?: string;
 };
 
 export type ProjectPipelineNode = {

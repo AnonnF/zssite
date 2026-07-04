@@ -66,6 +66,7 @@ function SnippetCard({
           code={code}
           language={language}
           startLine={snippet.startLine ?? 1}
+          prebuiltHighlightedHtml={snippet.highlightedHtml}
         />
       </div>
 
@@ -177,7 +178,12 @@ export function CodePreview({ entry }: CodePreviewProps) {
 
         {showFull && (
           <div className="bg-[#1c1b19] p-4 md:p-5">
-            <HighlightedCodeBlock code={code} language={language} startLine={1} />
+            <HighlightedCodeBlock
+              code={code}
+              language={language}
+              startLine={1}
+              prebuiltHighlightedHtml={entry.highlightedHtml}
+            />
           </div>
         )}
 
