@@ -1,0 +1,859 @@
+{
+  "projectId": "resume-jd-matcher",
+  "generatedAt": "2026-07-04T08:34:19.684Z",
+  "source": "ai-draft",
+  "provider": "deepseek",
+  "model": "deepseek-v4-flash",
+  "confidence": "draft",
+  "projectAnalysis": {
+    "overview": "这是一个基于Streamlit的AI简历-职位匹配工具，用户上传简历PDF并粘贴职位描述，通过DeepSeek API生成结构化匹配报告。项目包含UI入口、PDF解析、提示模板和LLM客户端四个核心模块。",
+    "suggestedPipeline": [
+      {
+        "id": "entry-point",
+        "label": "Entry Point",
+        "path": "app.py",
+        "language": "python",
+        "role": "Streamlit UI and workflow orchestration"
+      },
+      {
+        "id": "data-extraction",
+        "label": "Data Extraction",
+        "path": "parser.py",
+        "language": "python",
+        "role": "PDF text extraction using pypdf"
+      },
+      {
+        "id": "prompt-templates",
+        "label": "Prompt Templates",
+        "path": "prompts.py",
+        "language": "python",
+        "role": "System prompt and user message builder for LLM"
+      },
+      {
+        "id": "model-interaction",
+        "label": "Model Interaction",
+        "path": "llm_client.py",
+        "language": "python",
+        "role": "DeepSeek API client with key management and error handling"
+      }
+    ],
+    "suggestedGuidedTour": [
+      {
+        "id": "tour-readme",
+        "label": "README",
+        "path": "README.md",
+        "title": "项目文档",
+        "description": "查看项目概述、安装步骤和使用说明"
+      },
+      {
+        "id": "tour-app",
+        "label": "app.py",
+        "path": "app.py",
+        "title": "UI入口",
+        "description": "了解Streamlit交互界面和整体流程"
+      },
+      {
+        "id": "tour-parser",
+        "label": "parser.py",
+        "path": "parser.py",
+        "title": "PDF解析",
+        "description": "查看PDF文本提取的实现"
+      },
+      {
+        "id": "tour-prompt",
+        "label": "prompts.py",
+        "path": "prompts.py",
+        "title": "提示模板",
+        "description": "了解如何构建LLM的系统提示和用户消息"
+      },
+      {
+        "id": "tour-llm",
+        "label": "llm_client.py",
+        "path": "llm_client.py",
+        "title": "LLM客户端",
+        "description": "查看API密钥管理和报告生成逻辑"
+      }
+    ],
+    "technicalDecisions": [
+      {
+        "title": "使用Streamlit作为UI框架",
+        "decision": "采用Streamlit构建前端，提供快速交互式界面，降低开发复杂度。",
+        "rationale": "Streamlit适合数据科学原型，可直接用Python编写，无需前后端分离。",
+        "impact": "开发效率高，但自定义样式有限，适合工具型应用。"
+      },
+      {
+        "title": "集成DeepSeek API作为LLM后端",
+        "decision": "通过OpenAI兼容的方式调用DeepSeek API，利用其强大的文本生成能力。",
+        "rationale": "DeepSeek提供免费额度且性能优秀，支持高max_tokens输出。",
+        "impact": "报告质量依赖模型，需注意API密钥管理和错误处理。"
+      },
+      {
+        "title": "使用pypdf解析PDF",
+        "decision": "采用pypdf库从PDF中提取文本，支持内存操作，不保存文件到磁盘。",
+        "rationale": "pypdf轻量且纯Python，适合简单文本PDF，无需OCR。",
+        "impact": "仅适用于文本型PDF，扫描件或图片PDF会失败。"
+      },
+      {
+        "title": "环境变量与Streamlit Secrets双通道密钥管理",
+        "decision": "同时支持.env文件（本地开发）和Streamlit Secrets（部署），提供降级。",
+        "rationale": "用户可传入key，也可服务端配置，灵活性高。",
+        "impact": "增加配置复杂度，但提升了安全性和可用性。"
+      }
+    ],
+    "skills": [
+      {
+        "title": "Python",
+        "description": "项目全部使用Python编写，依赖Streamlit、pypdf、openai等库。"
+      },
+      {
+        "title": "Streamlit",
+        "description": "用于构建交互式Web应用，处理文件上传、文本输入和结果展示。"
+      },
+      {
+        "title": "LLM Integration",
+        "description": "调用DeepSeek（OpenAI兼容）API，构建提示并解析回复。"
+      },
+      {
+        "title": "PDF Parsing",
+        "description": "使用pypdf库从PDF中提取文本，支持字节流输入。"
+      },
+      {
+        "title": "Prompt Engineering",
+        "description": "设计系统提示和用户提示模板，指导模型输出结构化Markdown报告。"
+      }
+    ]
+  },
+  "entries": {
+    "app.py": {
+      "path": "app.py",
+      "type": "file",
+      "summary": "Streamlit应用入口，负责用户界面展示、文件上传、逻辑编排和报告展示。",
+      "analysis": {
+        "purpose": "提供AI Resume-Job Matcher的交互界面，协调PDF解析和LLM报告生成。",
+        "responsibilities": [
+          "设置Streamlit页面配置和标题",
+          "提供侧边栏API密钥输入",
+          "处理PDF文件上传和职位描述文本输入",
+          "点击分析后验证输入并调用parser和llm_client",
+          "显示匹配报告并提供下载功能"
+        ],
+        "input": "用户上传的PDF文件字节流、职位描述文本、API密钥（可选）",
+        "output": "在屏幕上显示Markdown报告，并允许下载为.md文件",
+        "role": "Entry point, Orchestrator",
+        "keyLogic": [
+          "条件判断：检查文件、描述和API密钥是否有效",
+          "错误处理：捕获PDF解析和LLM调用异常并显示错误信息",
+          "调用链：extract_text_from_pdf → generate_match_report → 显示报告"
+        ],
+        "relatedModules": [
+          "parser",
+          "llm_client"
+        ],
+        "relatedPaths": [
+          "parser.py",
+          "llm_client.py"
+        ],
+        "usedBy": [
+          "终端运行：streamlit run app.py"
+        ],
+        "notes": [
+          "用户可在侧边栏输入自己的API密钥，否则使用服务端环境变量",
+          "报告语言根据简历语言自动切换"
+        ]
+      },
+      "snippetSuggestions": [
+        {
+          "id": "app-ui-setup",
+          "filePath": "app.py",
+          "title": "UI初始化及输入组件",
+          "startLine": 1,
+          "endLine": 33,
+          "reason": "展示Streamlit页面配置、标题、侧边栏、文件上传和文本区域的核心UI结构。",
+          "confidence": "high",
+          "annotations": [
+            {
+              "line": 11,
+              "note": "设置页面标题和宽屏布局"
+            },
+            {
+              "line": 16,
+              "note": "侧边栏开始，包含API密钥输入说明"
+            }
+          ]
+        },
+        {
+          "id": "app-analysis-logic",
+          "filePath": "app.py",
+          "title": "分析按钮处理逻辑",
+          "startLine": 35,
+          "endLine": 66,
+          "reason": "包含输入验证、PDF解析和LLM调用，是核心业务逻辑。",
+          "confidence": "high",
+          "annotations": [
+            {
+              "line": 35,
+              "note": "点击分析后进入"
+            },
+            {
+              "line": 52,
+              "note": "调用PDF解析函数，可能抛出PDFExtractionError"
+            },
+            {
+              "line": 58,
+              "note": "调用LLM生成报告，捕获各类API错误"
+            }
+          ]
+        },
+        {
+          "id": "app-report-display",
+          "filePath": "app.py",
+          "title": "报告显示与下载",
+          "startLine": 68,
+          "endLine": 75,
+          "reason": "展示Markdown报告并提供下载按钮。",
+          "confidence": "high",
+          "annotations": [
+            {
+              "line": 68,
+              "note": "显示报告标题"
+            },
+            {
+              "line": 70,
+              "note": "下载按钮，文件名固定为resume_match_report.md"
+            }
+          ]
+        }
+      ],
+      "snippets": [
+        {
+          "id": "app-ui-setup",
+          "title": "UI初始化及输入组件",
+          "filePath": "app.py",
+          "startLine": 1,
+          "endLine": 33,
+          "reason": "展示Streamlit页面配置、标题、侧边栏、文件上传和文本区域的核心UI结构。",
+          "code": "import streamlit as st\n\nfrom llm_client import (\n    LLMError,\n    MissingAPIKeyError,\n    generate_match_report,\n    get_api_key,\n)\nfrom parser import PDFExtractionError, extract_text_from_pdf\n\nst.set_page_config(page_title=\"AI Resume-Job Matcher\", layout=\"wide\")\n\nst.title(\"AI Resume-Job Matcher\")\nst.caption(\"Upload your resume and paste a job description to get a tailored matching report.\")\n\nwith st.sidebar:\n    st.header(\"Setup\")\n    st.markdown(\n        \"This tool uses the [DeepSeek API](https://api-docs.deepseek.com/). \"\n        \"Enter your own API key below — get one for free at \"\n        \"[platform.deepseek.com](https://platform.deepseek.com/api_keys).\"\n    )\n    user_api_key = st.text_input(\n        \"DeepSeek API Key\",\n        type=\"password\",\n        placeholder=\"sk-...\",\n        help=\"Your key is only used this session and never stored.\",\n    )\n    st.caption(\"No key on hand? The server may provide a fallback if configured.\")\n\nuploaded_file = st.file_uploader(\"Upload your resume (PDF)\", type=[\"pdf\"])\njob_description = st.text_area(\"Paste the job description\", height=200)\nanalyze_clicked = st.button(\"Analyze\", type=\"primary\")",
+          "annotations": [
+            {
+              "line": 11,
+              "note": "设置页面标题和宽屏布局"
+            },
+            {
+              "line": 16,
+              "note": "侧边栏开始，包含API密钥输入说明"
+            }
+          ],
+          "validationStatus": "valid",
+          "confidence": "high"
+        },
+        {
+          "id": "app-analysis-logic",
+          "title": "分析按钮处理逻辑",
+          "filePath": "app.py",
+          "startLine": 35,
+          "endLine": 66,
+          "reason": "包含输入验证、PDF解析和LLM调用，是核心业务逻辑。",
+          "code": "if analyze_clicked:\n    if uploaded_file is None:\n        st.error(\"Please upload a PDF resume before analyzing.\")\n        st.stop()\n    \n    jd = job_description.strip()\n    if not jd:\n        st.error(\"Please paste a job description before analyzing.\")\n        st.stop()\n    \n    if not user_api_key and not get_api_key():\n        st.error(\n            \"No API key configured. Enter your DeepSeek API key in the sidebar, \"\n            \"or set DEEPSEEK_API_KEY on the server.\"\n        )\n        st.stop()\n\n    try:\n        resume_text = extract_text_from_pdf(uploaded_file.read())\n    except PDFExtractionError as e:\n        st.error(str(e))\n        st.stop()\n\n    with st.spinner(\"Analyzing resume against job description...\"):\n        try:\n            report = generate_match_report(resume_text, jd, api_key=user_api_key or None)\n        except MissingAPIKeyError as e:\n            st.error(str(e))\n            st.stop()\n        except LLMError as e:\n            st.error(f\"Analysis failed: {e}. Check your API key and try again.\")\n            st.stop()",
+          "annotations": [
+            {
+              "line": 35,
+              "note": "点击分析后进入"
+            },
+            {
+              "line": 52,
+              "note": "调用PDF解析函数，可能抛出PDFExtractionError"
+            },
+            {
+              "line": 58,
+              "note": "调用LLM生成报告，捕获各类API错误"
+            }
+          ],
+          "validationStatus": "valid",
+          "confidence": "high"
+        },
+        {
+          "id": "app-report-display",
+          "title": "报告显示与下载",
+          "filePath": "app.py",
+          "startLine": 68,
+          "endLine": 75,
+          "reason": "展示Markdown报告并提供下载按钮。",
+          "code": "    st.markdown(\"## Report\")\n    st.markdown(report, unsafe_allow_html=False)\n    st.download_button(\n        label=\"Download report (.md)\",\n        data=report,\n        file_name=\"resume_match_report.md\",\n        mime=\"text/markdown\"\n    )",
+          "annotations": [
+            {
+              "line": 68,
+              "note": "显示报告标题"
+            },
+            {
+              "line": 70,
+              "note": "下载按钮，文件名固定为resume_match_report.md"
+            }
+          ],
+          "validationStatus": "valid",
+          "confidence": "high"
+        }
+      ],
+      "review": {
+        "status": "ai-draft",
+        "source": "ai-draft"
+      }
+    },
+    "parser.py": {
+      "path": "parser.py",
+      "type": "file",
+      "summary": "PDF文本提取模块，使用pypdf库从PDF字节流中提取纯文本。",
+      "analysis": {
+        "purpose": "将用户上传的PDF文件转换为可处理的纯文本字符串。",
+        "responsibilities": [
+          "定义PDF提取异常类PDFExtractionError",
+          "实现extract_text_from_pdf函数，接受字节流返回文本"
+        ],
+        "input": "PDF文件的字节流（bytes）",
+        "output": "提取的纯文本字符串",
+        "role": "Data extraction layer",
+        "keyLogic": [
+          "使用BytesIO包装字节流，适配pypdf的PdfReader",
+          "遍历页面提取文本，拼接后去除首尾空白",
+          "无文本或异常时抛出PDFExtractionError"
+        ],
+        "relatedModules": [],
+        "relatedPaths": [
+          "app.py"
+        ],
+        "usedBy": [
+          "app.py"
+        ],
+        "notes": [
+          "仅支持文本型PDF，扫描件/图片PDF会失败",
+          "内存操作，不保存临时文件"
+        ]
+      },
+      "snippetSuggestions": [
+        {
+          "id": "parser-extract-function",
+          "filePath": "parser.py",
+          "title": "PDF文本提取函数",
+          "startLine": 7,
+          "endLine": 24,
+          "reason": "展示核心提取逻辑，包括异常处理和空文本检查。",
+          "confidence": "high",
+          "annotations": [
+            {
+              "line": 11,
+              "note": "使用pypdf读取PDF"
+            },
+            {
+              "line": 13,
+              "note": "逐页提取文本"
+            },
+            {
+              "line": 18,
+              "note": "捕获所有异常并包装为自定义异常"
+            }
+          ]
+        }
+      ],
+      "snippets": [
+        {
+          "id": "parser-extract-function",
+          "title": "PDF文本提取函数",
+          "filePath": "parser.py",
+          "startLine": 7,
+          "endLine": 24,
+          "reason": "展示核心提取逻辑，包括异常处理和空文本检查。",
+          "code": "def extract_text_from_pdf(pdf_bytes: bytes) -> str:\n    MSG = \"Could not extract text from the PDF. The file may be corrupted or image-only.\"\n\n    try:\n        reader = PdfReader(BytesIO(pdf_bytes))\n        parts = []\n        for page in reader.pages:\n            text = page.extract_text()\n            if text:\n                parts.append(text)\n        full_text = \"\\n\".join(parts).strip()\n    except Exception as e:\n        raise PDFExtractionError(MSG) from e\n    \n    if not full_text:\n        raise PDFExtractionError(MSG)\n    \n    return full_text",
+          "annotations": [
+            {
+              "line": 11,
+              "note": "使用pypdf读取PDF"
+            },
+            {
+              "line": 13,
+              "note": "逐页提取文本"
+            },
+            {
+              "line": 18,
+              "note": "捕获所有异常并包装为自定义异常"
+            }
+          ],
+          "validationStatus": "valid",
+          "confidence": "high"
+        }
+      ],
+      "review": {
+        "status": "ai-draft",
+        "source": "ai-draft"
+      }
+    },
+    "llm_client.py": {
+      "path": "llm_client.py",
+      "type": "file",
+      "summary": "DeepSeek API客户端，负责API密钥获取、报告生成及错误处理。",
+      "analysis": {
+        "purpose": "封装OpenAI兼容的DeepSeek API调用，生成匹配报告。",
+        "responsibilities": [
+          "加载环境变量或Streamlit Secrets中的API密钥",
+          "定义LLMError和MissingAPIKeyError异常类",
+          "实现get_api_key函数获取有效密钥",
+          "实现generate_match_report函数发送请求并返回内容"
+        ],
+        "input": "简历文本、职位描述文本、可选API密钥",
+        "output": "Markdown格式的匹配报告字符串",
+        "role": "Model interaction layer",
+        "keyLogic": [
+          "密钥优先级：用户提供 > Streamlit Secrets > 环境变量",
+          "使用OpenAI客户端设置base_url和model",
+          "调用chat.completions.create并处理认证、限流等异常",
+          "检查返回内容是否为空"
+        ],
+        "relatedModules": [
+          "prompts"
+        ],
+        "relatedPaths": [
+          "prompts.py",
+          "app.py"
+        ],
+        "usedBy": [
+          "app.py"
+        ],
+        "notes": [
+          "模型默认使用deepseek-v4-pro",
+          "设置了temperature=0.3以平衡创造性和准确性",
+          "max_tokens=8192支持长报告输出"
+        ]
+      },
+      "snippetSuggestions": [
+        {
+          "id": "llm-get-api-key",
+          "filePath": "llm_client.py",
+          "title": "API密钥获取函数",
+          "startLine": 19,
+          "endLine": 33,
+          "reason": "展示密钥获取的双通道策略：Streamlit Secrets和环境变量。",
+          "confidence": "high",
+          "annotations": [
+            {
+              "line": 21,
+              "note": "尝试从Streamlit secrets获取"
+            },
+            {
+              "line": 30,
+              "note": "回退到环境变量"
+            }
+          ]
+        },
+        {
+          "id": "llm-generate-report",
+          "filePath": "llm_client.py",
+          "title": "报告生成函数",
+          "startLine": 35,
+          "endLine": 70,
+          "reason": "核心API调用，包含密钥校验、构建请求、错误处理。",
+          "confidence": "high",
+          "annotations": [
+            {
+              "line": 38,
+              "note": "注释说明密钥优先级"
+            },
+            {
+              "line": 46,
+              "note": "初始化OpenAI客户端"
+            },
+            {
+              "line": 49,
+              "note": "调用DeepSeek API"
+            },
+            {
+              "line": 59,
+              "note": "捕获各种API错误"
+            }
+          ]
+        }
+      ],
+      "snippets": [
+        {
+          "id": "llm-get-api-key",
+          "title": "API密钥获取函数",
+          "filePath": "llm_client.py",
+          "startLine": 19,
+          "endLine": 33,
+          "reason": "展示密钥获取的双通道策略：Streamlit Secrets和环境变量。",
+          "code": "def get_api_key() -> str | None:\n    # Try Streamlit secrets first (for Streamlit Cloud deployment)\n    try:\n        import streamlit as st\n        key = st.secrets.get(\"DEEPSEEK_API_KEY\", None)\n        if key and key.strip() != \"\" and key != \"your_api_key_here\":\n            return key\n    except (ImportError, AttributeError):\n        pass\n\n    # Fall back to environment variable (for local dev with .env)\n    key = os.getenv(\"DEEPSEEK_API_KEY\")\n    if not key or key.strip() == \"\" or key == \"your_api_key_here\":\n        return None\n    return key",
+          "annotations": [
+            {
+              "line": 21,
+              "note": "尝试从Streamlit secrets获取"
+            },
+            {
+              "line": 30,
+              "note": "回退到环境变量"
+            }
+          ],
+          "validationStatus": "valid",
+          "confidence": "high"
+        },
+        {
+          "id": "llm-generate-report",
+          "title": "报告生成函数",
+          "filePath": "llm_client.py",
+          "startLine": 35,
+          "endLine": 70,
+          "reason": "核心API调用，包含密钥校验、构建请求、错误处理。",
+          "code": "def generate_match_report(\n    resume_text: str, job_description: str, api_key: str | None = None\n) -> str:\n    # Use user-provided key first, then fall back to server-side secrets / env\n    effective_key = api_key or get_api_key()\n    if not effective_key:\n        raise MissingAPIKeyError(\n            \"No API key configured. Enter your DeepSeek API key in the sidebar, \"\n            \"or set DEEPSEEK_API_KEY on the server.\"\n        )\n\n    client = OpenAI(api_key=effective_key, base_url=DEEPSEEK_BASE_URL)\n\n    try:\n        response = client.chat.completions.create(\n            model=DEEPSEEK_MODEL,\n            messages=[\n                {\"role\": \"system\", \"content\": SYSTEM_PROMPT},\n                {\"role\": \"user\", \"content\": build_user_prompt(resume_text, job_description),}\n            ],\n            temperature=0.3,\n            max_tokens=8192,\n            extra_body={\"thinking\": {\"type\": \"disabled\"}}\n        )\n    except AuthenticationError as e:\n        raise LLMError(\"Invalid API key. Check that you entered a valid DeepSeek API key.\") from e\n    except RateLimitError as e:\n        raise LLMError(\"Rate limit exceeded. Please try again in a few minutes.\") from e\n    except APIError as e:\n        raise LLMError(f\"Analysis failed: {e.message}\") from e\n    \n    content = response.choices[0].message.content\n    if not content:\n        raise LLMError(\"The model returned an empty response. Please try again.\")\n    \n    return content",
+          "annotations": [
+            {
+              "line": 38,
+              "note": "注释说明密钥优先级"
+            },
+            {
+              "line": 46,
+              "note": "初始化OpenAI客户端"
+            },
+            {
+              "line": 49,
+              "note": "调用DeepSeek API"
+            },
+            {
+              "line": 59,
+              "note": "捕获各种API错误"
+            }
+          ],
+          "validationStatus": "valid",
+          "confidence": "high"
+        }
+      ],
+      "review": {
+        "status": "ai-draft",
+        "source": "ai-draft"
+      }
+    },
+    "prompts.py": {
+      "path": "prompts.py",
+      "type": "file",
+      "summary": "提示模板模块，定义系统提示和用户消息构造函数。",
+      "analysis": {
+        "purpose": "提供LLM的system prompt和user prompt模板，指导模型生成结构化报告。",
+        "responsibilities": [
+          "定义SYSTEM_PROMPT常量，包含报告结构、规则、语言选择等",
+          "实现build_user_prompt函数，将简历和职位描述包装为用户消息"
+        ],
+        "input": "简历文本和职位描述文本（build_user_prompt参数）",
+        "output": "用户消息字符串（包含简历和职位描述）",
+        "role": "Data preparation / Prompt engineering layer",
+        "keyLogic": [
+          "SYSTEM_PROMPT规定了9个固定章节的输出格式",
+          "根据简历语言自动决定报告语言",
+          "build_user_prompt简单拼接"
+        ],
+        "relatedModules": [],
+        "relatedPaths": [
+          "llm_client.py"
+        ],
+        "usedBy": [
+          "llm_client.py"
+        ],
+        "notes": [
+          "大量详细的规则，确保模型输出结构化且可靠",
+          "用户提示强调只使用简历中的证据"
+        ]
+      },
+      "snippetSuggestions": [
+        {
+          "id": "prompts-system-prompt-begin",
+          "filePath": "prompts.py",
+          "title": "系统提示开头及关键规则",
+          "startLine": 3,
+          "endLine": 20,
+          "reason": "展示系统提示的核心规则和输出结构要求。",
+          "annotations": [
+            {
+              "line": 3,
+              "note": "系统提示开始，定义角色为简历-JD匹配分析师"
+            },
+            {
+              "line": 9,
+              "note": "强调只使用简历中的证据"
+            }
+          ]
+        },
+        {
+          "id": "prompts-build-user-prompt",
+          "filePath": "prompts.py",
+          "title": "用户消息构造函数",
+          "startLine": 51,
+          "endLine": 60,
+          "reason": "展示如何将简历和职位描述封装为用户提示。",
+          "confidence": "high",
+          "annotations": [
+            {
+              "line": 52,
+              "note": "函数文档"
+            },
+            {
+              "line": 54,
+              "note": "f-string嵌入简历和JD内容"
+            }
+          ]
+        }
+      ],
+      "snippets": [
+        {
+          "id": "prompts-system-prompt-begin",
+          "title": "系统提示开头及关键规则",
+          "filePath": "prompts.py",
+          "startLine": 3,
+          "endLine": 20,
+          "reason": "展示系统提示的核心规则和输出结构要求。",
+          "code": "SYSTEM_PROMPT = \"\"\"You are an expert resume–job description matching analyst.\n\nYour task is to compare the candidate's resume against the job description and produce a structured matching report.\n\nRules:\n- Use only information present in the resume as evidence. Do not invent jobs, employers, skills, degrees, certifications, or metrics.\n- If the job description requires something not supported by the resume, mark it as missing or weak explicitly.\n- When rewriting bullets, preserve factual meaning; improve clarity, impact, and alignment with the job description only.\n- Give practical, actionable advice. Output clean Markdown only (no HTML).\n- Language: Detect the primary language of the RESUME (not the job description).\n  - If the resume is primarily in English, write the entire report in English (all section headings, tables, bullets, and advice).\n  - If the resume is primarily in Chinese, write the entire report in 简体中文 (translate the section headings below into Chinese, e.g. 「1. 整体匹配度」).\n  - Do not mix languages in the report except when quoting original resume text.\n\nOutput exactly 9 sections below, in this order, using these headings (use the English headings for English reports; use equivalent Chinese headings for Chinese reports). Do not add extra sections or skip any.\n\n## 1. Overall Match\n- **Score:** X/100",
+          "annotations": [
+            {
+              "line": 3,
+              "note": "系统提示开始，定义角色为简历-JD匹配分析师"
+            },
+            {
+              "line": 9,
+              "note": "强调只使用简历中的证据"
+            }
+          ],
+          "validationStatus": "valid"
+        },
+        {
+          "id": "prompts-build-user-prompt",
+          "title": "用户消息构造函数",
+          "filePath": "prompts.py",
+          "startLine": 51,
+          "endLine": 60,
+          "reason": "展示如何将简历和职位描述封装为用户提示。",
+          "code": "## 9. Final Action Plan\n3-5 numbered, concrete steps the candidate should take next to improve their application for this role.\n\"\"\"\n\n\ndef build_user_prompt(resume_text: str, job_description: str) -> str:\n    \"\"\"Wrap resume and job description for the user message.\"\"\"\n    return f\"\"\"Analyze how well this resume matches the job description.\nUse only the resume text as evidence.\nMatch report language to the resume: English resume → English report; Chinese resume → 简体中文 report.",
+          "annotations": [
+            {
+              "line": 52,
+              "note": "函数文档"
+            },
+            {
+              "line": 54,
+              "note": "f-string嵌入简历和JD内容"
+            }
+          ],
+          "validationStatus": "valid",
+          "confidence": "high"
+        }
+      ],
+      "review": {
+        "status": "ai-draft",
+        "source": "ai-draft"
+      }
+    },
+    "README.md": {
+      "path": "README.md",
+      "type": "file",
+      "summary": "项目文档，包含功能说明、安装步骤、使用方法和故障排除。",
+      "analysis": {
+        "purpose": "帮助用户快速理解和使用项目。",
+        "responsibilities": [
+          "概述项目功能和特性",
+          "提供环境搭建和运行指导",
+          "列出项目文件结构及对应角色",
+          "常见问题排查"
+        ],
+        "input": "无",
+        "output": "无",
+        "role": "Documentation",
+        "keyLogic": [],
+        "relatedModules": [],
+        "relatedPaths": [
+          "app.py",
+          "parser.py",
+          "prompts.py",
+          "llm_client.py"
+        ],
+        "usedBy": [
+          "用户"
+        ],
+        "notes": [
+          "包含安装python、创建虚拟环境、安装依赖、设置API密钥等步骤",
+          "提供了故障排查表格"
+        ]
+      },
+      "review": {
+        "status": "ai-draft",
+        "source": "ai-draft"
+      }
+    },
+    ".gitignore": {
+      "path": ".gitignore",
+      "type": "file",
+      "summary": "Git忽略规则，防止敏感文件和构建产物被提交。",
+      "analysis": {
+        "purpose": "确保.env、Streamlit secrets、缓存文件等不被纳入版本控制。",
+        "responsibilities": [
+          "忽略.env和.env.local",
+          "忽略Python缓存和构建产物",
+          "忽略IDE和操作系统文件"
+        ],
+        "input": "无",
+        "output": "无",
+        "role": "Configuration",
+        "keyLogic": [],
+        "relatedModules": [],
+        "relatedPaths": [],
+        "usedBy": [
+          "Git",
+          "开发者"
+        ],
+        "notes": []
+      },
+      "review": {
+        "status": "ai-draft",
+        "source": "ai-draft"
+      }
+    },
+    "requirements.txt": {
+      "path": "requirements.txt",
+      "type": "file",
+      "summary": "Python依赖列表，包含streamlit、pypdf、openai、python-dotenv。",
+      "analysis": {
+        "purpose": "声明项目运行所需的Python包及其版本约束。",
+        "responsibilities": [
+          "列出四个核心依赖及其最低版本"
+        ],
+        "input": "无",
+        "output": "无",
+        "role": "Configuration",
+        "keyLogic": [],
+        "relatedModules": [],
+        "relatedPaths": [],
+        "usedBy": [
+          "pip install -r requirements.txt"
+        ],
+        "notes": [
+          "streamlit>=1.32.0, pypdf>=4.0.0, openai>=1.40.0, python-dotenv>=1.0.0"
+        ]
+      },
+      "review": {
+        "status": "ai-draft",
+        "source": "ai-draft"
+      }
+    },
+    ".": {
+      "path": ".",
+      "type": "folder",
+      "summary": "项目根目录，包含所有源代码和配置文件。",
+      "analysis": {
+        "purpose": "组织项目文件",
+        "responsibilities": [],
+        "input": "",
+        "output": "",
+        "role": "Root",
+        "keyLogic": [],
+        "relatedModules": [],
+        "relatedPaths": [
+          "app.py",
+          "parser.py",
+          "prompts.py",
+          "llm_client.py",
+          "README.md",
+          ".gitignore",
+          "requirements.txt"
+        ],
+        "usedBy": [],
+        "notes": []
+      },
+      "review": {
+        "status": "ai-draft",
+        "source": "ai-draft"
+      }
+    }
+  },
+  "warnings": [
+    "Pipeline中缺失测试阶段（tests）：项目没有测试文件或测试框架。",
+    "缺少模型/IR层：prompts.py和llm_client.py直接耦合，未抽象出独立的数据模型层。",
+    "CFG阶段未覆盖：项目无配置文件生成或管理（如yaml/json），使用环境变量硬编码。"
+  ],
+  "selectionReport": {
+    "selectedFiles": [
+      {
+        "path": "app.py",
+        "score": 125,
+        "reasons": [
+          "generic template: entry point",
+          "preferred text extension"
+        ],
+        "category": "file"
+      },
+      {
+        "path": "README.md",
+        "score": 110,
+        "reasons": [
+          "README.md",
+          "preferred text extension"
+        ],
+        "category": "file"
+      },
+      {
+        "path": "llm_client.py",
+        "score": 40,
+        "reasons": [
+          "preferred text extension"
+        ],
+        "category": "file"
+      },
+      {
+        "path": "parser.py",
+        "score": 40,
+        "reasons": [
+          "preferred text extension"
+        ],
+        "category": "file"
+      },
+      {
+        "path": "prompts.py",
+        "score": 40,
+        "reasons": [
+          "preferred text extension"
+        ],
+        "category": "file"
+      },
+      {
+        "path": ".gitignore",
+        "score": 1,
+        "reasons": [
+          "baseline file"
+        ],
+        "category": "file"
+      },
+      {
+        "path": "requirements.txt",
+        "score": 1,
+        "reasons": [
+          "baseline file"
+        ],
+        "category": "file"
+      }
+    ],
+    "selectedFolders": [
+      {
+        "path": "",
+        "score": 10,
+        "reasons": [
+          "folder in tree"
+        ],
+        "category": "folder"
+      }
+    ],
+    "selectedTests": [],
+    "skippedFiles": [],
+    "warnings": [],
+    "stageChecklist": [
+      "Entry point",
+      "Core modules",
+      "Data / model layer",
+      "Tests"
+    ]
+  },
+  "validationReport": {
+    "validSnippets": 8,
+    "invalidSnippets": 0,
+    "warnings": []
+  }
+}

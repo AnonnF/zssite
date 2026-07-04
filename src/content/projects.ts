@@ -57,6 +57,22 @@ export const projects: Project[] = [
     analysis: { status: "none" },
   },
   {
+    slug: "resume-jd-matcher",
+    title: "Resume-JD Matcher",
+    year: 2025,
+    type: "AI",
+    status: "completed",
+    summary:
+      "基于 Streamlit 与 DeepSeek 的简历—岗位匹配工具，上传 PDF 简历并粘贴 JD，生成结构化匹配报告。",
+    stack: ["Python", "Streamlit", "DeepSeek"],
+    tags: ["AI"],
+    analysis: {
+      status: "ready",
+      source: "github",
+      repoUrl: "https://github.com/AnonnF/Resume-JD-Matcher",
+    },
+  },
+  {
     slug: "resume-job-matching-agent",
     title: "Resume-Job Matching Agent",
     year: 2025,

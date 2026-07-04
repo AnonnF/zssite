@@ -1,14 +1,12 @@
 #!/usr/bin/env node
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { resolveProjectAnalyzerData } from "../src/data/projects/applyProjectTemplate.js";
+import { buildAnalyzerDataForProject, listEnabledAnalyzerProjectIds } from "../src/data/projects/buildAnalyzerData.js";
 import { HIGHLIGHT_THEME } from "../src/data/projects/highlightLanguage.js";
 import type {
   ProjectHighlightData,
   ProjectHighlightEntryData,
 } from "../src/data/projects/highlight-types.js";
-import { manualRegistry } from "../src/data/projects/manual/registry.js";
-import { generatedRegistry } from "../src/data/projects/generated/registry.js";
 import { shouldSkipFullFileHighlight } from "./lib/code-highlights/config.js";
 import { highlightCodeBuildTime } from "./lib/code-highlights/highlighter.js";
 import { writeHighlightData } from "./lib/code-highlights/emit.js";
@@ -29,18 +27,18 @@ function printUsage(): void {
 
 Examples:
   npm run generate:highlights -- wacc-compiler
+  npm run generate:highlights -- resume-jd-matcher
   npm run generate:highlights -- --all`);
 }
 
 async function generateForProject(projectId: string): Promise<void> {
-  const manual = manualRegistry[projectId];
-  if (!manual) {
-    console.error(`No manual analysis registered for "${projectId}".`);
+  const merged = buildAnalyzerDataForProject(projectId, { includeHighlights: false });
+  if (!merged) {
+    console.error(
+      `No analyzer data available for "${projectId}". Ensure generated data exists and publication flags are enabled.`
+    );
     process.exit(1);
   }
-
-  const generated = generatedRegistry[projectId];
-  const merged = resolveProjectAnalyzerData(manual, generated);
 
   const entries: Record<string, ProjectHighlightEntryData> = {};
   const summary: Summary = {
@@ -154,9 +152,9 @@ async function main(): Promise<void> {
   }
 
   if (args[0] === "--all") {
-    const projectIds = Object.keys(manualRegistry);
+    const projectIds = listEnabledAnalyzerProjectIds();
     if (projectIds.length === 0) {
-      console.error("No projects found in manual registry.");
+      console.error("No enabled projects found in publication flags.");
       process.exit(1);
     }
 

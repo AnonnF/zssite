@@ -8,11 +8,7 @@ import type {
   ProjectStructuredAnalysis,
   ProjectTreeNode,
 } from "./types";
-import { waccCompilerAnalysis } from "./wacc-compiler.analysis";
-import { generatedRegistry } from "./generated/registry";
-import { highlightedRegistry } from "./highlighted/registry";
-import { resolveProjectAnalyzerData } from "./applyProjectTemplate";
-import { mergeHighlightData } from "./mergeHighlightData";
+import { buildAnalyzerRegistry } from "./buildAnalyzerData";
 
 export type {
   ProjectAnalyzerData,
@@ -48,17 +44,22 @@ export {
   getReviewTitle,
 } from "./reviewMeta";
 export type { AiDraft, AiDraftEntry, AiDraftProjectAnalysis } from "./ai-draft-types";
+export {
+  getProjectPublicationFlags,
+  projectPublicationFlags,
+  type ProjectPublicationFlag,
+} from "./projectPublicationFlags";
+export { applyPublicationReview, reviewFromPublicationFlags } from "./applyPublicationReview";
+export { createAnalyzerDataFromAiDraft } from "./mergeAiDraftAnalysis";
+export { aiDraftRegistry, getAiDraft } from "./ai-drafts";
+export {
+  buildAnalyzerDataForProject,
+  buildAnalyzerRegistry,
+  inferAnalyzerSource,
+  listEnabledAnalyzerProjectIds,
+} from "./buildAnalyzerData";
 
-function registerAnalyzer(manual: ProjectManualAnalysisData): ProjectAnalyzerData {
-  const generated = generatedRegistry[manual.projectId];
-  const resolved = resolveProjectAnalyzerData(manual, generated);
-  const highlights = highlightedRegistry[manual.projectId];
-  return mergeHighlightData(resolved, highlights);
-}
-
-const analyzerRegistry: Record<string, ProjectAnalyzerData> = {
-  "wacc-compiler": registerAnalyzer(waccCompilerAnalysis),
-};
+const analyzerRegistry: Record<string, ProjectAnalyzerData> = buildAnalyzerRegistry();
 
 /** Temporary: hide pipeline bar while Guided Tour covers the reading path. */
 export const PROJECT_ARCHITECTURE_ENABLED = false;
