@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { getSnapshotRoot as resolveSnapshotRoot } from "../paths.js";
 import type { ScannerConfig } from "./types.js";
 import { DEFAULT_SCANNER_CONFIG } from "./types.js";
 
@@ -43,7 +44,7 @@ function readJsonConfig(filePath: string): Partial<ScannerConfig> {
 }
 
 export function getSnapshotRoot(repoRoot: string, projectId: string): string {
-  return path.join(repoRoot, "project-snapshots", projectId);
+  return resolveSnapshotRoot(repoRoot, projectId);
 }
 
 export function listSnapshotProjectIds(repoRoot: string): string[] {

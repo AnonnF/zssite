@@ -12,6 +12,7 @@
     "generate:analysis": "tsx scripts/generate-project-analysis.ts",
     "generate:ai-analysis": "tsx scripts/generate-ai-analysis.ts",
     "generate:highlights": "tsx scripts/generate-code-highlights.ts",
+    "import:github": "tsx scripts/import-github-repo.ts",
     "prepare:analyzer": "npm run generate:analysis -- --all && npm run generate:highlights -- --all"
   },
   "dependencies": {
@@ -23,12 +24,14 @@
     "shiki": "^4.3.0"
   },
   "devDependencies": {
-    "dotenv": "^16.4.7",
-    "openai": "^4.77.0",
+    "@supabase/supabase-js": "^2.49.1",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "dotenv": "^16.4.7",
+    "openai": "^4.77.0",
     "postcss": "^8",
+    "supabase": "^2.109.0",
     "tailwindcss": "^3.4.1",
     "tsx": "^4.19.4",
     "typescript": "^5"

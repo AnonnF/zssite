@@ -140,3 +140,16 @@ export function getFileExtension(name: string): string {
   if (dotIndex <= 0) return "";
   return name.slice(dotIndex + 1).toLowerCase();
 }
+
+export function pathContainsIgnoredSegment(filePath: string): boolean {
+  return filePath.split("/").some((segment) => DEFAULT_IGNORE_DIRS.has(segment));
+}
+
+export function isSensitivePath(filePath: string): boolean {
+  const name = filePath.split("/").pop() ?? filePath;
+  if (shouldIgnoreFile(name)) return true;
+  if (name.startsWith(".env")) return true;
+  if (matchPattern(name, "*.pem")) return true;
+  if (matchPattern(name, "*.key")) return true;
+  return false;
+}

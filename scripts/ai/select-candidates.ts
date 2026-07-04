@@ -3,7 +3,7 @@ import {
   getFileExtension,
   isBinaryExtension,
   isPreferredTextExtension,
-  matchPattern,
+  isSensitivePath,
   shouldIgnoreFile,
 } from "../lib/project-analysis/filters.js";
 import {
@@ -31,15 +31,6 @@ type ScoreState = {
 
 function pathContainsIgnoredSegment(filePath: string): boolean {
   return filePath.split("/").some((segment) => DEFAULT_IGNORE_DIRS.has(segment));
-}
-
-function isSensitivePath(filePath: string): boolean {
-  const name = filePath.split("/").pop() ?? filePath;
-  if (shouldIgnoreFile(name)) return true;
-  if (name.startsWith(".env")) return true;
-  if (matchPattern(name, "*.pem")) return true;
-  if (matchPattern(name, "*.key")) return true;
-  return false;
 }
 
 function isConfigOrLockFile(filePath: string): boolean {
