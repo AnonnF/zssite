@@ -1,6 +1,4 @@
 #!/usr/bin/env node
-import fs from "node:fs";
-import path from "node:path";
 import { parseGitHubRepoInput } from "./lib/github/parseRepoUrl.js";
 import { getRepoRoot } from "./lib/paths.js";
 import { formatNpmCommand, runNpmScript } from "./lib/runNpmScript.js";
@@ -18,6 +16,8 @@ type AnalyzeOptions = {
   skipAi: boolean;
   skipExport: boolean;
   skipHighlights: boolean;
+  skipRegister: boolean;
+  registerOnly: boolean;
   force: boolean;
 };
 
@@ -40,6 +40,8 @@ Options:
   --skip-ai             Skip generate:ai-analysis
   --skip-export         Skip export:project
   --skip-highlights     Skip generate:highlights
+  --skip-register       Skip automatic frontend registration
+  --register-only       Only run register:project
   --force               Force re-import even if snapshot exists
 
 Examples:
@@ -99,6 +101,8 @@ function parseArgs(argv: string[]): AnalyzeOptions | null {
     skipAi: flags.has("--skip-ai"),
     skipExport: flags.has("--skip-export"),
     skipHighlights: flags.has("--skip-highlights"),
+    skipRegister: flags.has("--skip-register"),
+    registerOnly: flags.has("--register-only"),
     force: flags.has("--force"),
   };
 }
@@ -117,7 +121,26 @@ function buildImportArgs(options: AnalyzeOptions): string[] {
   return args;
 }
 
+function buildRegisterArgs(options: AnalyzeOptions): string[] {
+  const parsed = parseGitHubRepoInput(options.repoInput);
+  const args = [options.projectId, "--repoUrl", parsed.htmlUrl];
+  if (options.templateId) {
+    args.push("--templateId", options.templateId);
+  }
+  return args;
+}
+
 function buildSteps(options: AnalyzeOptions): AnalyzeStep[] {
+  if (options.registerOnly) {
+    return [
+      {
+        label: "Register project for frontend",
+        scriptName: "register:project",
+        args: buildRegisterArgs(options),
+      },
+    ];
+  }
+
   const steps: AnalyzeStep[] = [];
 
   if (!options.skipImport) {
@@ -158,32 +181,15 @@ function buildSteps(options: AnalyzeOptions): AnalyzeStep[] {
     });
   }
 
-  return steps;
-}
-
-function readPublicationFlags(projectId: string): {
-  exists: boolean;
-  humanReviewed?: boolean;
-} {
-  const flagsPath = path.join(
-    getRepoRoot(),
-    "src/data/projects/projectPublicationFlags.ts"
-  );
-  const source = fs.readFileSync(flagsPath, "utf8");
-  const blockPattern = new RegExp(
-    `"${projectId.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}"\\s*:\\s*\\{([\\s\\S]*?)\\n\\s*\\}`,
-    "m"
-  );
-  const match = source.match(blockPattern);
-  if (!match) {
-    return { exists: false };
+  if (!options.skipRegister) {
+    steps.push({
+      label: "Register project for frontend",
+      scriptName: "register:project",
+      args: buildRegisterArgs(options),
+    });
   }
 
-  const humanReviewedMatch = match[1].match(/humanReviewed:\s*(true|false)/);
-  return {
-    exists: true,
-    humanReviewed: humanReviewedMatch?.[1] === "true",
-  };
+  return steps;
 }
 
 function printDryRun(steps: AnalyzeStep[]): void {
@@ -194,21 +200,20 @@ function printDryRun(steps: AnalyzeStep[]): void {
 }
 
 function printSuccess(options: AnalyzeOptions): void {
-  const flags = readPublicationFlags(options.projectId);
-
   console.log("");
   console.log("Done.");
+  if (!options.skipRegister || options.registerOnly) {
+    console.log("Project registered.");
+  }
   console.log(`Project: ${options.projectId}`);
   console.log(`Open: /projects/${options.projectId}`);
   console.log("Review flag: src/data/projects/projectPublicationFlags.ts");
-  console.log("Manual frontend wiring still required:");
-  console.log("  - src/content/projects.ts");
-  console.log("  - src/data/projects/ai-drafts/index.ts");
-  console.log("  - src/data/projects/projectPublicationFlags.ts");
-
-  if (!flags.exists || flags.humanReviewed === false) {
-    console.log("This project is visible as AI DRAFT until manually reviewed.");
-  }
+  console.log(
+    `To mark reviewed: npm run review:project -- ${options.projectId} --humanReviewed true`
+  );
+  console.log(
+    "This project appears under AI Drafts with an AI DRAFT badge until manually reviewed."
+  );
 }
 
 async function main(): Promise<void> {

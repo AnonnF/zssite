@@ -13,7 +13,7 @@ export const projectPublicationFlags = {
     featured: true,
     templateId: "compiler-pipeline",
   },
-      "resume-jd-matcher": {
+  "resume-jd-matcher": {
     enabled: true,
     humanReviewed: false,
     featured: false,

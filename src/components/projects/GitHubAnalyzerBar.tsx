@@ -115,7 +115,7 @@ export function GitHubAnalyzerBar() {
         <SectionLabel>Repository Analyzer</SectionLabel>
         <p className="mt-2 max-w-2xl font-[family-name:var(--font-body-sc)] text-sm leading-relaxed text-muted md:text-body">
           粘贴公开 GitHub 仓库地址，生成本地 CLI 命令以导入并创建 AI Draft。
-          AI 生成的分析会进入 AI Drafts，并在人工审核前保持未审核标记。
+          在本机终端运行命令后，项目会自动加入 AI Drafts，并带有 AI DRAFT 标记。
         </p>
       </div>
 
@@ -218,7 +218,8 @@ export function GitHubAnalyzerBar() {
           </pre>
 
           <p className="mt-3 font-[family-name:var(--font-body-sc)] text-sm text-muted">
-            运行命令后，项目会出现在 AI Drafts 分组，并带有 AI DRAFT 标记。此页面不会在线执行分析。
+            运行命令后，项目会自动加入 AI Drafts，并带有 AI DRAFT 标记。命令需在本机终端运行；浏览器不会直接调用
+            GitHub / Supabase / DeepSeek。
           </p>
           {copyState === "failed" ? (
             <p className="mt-2 font-mono text-meta text-muted">
