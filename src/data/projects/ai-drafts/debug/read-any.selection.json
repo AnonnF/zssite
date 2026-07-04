@@ -1,0 +1,405 @@
+{
+  "selectedFiles": [
+    {
+      "path": "packages/app-expo/app.config.js",
+      "score": 155,
+      "reasons": [
+        "generic template: entry point",
+        "generic template: config",
+        "preferred text extension"
+      ],
+      "category": "file"
+    },
+    {
+      "path": "packages/app-expo/modules/system-tts-synthesis/index.ts",
+      "score": 125,
+      "reasons": [
+        "generic template: entry point",
+        "preferred text extension"
+      ],
+      "category": "file"
+    },
+    {
+      "path": "packages/app-expo/modules/volume-key-paging/index.ts",
+      "score": 125,
+      "reasons": [
+        "generic template: entry point",
+        "preferred text extension"
+      ],
+      "category": "file"
+    },
+    {
+      "path": "packages/app-expo/src/App.tsx",
+      "score": 125,
+      "reasons": [
+        "generic template: entry point",
+        "preferred text extension"
+      ],
+      "category": "file"
+    },
+    {
+      "path": "packages/app-expo/src/hooks/index.ts",
+      "score": 125,
+      "reasons": [
+        "generic template: entry point",
+        "preferred text extension"
+      ],
+      "category": "file"
+    },
+    {
+      "path": "packages/app-expo/src/screens/reader/styles/index.ts",
+      "score": 125,
+      "reasons": [
+        "generic template: entry point",
+        "preferred text extension"
+      ],
+      "category": "file"
+    },
+    {
+      "path": "packages/app-expo/src/stores/index.ts",
+      "score": 125,
+      "reasons": [
+        "generic template: entry point",
+        "preferred text extension"
+      ],
+      "category": "file"
+    },
+    {
+      "path": "packages/app/index.html",
+      "score": 125,
+      "reasons": [
+        "generic template: entry point",
+        "preferred text extension"
+      ],
+      "category": "file"
+    },
+    {
+      "path": "packages/app/src-tauri/src/main.rs",
+      "score": 125,
+      "reasons": [
+        "generic template: entry point",
+        "preferred text extension"
+      ],
+      "category": "file"
+    },
+    {
+      "path": "packages/app/src/App.tsx",
+      "score": 125,
+      "reasons": [
+        "generic template: entry point",
+        "preferred text extension"
+      ],
+      "category": "file"
+    },
+    {
+      "path": "packages/app/src/lib/reader/index.ts",
+      "score": 125,
+      "reasons": [
+        "generic template: entry point",
+        "preferred text extension"
+      ],
+      "category": "file"
+    },
+    {
+      "path": "packages/app/src/main.tsx",
+      "score": 125,
+      "reasons": [
+        "generic template: entry point",
+        "preferred text extension"
+      ],
+      "category": "file"
+    },
+    {
+      "path": "packages/core/src/ai/index.ts",
+      "score": 125,
+      "reasons": [
+        "generic template: entry point",
+        "preferred text extension"
+      ],
+      "category": "file"
+    },
+    {
+      "path": "packages/core/src/ai/skills/index.ts",
+      "score": 125,
+      "reasons": [
+        "generic template: entry point",
+        "preferred text extension"
+      ],
+      "category": "file"
+    },
+    {
+      "path": "packages/core/src/ai/tools/index.ts",
+      "score": 125,
+      "reasons": [
+        "generic template: entry point",
+        "preferred text extension"
+      ],
+      "category": "file"
+    },
+    {
+      "path": "packages/core/src/db/index.ts",
+      "score": 125,
+      "reasons": [
+        "generic template: entry point",
+        "preferred text extension"
+      ],
+      "category": "file"
+    },
+    {
+      "path": "packages/core/src/feedback/index.ts",
+      "score": 125,
+      "reasons": [
+        "generic template: entry point",
+        "preferred text extension"
+      ],
+      "category": "file"
+    },
+    {
+      "path": "packages/core/src/hooks/index.ts",
+      "score": 125,
+      "reasons": [
+        "generic template: entry point",
+        "preferred text extension"
+      ],
+      "category": "file"
+    },
+    {
+      "path": "packages/core/src/hooks/reader/index.ts",
+      "score": 125,
+      "reasons": [
+        "generic template: entry point",
+        "preferred text extension"
+      ],
+      "category": "file"
+    },
+    {
+      "path": "packages/core/src/i18n/index.ts",
+      "score": 125,
+      "reasons": [
+        "generic template: entry point",
+        "preferred text extension"
+      ],
+      "category": "file"
+    }
+  ],
+  "selectedFolders": [
+    {
+      "path": "",
+      "score": 10,
+      "reasons": [
+        "folder in tree"
+      ],
+      "category": "folder"
+    },
+    {
+      "path": ".agents",
+      "score": 10,
+      "reasons": [
+        "folder in tree"
+      ],
+      "category": "folder"
+    },
+    {
+      "path": ".agents/skills",
+      "score": 10,
+      "reasons": [
+        "folder in tree"
+      ],
+      "category": "folder"
+    },
+    {
+      "path": ".agents/skills/frontend-design",
+      "score": 10,
+      "reasons": [
+        "folder in tree"
+      ],
+      "category": "folder"
+    },
+    {
+      "path": ".agents/skills/shadcn-ui",
+      "score": 10,
+      "reasons": [
+        "folder in tree"
+      ],
+      "category": "folder"
+    },
+    {
+      "path": ".agents/skills/shadcn-ui/references",
+      "score": 10,
+      "reasons": [
+        "folder in tree"
+      ],
+      "category": "folder"
+    },
+    {
+      "path": ".agents/skills/tauri-v2",
+      "score": 10,
+      "reasons": [
+        "folder in tree"
+      ],
+      "category": "folder"
+    },
+    {
+      "path": ".agents/skills/tauri-v2/assets",
+      "score": 10,
+      "reasons": [
+        "folder in tree"
+      ],
+      "category": "folder"
+    },
+    {
+      "path": ".agents/skills/tauri-v2/references",
+      "score": 10,
+      "reasons": [
+        "folder in tree"
+      ],
+      "category": "folder"
+    },
+    {
+      "path": ".agents/skills/tauri-v2/scripts",
+      "score": 10,
+      "reasons": [
+        "folder in tree"
+      ],
+      "category": "folder"
+    },
+    {
+      "path": ".claude",
+      "score": 10,
+      "reasons": [
+        "folder in tree"
+      ],
+      "category": "folder"
+    },
+    {
+      "path": ".claude/skills",
+      "score": 10,
+      "reasons": [
+        "folder in tree"
+      ],
+      "category": "folder"
+    },
+    {
+      "path": ".claude/skills/frontend-design",
+      "score": 10,
+      "reasons": [
+        "folder in tree"
+      ],
+      "category": "folder"
+    },
+    {
+      "path": ".claude/skills/shadcn-ui",
+      "score": 10,
+      "reasons": [
+        "folder in tree"
+      ],
+      "category": "folder"
+    },
+    {
+      "path": ".claude/skills/shadcn-ui/references",
+      "score": 10,
+      "reasons": [
+        "folder in tree"
+      ],
+      "category": "folder"
+    },
+    {
+      "path": ".claude/skills/tauri-v2",
+      "score": 10,
+      "reasons": [
+        "folder in tree"
+      ],
+      "category": "folder"
+    },
+    {
+      "path": ".claude/skills/tauri-v2/assets",
+      "score": 10,
+      "reasons": [
+        "folder in tree"
+      ],
+      "category": "folder"
+    },
+    {
+      "path": ".claude/skills/tauri-v2/references",
+      "score": 10,
+      "reasons": [
+        "folder in tree"
+      ],
+      "category": "folder"
+    },
+    {
+      "path": ".claude/skills/tauri-v2/scripts",
+      "score": 10,
+      "reasons": [
+        "folder in tree"
+      ],
+      "category": "folder"
+    },
+    {
+      "path": ".expo",
+      "score": 10,
+      "reasons": [
+        "folder in tree"
+      ],
+      "category": "folder"
+    }
+  ],
+  "selectedTests": [
+    {
+      "path": "packages/core/src/stats/view-model-builder.test.ts",
+      "score": 145,
+      "reasons": [
+        "generic template: model/schema",
+        "preferred text extension",
+        "test file"
+      ],
+      "category": "test"
+    },
+    {
+      "path": "packages/core/src/sync/__tests__/schema-filtering.test.ts",
+      "score": 145,
+      "reasons": [
+        "generic template: model/schema",
+        "preferred text extension",
+        "test file"
+      ],
+      "category": "test"
+    },
+    {
+      "path": "packages/core/vitest.config.ts",
+      "score": 105,
+      "reasons": [
+        "generic template: config",
+        "preferred text extension",
+        "test file"
+      ],
+      "category": "test"
+    },
+    {
+      "path": "packages/core/src/ai/__tests__/chat-memory.test.ts",
+      "score": 75,
+      "reasons": [
+        "preferred text extension",
+        "test file"
+      ],
+      "category": "test"
+    },
+    {
+      "path": "packages/core/src/ai/__tests__/llm-provider.test.ts",
+      "score": 75,
+      "reasons": [
+        "preferred text extension",
+        "test file"
+      ],
+      "category": "test"
+    }
+  ],
+  "skippedFiles": [],
+  "warnings": [],
+  "stageChecklist": [
+    "Entry point",
+    "Core modules",
+    "Data / model layer",
+    "Tests"
+  ]
+}

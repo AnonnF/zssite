@@ -96,6 +96,21 @@ export const projects: Project[] = [
     ref: "REF-005",
     analysis: { status: "none" },
   },
+  {
+    slug: "read-any",
+    title: "ReadAny",
+    year: 2026,
+    type: "AI",
+    status: "completed",
+    summary: "AI-generated project analysis imported from GitHub.",
+    stack: ["Markdown", "JSON", "YAML", "Python"],
+    tags: ["AI"],
+    analysis: {
+      status: "ready",
+      source: "github",
+      repoUrl: "https://github.com/codedogQBY/ReadAny",
+    },
+  },
 ];
 
 export function getProjectBySlug(slug: string): Project | undefined {

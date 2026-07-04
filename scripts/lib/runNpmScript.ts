@@ -1,27 +1,32 @@
-import { spawnSync } from "node:child_process";
+import { spawn } from "node:child_process";
 import { getRepoRoot } from "./paths.js";
 
 export function runNpmScript(
   scriptName: string,
   args: string[] = []
-): void {
+): Promise<void> {
   const repoRoot = getRepoRoot();
   const npmArgs = ["run", scriptName, "--", ...args];
 
-  const result = spawnSync("npm", npmArgs, {
-    cwd: repoRoot,
-    stdio: "inherit",
-    shell: process.platform === "win32",
+  return new Promise((resolve) => {
+    const child = spawn("npm", npmArgs, {
+      cwd: repoRoot,
+      stdio: "inherit",
+      shell: process.platform === "win32",
+    });
+
+    child.on("error", (error) => {
+      console.error(error.message);
+      process.exit(1);
+    });
+
+    child.on("close", (code) => {
+      if (code !== 0) {
+        process.exit(code ?? 1);
+      }
+      resolve();
+    });
   });
-
-  if (result.error) {
-    console.error(result.error.message);
-    process.exit(1);
-  }
-
-  if (result.status !== 0) {
-    process.exit(result.status ?? 1);
-  }
 }
 
 export function formatNpmCommand(scriptName: string, args: string[] = []): string {

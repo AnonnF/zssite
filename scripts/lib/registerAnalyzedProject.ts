@@ -336,8 +336,12 @@ function registerPublicationFlags(
 
   const before = source.slice(0, markerIndex).trimEnd();
   const after = source.slice(markerIndex);
-  const needsComma = !before.endsWith("{");
-  const nextSource = `${before}${needsComma ? ",\n" : "\n"}${block}\n${after}`;
+  const separator = before.endsWith("{")
+    ? "\n"
+    : before.endsWith(",")
+      ? "\n"
+      : ",\n";
+  const nextSource = `${before}${separator}${block}\n${after}`;
 
   if (!options.dryRun) {
     fs.writeFileSync(filePath, nextSource, "utf8");

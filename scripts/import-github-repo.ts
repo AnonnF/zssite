@@ -10,6 +10,11 @@ import {
   type GitHubRepoMetadata,
 } from "./lib/github/fetchRepo.js";
 import { downloadGitHubFileToDisk } from "./lib/github/downloadFile.js";
+import {
+  createDownloadProgressReporter,
+  formatBytes,
+  sumEstimatedBytes,
+} from "./lib/downloadProgress.js";
 import { parseGitHubRepoInput } from "./lib/github/parseRepoUrl.js";
 import { scoreImportCandidate } from "./lib/import-candidate-scoring.js";
 import {
@@ -44,6 +49,8 @@ type CliOptions = {
   title?: string;
   dryRun: boolean;
   force: boolean;
+  noProgress: boolean;
+  verbose: boolean;
 };
 
 type FileRecord = {
@@ -63,8 +70,11 @@ type ImportSummary = {
   foldersIncluded: number;
   candidates: number;
   downloaded: number;
+  downloadFailed: number;
   downloadSkippedTooLarge: number;
   downloadSkippedSecrets: number;
+  downloadedBytes: number;
+  downloadDurationMs: number;
   treeTruncated: boolean;
   candidatePaths: string[];
   tmpPath?: string;
@@ -94,6 +104,8 @@ Options:
   --title               Project title
   --force               Re-import even if snapshot for commit already exists
   --dry-run             Preview import without writing Supabase or snapshots
+  --no-progress         Disable live download progress display
+  --verbose             Log each file start/done (debug)
 
 Examples:
   npm run import:github -- https://github.com/owner/repo --projectId bridge-talk
@@ -145,6 +157,8 @@ function parseArgs(argv: string[]): CliOptions {
     title: readFlagValue(args, "--title"),
     dryRun: flags.has("--dry-run"),
     force: flags.has("--force"),
+    noProgress: flags.has("--no-progress"),
+    verbose: flags.has("--verbose"),
   };
 }
 
@@ -262,8 +276,11 @@ function buildFileRecords(
     foldersIncluded,
     candidates,
     downloaded: 0,
+    downloadFailed: 0,
     downloadSkippedTooLarge: 0,
     downloadSkippedSecrets: 0,
+    downloadedBytes: 0,
+    downloadDurationMs: 0,
     treeTruncated: metadata.treeTruncated,
     candidatePaths,
   };
@@ -275,6 +292,21 @@ function buildFileRecords(
   };
 }
 
+function buildClassificationMap(
+  classifications: ImportTreeClassification[]
+): Map<string, ImportTreeClassification> {
+  return new Map(classifications.map((entry) => [entry.path, entry]));
+}
+
+function estimateDownloadQueueBytes(
+  downloadQueue: string[],
+  classificationMap: Map<string, ImportTreeClassification>
+): number | null {
+  return sumEstimatedBytes(
+    downloadQueue.map((filePath) => classificationMap.get(filePath)?.sizeBytes)
+  );
+}
+
 async function downloadSnapshotFiles(
   metadata: GitHubRepoMetadata,
   options: CliOptions,
@@ -283,7 +315,13 @@ async function downloadSnapshotFiles(
   classifications: ImportTreeClassification[]
 ): Promise<Pick<
   ImportSummary,
-  "downloaded" | "downloadSkippedTooLarge" | "downloadSkippedSecrets" | "tmpPath"
+  | "downloaded"
+  | "downloadFailed"
+  | "downloadSkippedTooLarge"
+  | "downloadSkippedSecrets"
+  | "downloadedBytes"
+  | "downloadDurationMs"
+  | "tmpPath"
 >> {
   const snapshotRoot = getSnapshotTmpRoot(repoRoot, options.projectId, jobId);
   const tmpRelativePath = getSnapshotTmpRelativePath(options.projectId, jobId);
@@ -293,14 +331,43 @@ async function downloadSnapshotFiles(
 
   const scannerConfig = loadScannerConfig(repoRoot, options.projectId);
   const maxFileSizeBytes = scannerConfig.maxFileSizeKb * 1024;
+  const classificationMap = buildClassificationMap(classifications);
+  const estimatedTotalBytes = estimateDownloadQueueBytes(
+    downloadQueue,
+    classificationMap
+  );
+
+  const progress = createDownloadProgressReporter({
+    totalFiles: downloadQueue.length,
+    estimatedTotalBytes,
+    repoLabel: `${metadata.owner}/${metadata.repo}`,
+    noProgress: options.noProgress,
+    verbose: options.verbose,
+  });
+
+  progress.printBatchHeader();
 
   let downloaded = 0;
+  let downloadFailed = 0;
   let downloadSkippedTooLarge = 0;
   let downloadSkippedSecrets = 0;
 
-  for (const filePath of downloadQueue) {
-    const classification = classifications.find((entry) => entry.path === filePath);
-    if (!classification) continue;
+  for (let index = 0; index < downloadQueue.length; index += 1) {
+    if (runtimeContext.aborting) {
+      break;
+    }
+
+    const filePath = downloadQueue[index];
+    const classification = classificationMap.get(filePath);
+    if (!classification) {
+      continue;
+    }
+
+    const fileIndex = index + 1;
+    const expectedBytes =
+      typeof classification.sizeBytes === "number" ? classification.sizeBytes : null;
+
+    progress.startFile(fileIndex, filePath, expectedBytes);
 
     const rawUrl = buildRawGitHubUrl(
       metadata.owner,
@@ -315,31 +382,44 @@ async function downloadSnapshotFiles(
         rawUrl,
         destinationPath,
         maxBytes: maxFileSizeBytes,
+        expectedBytes,
+        onProgress: (downloadedBytes, totalBytes) => {
+          progress.updateFileBytes(downloadedBytes, totalBytes);
+        },
       });
 
       if (result.downloaded) {
         downloaded += 1;
+        progress.markFileDone(result.bytesWritten);
       } else if (result.blockedBySecrets) {
         downloadSkippedSecrets += 1;
         if (fs.existsSync(destinationPath)) {
           fs.unlinkSync(destinationPath);
         }
+        progress.markFileSkipped();
       } else {
         downloadSkippedTooLarge += 1;
+        progress.markFileSkipped();
       }
     } catch (error) {
-      console.warn(
-        `Warning: failed to download ${filePath}: ${
-          error instanceof Error ? error.message : String(error)
-        }`
+      downloadFailed += 1;
+      const reason = error instanceof Error ? error.message : String(error);
+      progress.warn(
+        `Warning: failed to download [${fileIndex}/${downloadQueue.length}] ${filePath} — ${reason}`
       );
+      progress.markFileFailed(filePath, fileIndex, reason);
     }
   }
 
+  const downloadSummary = progress.finish();
+
   return {
     downloaded,
+    downloadFailed,
     downloadSkippedTooLarge,
     downloadSkippedSecrets,
+    downloadedBytes: downloadSummary.downloadedBytes,
+    downloadDurationMs: downloadSummary.durationMs,
     tmpPath: tmpRelativePath,
   };
 }
@@ -368,7 +448,12 @@ function promoteSnapshotTmpDir(projectId: string, jobId: string): void {
   runtimeContext.tmpRelativePath = null;
 }
 
-function printDryRunSummary(summary: ImportSummary, repoUrl: string): void {
+function printDryRunSummary(
+  summary: ImportSummary,
+  repoUrl: string,
+  downloadQueueLength: number,
+  estimatedTotalBytes: number | null
+): void {
   console.log("Dry-run GitHub import preview");
   console.log(`Repo: ${summary.owner}/${summary.repo}`);
   console.log(`Project slug: ${summary.projectId}`);
@@ -379,6 +464,12 @@ function printDryRunSummary(summary: ImportSummary, repoUrl: string): void {
   console.log(`Files included: ${summary.filesIncluded}`);
   console.log(`Folders included: ${summary.foldersIncluded}`);
   console.log(`Files skipped: ${summary.filesSkipped}`);
+  console.log(`Files selected for download: ${downloadQueueLength}`);
+  if (estimatedTotalBytes === null) {
+    console.log("Estimated download size: unknown");
+  } else {
+    console.log(`Estimated download size: ${formatBytes(estimatedTotalBytes)}`);
+  }
   console.log(`Candidate paths: ${summary.candidates}`);
   if (summary.treeTruncated) {
     console.log("Warning: tree truncated — import may be incomplete.");
@@ -415,6 +506,9 @@ function printSuccessSummary(options: {
   console.log(`Files included: ${summary.filesIncluded}`);
   console.log(`Files skipped: ${summary.filesSkipped}`);
   console.log(`Files downloaded: ${summary.downloaded}`);
+  if (summary.downloadFailed > 0) {
+    console.log(`Download failures: ${summary.downloadFailed}`);
+  }
   console.log(`Snapshot path: ${getSnapshotRelativePath(projectId)}`);
   console.log(`Supabase project id: ${supabaseProjectId}`);
   console.log(`Snapshot id: ${snapshotId}`);
@@ -603,8 +697,11 @@ async function persistSnapshotToSupabase(options: {
     foldersIncluded: summary.foldersIncluded,
     candidates: summary.candidates,
     downloaded: summary.downloaded,
+    downloadFailed: summary.downloadFailed,
     downloadSkippedTooLarge: summary.downloadSkippedTooLarge,
     downloadSkippedSecrets: summary.downloadSkippedSecrets,
+    downloadedBytes: summary.downloadedBytes,
+    downloadDurationMs: summary.downloadDurationMs,
     tmpPath: summary.tmpPath,
   };
 
@@ -724,8 +821,14 @@ async function main(): Promise<void> {
   const { fileRecords, summary, downloadQueue } = buildFileRecords(metadata, options);
 
   if (options.dryRun) {
-    summary.downloaded = downloadQueue.length;
-    printDryRunSummary(summary, parsed.htmlUrl);
+    const classificationMap = buildClassificationMap(
+      fileRecords.map((record) => record.item)
+    );
+    const estimatedTotalBytes = estimateDownloadQueueBytes(
+      downloadQueue,
+      classificationMap
+    );
+    printDryRunSummary(summary, parsed.htmlUrl, downloadQueue.length, estimatedTotalBytes);
     return;
   }
 
@@ -769,8 +872,11 @@ async function main(): Promise<void> {
       fileRecords.map((record) => record.item)
     );
     summary.downloaded = downloadStats.downloaded;
+    summary.downloadFailed = downloadStats.downloadFailed;
     summary.downloadSkippedTooLarge = downloadStats.downloadSkippedTooLarge;
     summary.downloadSkippedSecrets = downloadStats.downloadSkippedSecrets;
+    summary.downloadedBytes = downloadStats.downloadedBytes;
+    summary.downloadDurationMs = downloadStats.downloadDurationMs;
     summary.tmpPath = downloadStats.tmpPath;
 
     const snapshotId = await persistSnapshotToSupabase({

@@ -19,6 +19,8 @@ type AnalyzeOptions = {
   skipRegister: boolean;
   registerOnly: boolean;
   force: boolean;
+  noProgress: boolean;
+  verbose: boolean;
 };
 
 type AnalyzeStep = {
@@ -43,6 +45,8 @@ Options:
   --skip-register       Skip automatic frontend registration
   --register-only       Only run register:project
   --force               Force re-import even if snapshot exists
+  --no-progress         Disable live import download progress (passed to import:github)
+  --verbose             Verbose import download logs (passed to import:github)
 
 Examples:
   npm run analyze:github -- AnonnF/Resume-JD-Matcher --projectId resume-jd-matcher --templateId ai-pipeline
@@ -104,6 +108,8 @@ function parseArgs(argv: string[]): AnalyzeOptions | null {
     skipRegister: flags.has("--skip-register"),
     registerOnly: flags.has("--register-only"),
     force: flags.has("--force"),
+    noProgress: flags.has("--no-progress"),
+    verbose: flags.has("--verbose"),
   };
 }
 
@@ -117,6 +123,12 @@ function buildImportArgs(options: AnalyzeOptions): string[] {
   }
   if (options.force) {
     args.push("--force");
+  }
+  if (options.noProgress) {
+    args.push("--no-progress");
+  }
+  if (options.verbose) {
+    args.push("--verbose");
   }
   return args;
 }
@@ -233,7 +245,7 @@ async function main(): Promise<void> {
     const step = steps[index];
     console.log("");
     console.log(`=== Step ${index + 1}: ${step.label} ===`);
-    runNpmScript(step.scriptName, step.args);
+    await runNpmScript(step.scriptName, step.args);
   }
 
   printSuccess(options);

@@ -20,6 +20,13 @@ export const projectPublicationFlags = {
     templateId: "ai-pipeline",
     note: "AI-generated project analysis, not yet manually reviewed.",
   },
+  "read-any": {
+    enabled: true,
+    humanReviewed: false,
+    featured: false,
+    templateId: "ai-pipeline",
+    note: "AI-generated project analysis imported from GitHub.",
+  },
 } satisfies Record<string, ProjectPublicationFlag>;
 
 export function getProjectPublicationFlags(
