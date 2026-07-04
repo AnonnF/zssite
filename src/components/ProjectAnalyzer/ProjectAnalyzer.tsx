@@ -19,6 +19,7 @@ import { CodePreview } from "./CodePreview";
 import { FolderOverview } from "./FolderOverview";
 import { ProjectArchitecture } from "./ProjectArchitecture";
 import { GuidedTour } from "./GuidedTour";
+import { ReviewBadge } from "./ReviewBadge";
 
 interface ProjectAnalyzerProps {
   data: ProjectAnalyzerData;
@@ -140,9 +141,17 @@ export function ProjectAnalyzer({
   return (
     <div id="project-analyzer" className="panel-card scroll-mt-24 overflow-hidden">
       <div className="analyzer-card-header border-b border-border-soft px-4 py-2 md:px-5">
-        <p className="font-mono text-meta uppercase tracking-wider text-muted">
-          Project Analyzer
-        </p>
+        <div className="flex flex-wrap items-center gap-2">
+          <p className="font-mono text-meta uppercase tracking-wider text-muted">
+            Project Analyzer
+          </p>
+          {data.review ? <ReviewBadge review={data.review} /> : null}
+        </div>
+        {data.review?.status === "ai-draft" ? (
+          <p className="mt-1 font-[family-name:var(--font-body-sc)] text-sm text-muted">
+            {data.review.note ?? "该分析由 AI 自动生成，尚未人工审核。"}
+          </p>
+        ) : null}
         {data.description ? (
           <p className="analyzer-card-header__desc mt-0.5 font-[family-name:var(--font-body-sc)] text-muted">
             {data.description}

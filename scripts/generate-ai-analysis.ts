@@ -7,6 +7,7 @@ import {
   emitRawDebug,
   emitSelectionDebug,
 } from "./ai/emit-draft.js";
+import { persistAiDraftToSupabase } from "./lib/persistAiDraft.js";
 import { loadAnalyzerAiConfig } from "./ai/load-analyzer-config.js";
 import { loadProjectContext } from "./ai/load-project-context.js";
 import { processAiDraftResponse } from "./ai/process-draft.js";
@@ -162,6 +163,24 @@ async function main(): Promise<void> {
 
   const outputPath = emitAiDraft(draft);
 
+  let supabaseDraftId: string | undefined;
+  if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    try {
+      const persisted = await persistAiDraftToSupabase(draft);
+      supabaseDraftId = persisted.id;
+    } catch (error) {
+      console.warn(
+        `Warning: failed to persist ai_drafts to Supabase: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
+  } else {
+    console.warn(
+      "Warning: SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY not set; ai_drafts row not written."
+    );
+  }
+
   console.log(`AI draft generated for ${projectId}`);
   console.log(`Provider: ${config.provider} (${config.model})`);
   printSelectionSummary(projectId, draft.selectionReport);
@@ -170,6 +189,9 @@ async function main(): Promise<void> {
     `Snippets: ${draft.validationReport.validSnippets} valid, ${draft.validationReport.invalidSnippets} invalid`
   );
   console.log(`Warnings: ${draft.warnings.length}`);
+  if (supabaseDraftId) {
+    console.log(`Supabase ai_drafts id: ${supabaseDraftId}`);
+  }
   console.log(`Selection report: ${selectionDebugPath}`);
   console.log(`Output: ${outputPath}`);
 }

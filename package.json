@@ -13,6 +13,7 @@
     "generate:ai-analysis": "tsx scripts/generate-ai-analysis.ts",
     "generate:highlights": "tsx scripts/generate-code-highlights.ts",
     "import:github": "tsx scripts/import-github-repo.ts",
+    "export:project": "tsx scripts/export-project.ts",
     "prepare:analyzer": "npm run generate:analysis -- --all && npm run generate:highlights -- --all"
   },
   "dependencies": {

@@ -1,5 +1,11 @@
 import Link from "next/link";
 import type { Project } from "@/content/projects";
+import {
+  getProjectPublicationFlags,
+  hasProjectAnalyzer,
+  reviewFromPublicationFlags,
+} from "@/data/projects";
+import { ReviewBadge } from "@/components/ProjectAnalyzer/ReviewBadge";
 import { Tag } from "@/components/ui/Tag";
 import { Divider } from "@/components/ui/Divider";
 
@@ -8,6 +14,7 @@ interface ProjectCardProps {
   index: number;
   detailComingSoon: string;
   viewDetail: string;
+  showNumber?: boolean;
 }
 
 export function ProjectCard({
@@ -15,10 +22,17 @@ export function ProjectCard({
   index,
   detailComingSoon,
   viewDetail,
+  showNumber = true,
 }: ProjectCardProps) {
-  const displayNumber = String(index + 1).padStart(2, "0");
-  const hasDetail = project.analysis?.status === "ready";
+  const publicationFlags = getProjectPublicationFlags(project.slug);
+  const displayNumber = showNumber ? String(index + 1).padStart(2, "0") : null;
+  const hasDetail =
+    project.analysis?.status === "ready" && hasProjectAnalyzer(project.slug);
   const footerLabel = hasDetail ? viewDetail : detailComingSoon;
+  const reviewBadge =
+    publicationFlags?.enabled && hasDetail
+      ? reviewFromPublicationFlags(publicationFlags)
+      : undefined;
 
   const card = (
     <article className="panel-card panel-card-interactive group relative overflow-hidden">
@@ -26,7 +40,15 @@ export function ProjectCard({
 
       <div className="flex flex-col lg:flex-row">
         <div className="flex items-center justify-between gap-4 border-b border-border-soft px-5 py-4 font-mono text-meta lg:w-40 lg:flex-col lg:items-start lg:border-b-0 lg:border-r lg:py-6">
-          <span className="text-3xl font-bold leading-none text-accent">{displayNumber}</span>
+          {displayNumber ? (
+            <span className="text-3xl font-bold leading-none text-accent">
+              {displayNumber}
+            </span>
+          ) : (
+            <span className="text-xs font-semibold uppercase tracking-wider text-muted">
+              Draft
+            </span>
+          )}
           <span className="font-semibold text-accent">{project.year}</span>
           <span className="uppercase text-muted">{project.type}</span>
           <span className="rounded-sm border border-border-soft px-1.5 py-0.5 uppercase text-muted transition-colors group-hover:border-accent/40 group-hover:text-text">
@@ -36,9 +58,12 @@ export function ProjectCard({
 
         <div className="flex-1 p-5 md:p-6 lg:p-7">
           <div className="flex flex-wrap items-start justify-between gap-3">
-            <h2 className="font-display text-h3 font-bold uppercase tracking-tight text-text transition-colors group-hover:text-text md:text-h2">
-              {project.title}
-            </h2>
+            <div className="flex flex-wrap items-center gap-3">
+              <h2 className="font-display text-h3 font-bold uppercase tracking-tight text-text transition-colors group-hover:text-text md:text-h2">
+                {project.title}
+              </h2>
+              {reviewBadge && <ReviewBadge review={reviewBadge} />}
+            </div>
             {project.ref && (
               <span className="font-mono text-meta text-muted">{project.ref}</span>
             )}

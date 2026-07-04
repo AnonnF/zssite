@@ -1,0 +1,81 @@
+{
+  "selectedFiles": [
+    {
+      "path": "app.py",
+      "score": 125,
+      "reasons": [
+        "generic template: entry point",
+        "preferred text extension"
+      ],
+      "category": "file"
+    },
+    {
+      "path": "README.md",
+      "score": 110,
+      "reasons": [
+        "README.md",
+        "preferred text extension"
+      ],
+      "category": "file"
+    },
+    {
+      "path": "llm_client.py",
+      "score": 40,
+      "reasons": [
+        "preferred text extension"
+      ],
+      "category": "file"
+    },
+    {
+      "path": "parser.py",
+      "score": 40,
+      "reasons": [
+        "preferred text extension"
+      ],
+      "category": "file"
+    },
+    {
+      "path": "prompts.py",
+      "score": 40,
+      "reasons": [
+        "preferred text extension"
+      ],
+      "category": "file"
+    },
+    {
+      "path": ".gitignore",
+      "score": 1,
+      "reasons": [
+        "baseline file"
+      ],
+      "category": "file"
+    },
+    {
+      "path": "requirements.txt",
+      "score": 1,
+      "reasons": [
+        "baseline file"
+      ],
+      "category": "file"
+    }
+  ],
+  "selectedFolders": [
+    {
+      "path": "",
+      "score": 10,
+      "reasons": [
+        "folder in tree"
+      ],
+      "category": "folder"
+    }
+  ],
+  "selectedTests": [],
+  "skippedFiles": [],
+  "warnings": [],
+  "stageChecklist": [
+    "Entry point",
+    "Core modules",
+    "Data / model layer",
+    "Tests"
+  ]
+}

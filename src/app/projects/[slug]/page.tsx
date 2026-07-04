@@ -13,6 +13,7 @@ import { Divider } from "@/components/ui/Divider";
 import { Tag } from "@/components/ui/Tag";
 import { ProjectAnalyzer } from "@/components/ProjectAnalyzer/ProjectAnalyzer";
 import { ProjectNarrative } from "@/components/ProjectAnalyzer/ProjectNarrative";
+import { ReviewBadge } from "@/components/ProjectAnalyzer/ReviewBadge";
 import { ProjectDetailNav } from "@/components/projects/ProjectDetailNav";
 
 interface ProjectDetailPageProps {
@@ -100,6 +101,16 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
             </div>
 
             <Divider accent className="my-5" />
+
+            {analyzerData?.review?.status === "ai-draft" ? (
+              <div className="mb-5 flex flex-wrap items-center gap-3 rounded-sm border border-border-soft bg-surface/40 px-4 py-3">
+                <ReviewBadge review={analyzerData.review} />
+                <p className="font-[family-name:var(--font-body-sc)] text-sm text-muted">
+                  {analyzerData.review.note ??
+                    "该分析由 AI 自动生成，尚未人工审核。"}
+                </p>
+              </div>
+            ) : null}
 
             <p className="max-w-3xl font-[family-name:var(--font-body-sc)] text-body leading-relaxed text-muted md:text-lg">
               {project.summary}
