@@ -3,6 +3,7 @@ import { projects } from "@/content/projects";
 import { getProjectPublicationFlags } from "@/data/projects";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { ProjectCard } from "@/components/projects/ProjectCard";
+import { GitHubAnalyzerBar } from "@/components/projects/GitHubAnalyzerBar";
 
 function partitionProjects() {
   const curated: typeof projects = [];
@@ -43,6 +44,8 @@ export default function ProjectsPage() {
           ENTRIES
         </p>
       </header>
+
+      <GitHubAnalyzerBar />
 
       <section className="mt-10 md:mt-12">
         <SectionLabel>Curated Projects</SectionLabel>
