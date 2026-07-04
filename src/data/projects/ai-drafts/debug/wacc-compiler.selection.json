@@ -1,0 +1,447 @@
+{
+  "selectedFiles": [
+    {
+      "path": "src/main/wacc/CFG.scala",
+      "score": 980,
+      "reasons": [
+        "priority path: src/main/wacc/CFG.scala",
+        "priority pattern: **/*CFG*",
+        "compiler-pipeline template: IR/CFG",
+        "core path: src/main",
+        "preferred text extension"
+      ],
+      "category": "file"
+    },
+    {
+      "path": "src/main/wacc/backend/arm/ARMCodeGenerator.scala",
+      "score": 790,
+      "reasons": [
+        "priority pattern: **/*CodeGenerator*",
+        "manual pipeline path",
+        "manual guided tour path",
+        "manual entry exists",
+        "compiler-pipeline template: code generation",
+        "core path: src/main",
+        "core path: backend",
+        "preferred text extension"
+      ],
+      "category": "file"
+    },
+    {
+      "path": "src/main/wacc/ast.scala",
+      "score": 745,
+      "reasons": [
+        "priority pattern: **/*AST*",
+        "manual pipeline path",
+        "manual guided tour path",
+        "manual entry exists",
+        "compiler-pipeline template: AST",
+        "core path: src/main",
+        "preferred text extension"
+      ],
+      "category": "file"
+    },
+    {
+      "path": "src/main/wacc/typeChecker.scala",
+      "score": 745,
+      "reasons": [
+        "priority pattern: **/*TypeChecker*",
+        "manual pipeline path",
+        "manual guided tour path",
+        "manual entry exists",
+        "compiler-pipeline template: semantic checker",
+        "core path: src/main",
+        "preferred text extension"
+      ],
+      "category": "file"
+    },
+    {
+      "path": "src/main/wacc/Main.scala",
+      "score": 680,
+      "reasons": [
+        "priority path: src/main/wacc/Main.scala",
+        "compiler-pipeline template: entry point",
+        "core path: src/main",
+        "preferred text extension"
+      ],
+      "category": "file"
+    },
+    {
+      "path": "src/main/wacc/backend/CodeGenerator.scala",
+      "score": 520,
+      "reasons": [
+        "priority pattern: **/*CodeGenerator*",
+        "compiler-pipeline template: code generation",
+        "core path: src/main",
+        "core path: backend",
+        "preferred text extension"
+      ],
+      "category": "file"
+    },
+    {
+      "path": "src/main/wacc/lexer.scala",
+      "score": 445,
+      "reasons": [
+        "manual pipeline path",
+        "manual guided tour path",
+        "manual entry exists",
+        "compiler-pipeline template: lexer",
+        "core path: src/main",
+        "preferred text extension"
+      ],
+      "category": "file"
+    },
+    {
+      "path": "src/main/wacc/parser.scala",
+      "score": 445,
+      "reasons": [
+        "manual pipeline path",
+        "manual guided tour path",
+        "manual entry exists",
+        "compiler-pipeline template: parser",
+        "core path: src/main",
+        "preferred text extension"
+      ],
+      "category": "file"
+    },
+    {
+      "path": "src/main/wacc/backend/arm/RegAlloc.scala",
+      "score": 300,
+      "reasons": [
+        "manual guided tour path",
+        "compiler-pipeline template: register allocation",
+        "core path: src/main",
+        "core path: backend",
+        "preferred text extension"
+      ],
+      "category": "file"
+    },
+    {
+      "path": "src/main/wacc/backend/arm/RegAllocNaive.scala",
+      "score": 300,
+      "reasons": [
+        "manual guided tour path",
+        "compiler-pipeline template: register allocation",
+        "core path: src/main",
+        "core path: backend",
+        "preferred text extension"
+      ],
+      "category": "file"
+    },
+    {
+      "path": "src/main/wacc/backend/arm/Liveness.scala",
+      "score": 295,
+      "reasons": [
+        "manual guided tour path",
+        "compiler-pipeline template: liveness analysis",
+        "core path: src/main",
+        "core path: backend",
+        "preferred text extension"
+      ],
+      "category": "file"
+    },
+    {
+      "path": "src/main/wacc/backend/arm/ARMInstruction.scala",
+      "score": 225,
+      "reasons": [
+        "manual guided tour path",
+        "core path: src/main",
+        "core path: backend",
+        "preferred text extension"
+      ],
+      "category": "file"
+    },
+    {
+      "path": "src/main/wacc/backend/arm/Printer.scala",
+      "score": 225,
+      "reasons": [
+        "manual guided tour path",
+        "core path: src/main",
+        "core path: backend",
+        "preferred text extension"
+      ],
+      "category": "file"
+    },
+    {
+      "path": "src/main/wacc/backend/arm/RuntimeProvider.scala",
+      "score": 225,
+      "reasons": [
+        "manual guided tour path",
+        "core path: src/main",
+        "core path: backend",
+        "preferred text extension"
+      ],
+      "category": "file"
+    },
+    {
+      "path": "README.md",
+      "score": 210,
+      "reasons": [
+        "manual pipeline path",
+        "README.md",
+        "preferred text extension"
+      ],
+      "category": "file"
+    },
+    {
+      "path": "src/main/wacc/backend/DataManager.scala",
+      "score": 135,
+      "reasons": [
+        "core path: src/main",
+        "core path: backend",
+        "preferred text extension"
+      ],
+      "category": "file"
+    },
+    {
+      "path": "src/main/wacc/backend/LabelManager.scala",
+      "score": 135,
+      "reasons": [
+        "core path: src/main",
+        "core path: backend",
+        "preferred text extension"
+      ],
+      "category": "file"
+    },
+    {
+      "path": "src/main/wacc/bridge.scala",
+      "score": 90,
+      "reasons": [
+        "core path: src/main",
+        "preferred text extension"
+      ],
+      "category": "file"
+    },
+    {
+      "path": "src/main/wacc/ConstantPropagation.scala",
+      "score": 90,
+      "reasons": [
+        "core path: src/main",
+        "preferred text extension"
+      ],
+      "category": "file"
+    },
+    {
+      "path": "src/main/wacc/diagnostics.scala",
+      "score": 90,
+      "reasons": [
+        "core path: src/main",
+        "preferred text extension"
+      ],
+      "category": "file"
+    }
+  ],
+  "selectedFolders": [
+    {
+      "path": "src",
+      "score": 1050,
+      "reasons": [
+        "manual pipeline path",
+        "manual guided tour path",
+        "folder in tree"
+      ],
+      "category": "folder"
+    },
+    {
+      "path": "src/main/wacc",
+      "score": 1040,
+      "reasons": [
+        "manual pipeline path",
+        "manual guided tour path",
+        "manual entry exists",
+        "folder in tree"
+      ],
+      "category": "folder"
+    },
+    {
+      "path": "src/main",
+      "score": 960,
+      "reasons": [
+        "manual pipeline path",
+        "manual guided tour path",
+        "folder in tree"
+      ],
+      "category": "folder"
+    },
+    {
+      "path": "src/test/wacc",
+      "score": 480,
+      "reasons": [
+        "priority pattern: **/*Test*",
+        "manual guided tour path",
+        "manual entry exists",
+        "folder in tree"
+      ],
+      "category": "folder"
+    },
+    {
+      "path": "src/test",
+      "score": 400,
+      "reasons": [
+        "priority pattern: **/*Test*",
+        "manual guided tour path",
+        "folder in tree"
+      ],
+      "category": "folder"
+    },
+    {
+      "path": "src/test/wacc/custom-integration",
+      "score": 400,
+      "reasons": [
+        "priority pattern: **/*Test*",
+        "manual guided tour path",
+        "folder in tree"
+      ],
+      "category": "folder"
+    },
+    {
+      "path": "src/test/wacc/imports",
+      "score": 400,
+      "reasons": [
+        "priority pattern: **/*Test*",
+        "manual guided tour path",
+        "folder in tree"
+      ],
+      "category": "folder"
+    },
+    {
+      "path": "src/test/wacc/imports/stdlib",
+      "score": 400,
+      "reasons": [
+        "priority pattern: **/*Test*",
+        "manual guided tour path",
+        "folder in tree"
+      ],
+      "category": "folder"
+    },
+    {
+      "path": "src/main/wacc/backend/arm",
+      "score": 280,
+      "reasons": [
+        "manual pipeline path",
+        "manual guided tour path",
+        "manual entry exists",
+        "folder in tree"
+      ],
+      "category": "folder"
+    },
+    {
+      "path": "src/main/wacc/backend",
+      "score": 200,
+      "reasons": [
+        "manual pipeline path",
+        "manual guided tour path",
+        "folder in tree"
+      ],
+      "category": "folder"
+    },
+    {
+      "path": "",
+      "score": 180,
+      "reasons": [
+        "manual guided tour path",
+        "manual entry exists",
+        "folder in tree"
+      ],
+      "category": "folder"
+    },
+    {
+      "path": "src/main/wacc/interpreter",
+      "score": 10,
+      "reasons": [
+        "folder in tree"
+      ],
+      "category": "folder"
+    }
+  ],
+  "selectedTests": [
+    {
+      "path": "src/test/wacc/CodeGeneratorTests.scala",
+      "score": 850,
+      "reasons": [
+        "priority pattern: **/*CodeGenerator*",
+        "priority pattern: **/*Test*",
+        "manual guided tour path",
+        "compiler-pipeline template: code generation",
+        "preferred text extension",
+        "test file"
+      ],
+      "category": "test"
+    },
+    {
+      "path": "src/test/wacc/TypeCheckerTests.scala",
+      "score": 850,
+      "reasons": [
+        "priority pattern: **/*TypeChecker*",
+        "priority pattern: **/*Test*",
+        "manual guided tour path",
+        "compiler-pipeline template: semantic checker",
+        "preferred text extension",
+        "test file"
+      ],
+      "category": "test"
+    },
+    {
+      "path": "src/test/wacc/CFGTests.scala",
+      "score": 765,
+      "reasons": [
+        "priority pattern: **/*CFG*",
+        "priority pattern: **/*Test*",
+        "manual guided tour path",
+        "preferred text extension",
+        "test file"
+      ],
+      "category": "test"
+    },
+    {
+      "path": "src/test/wacc/LexerTests.scala",
+      "score": 550,
+      "reasons": [
+        "priority pattern: **/*Test*",
+        "manual guided tour path",
+        "compiler-pipeline template: lexer",
+        "preferred text extension",
+        "test file"
+      ],
+      "category": "test"
+    },
+    {
+      "path": "src/test/wacc/ParserTests.scala",
+      "score": 550,
+      "reasons": [
+        "priority pattern: **/*Test*",
+        "manual guided tour path",
+        "compiler-pipeline template: parser",
+        "preferred text extension",
+        "test file"
+      ],
+      "category": "test"
+    }
+  ],
+  "skippedFiles": [
+    {
+      "path": "Makefile",
+      "reason": "config/lock/build artifact"
+    },
+    {
+      "path": "compile",
+      "reason": "config/lock/build artifact"
+    },
+    {
+      "path": "project.scala",
+      "reason": "config/lock/build artifact"
+    }
+  ],
+  "warnings": [],
+  "templateId": "compiler-pipeline",
+  "stageChecklist": [
+    "Lexer",
+    "Parser",
+    "AST",
+    "Semantic / Type Checker",
+    "IR or CFG",
+    "Codegen",
+    "Tests",
+    "Entry point (Main)"
+  ]
+}

@@ -1,21 +1,32 @@
-import type { ProjectTreeNode } from "@/data/projects/types";
+import type { ProjectAnalysisEntry, ProjectTreeNode } from "@/data/projects/types";
+import { getEntryBlurb } from "@/data/projects";
 
 interface FolderOverviewProps {
   path: string;
   items: ProjectTreeNode[];
+  selectedPath: string;
+  getEntry: (path: string) => ProjectAnalysisEntry;
+  onItemClick: (node: ProjectTreeNode) => void;
 }
 
-export function FolderOverview({ path, items }: FolderOverviewProps) {
+export function FolderOverview({
+  path,
+  items,
+  selectedPath,
+  getEntry,
+  onItemClick,
+}: FolderOverviewProps) {
   const folderCount = items.filter((c) => c.type === "folder").length;
   const fileCount = items.filter((c) => c.type === "file").length;
 
   return (
     <section className="flex h-full min-h-0 flex-col">
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border-soft bg-surface/40 px-4 py-2.5 md:px-5">
-        <span className="font-mono text-meta uppercase tracking-wider text-muted">
-          Folder Overview
-        </span>
-        <span className="font-mono text-meta text-muted">
+      <div className="analyzer-pane-header">
+        <div className="analyzer-pane-header__lead">
+          <span className="accent-bar mt-0.5" aria-hidden="true" />
+          <span className="analyzer-pane-header__label">Folder Overview</span>
+        </div>
+        <span className="analyzer-pane-header__meta max-w-[12rem] truncate md:max-w-xs">
           {path || "/"}
         </span>
       </div>
@@ -42,26 +53,43 @@ export function FolderOverview({ path, items }: FolderOverviewProps) {
 
         {items.length > 0 ? (
           <ul className="mt-4 divide-y divide-border-soft">
-            {items.map((child) => (
-              <li
-                key={child.path}
-                className="flex items-center justify-between gap-3 py-2.5"
-              >
-                <span className="font-mono text-body text-text">{child.name}</span>
-                <span className="shrink-0 border border-border-soft px-1.5 py-0.5 font-mono text-meta uppercase tracking-wider text-muted">
-                  {child.type}
-                </span>
-              </li>
-            ))}
+            {items.map((child) => {
+              const blurb = getEntryBlurb(getEntry(child.path));
+              const isSelected = selectedPath === child.path;
+
+              return (
+                <li key={child.path}>
+                  <button
+                    type="button"
+                    className={`folder-overview-item group w-full py-3 text-left ${
+                      isSelected ? "folder-overview-item--selected" : ""
+                    }`}
+                    onClick={() => onItemClick(child)}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0 flex-1">
+                        <span className="font-mono text-body text-text transition-colors group-hover:text-text">
+                          {child.name}
+                        </span>
+                        <p className="mt-1 font-[family-name:var(--font-body-sc)] text-meta leading-relaxed text-muted">
+                          {blurb ?? "暂无说明。"}
+                        </p>
+                      </div>
+                      <span className="shrink-0 border border-border-soft px-1.5 py-0.5 font-mono text-meta uppercase tracking-wider text-muted transition-colors group-hover:border-border-strong">
+                        {child.type}
+                      </span>
+                    </div>
+                  </button>
+                </li>
+              );
+            })}
           </ul>
         ) : (
-          <p className="mt-4 font-mono text-meta text-muted">
-            This folder is empty.
-          </p>
+          <p className="mt-4 font-mono text-meta text-muted">此文件夹为空。</p>
         )}
 
         <p className="mt-6 border-t border-border-soft pt-4 font-mono text-meta uppercase tracking-wider text-muted">
-          Select a file in the tree to view its code preview.
+          在下方或左侧文件树中选择一项以继续浏览。
         </p>
       </div>
     </section>

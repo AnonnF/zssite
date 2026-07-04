@@ -1,17 +1,24 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
-import type { ProjectAnalyzerData } from "@/data/projects/types";
+import type { ProjectAnalyzerData, ProjectTreeNode } from "@/data/projects/types";
 import {
+  collectAllFolderPaths,
   collectAncestorPaths,
+  collectExpandedPathsFor,
   findTreeNode,
   getAnalysisEntry,
   getDirectChildren,
+  resolveActiveTourStepIndex,
+  PROJECT_ARCHITECTURE_ENABLED,
 } from "@/data/projects";
 import { FileTree } from "./FileTree";
+import { FileTreeSearch } from "./FileTreeSearch";
 import { FileAnalysisPanel } from "./FileAnalysisPanel";
 import { CodePreview } from "./CodePreview";
 import { FolderOverview } from "./FolderOverview";
+import { ProjectArchitecture } from "./ProjectArchitecture";
+import { GuidedTour } from "./GuidedTour";
 
 interface ProjectAnalyzerProps {
   data: ProjectAnalyzerData;
@@ -22,13 +29,16 @@ export function ProjectAnalyzer({
   data,
   defaultPath = "src",
 }: ProjectAnalyzerProps) {
+  const resolvedDefaultPath = data.guidedTour?.[0]?.path ?? defaultPath;
+
   const initialExpanded = useMemo(
-    () => new Set(["", ...collectAncestorPaths(defaultPath)]),
-    [defaultPath]
+    () => new Set(collectExpandedPathsFor(resolvedDefaultPath)),
+    [resolvedDefaultPath]
   );
 
-  const [selectedPath, setSelectedPath] = useState(defaultPath);
+  const [selectedPath, setSelectedPath] = useState(resolvedDefaultPath);
   const [expandedPaths, setExpandedPaths] = useState<Set<string>>(initialExpanded);
+  const [activeTourStep, setActiveTourStep] = useState(0);
 
   const selectedNode = useMemo(
     () => findTreeNode(data.tree, selectedPath),
@@ -40,6 +50,11 @@ export function ProjectAnalyzer({
     [data, selectedPath, selectedNode]
   );
 
+  const getEntry = useCallback(
+    (path: string) => getAnalysisEntry(data, path, findTreeNode(data.tree, path)),
+    [data]
+  );
+
   const directChildren = useMemo(
     () => getDirectChildren(data.tree, selectedPath),
     [data.tree, selectedPath]
@@ -47,73 +62,171 @@ export function ProjectAnalyzer({
 
   const isFolder = entry.type === "folder";
 
-  const handleToggle = useCallback((path: string) => {
-    setExpandedPaths((prev) => {
-      const next = new Set(prev);
-      if (next.has(path)) {
-        next.delete(path);
-      } else {
-        next.add(path);
-      }
-      return next;
-    });
+  const handleExpandAll = useCallback(() => {
+    setExpandedPaths(new Set(collectAllFolderPaths(data.tree)));
+  }, [data.tree]);
+
+  const handleCollapseAll = useCallback(() => {
+    setExpandedPaths(new Set([""]));
   }, []);
 
-  const handleSelect = useCallback(
-    (path: string) => {
+  const selectPath = useCallback(
+    (path: string, options?: { toggleFolder?: boolean }) => {
       setSelectedPath(path);
+
+      if (data.guidedTour?.length) {
+        setActiveTourStep(resolveActiveTourStepIndex(data.guidedTour, path));
+      }
+
       setExpandedPaths((prev) => {
         const next = new Set(prev);
+
         for (const ancestor of collectAncestorPaths(path)) {
           next.add(ancestor);
         }
+
+        if (options?.toggleFolder) {
+          const node = findTreeNode(data.tree, path);
+          const hasChildren =
+            node?.type === "folder" && (node.children?.length ?? 0) > 0;
+
+          if (node?.type === "folder" && hasChildren) {
+            if (next.has(path)) {
+              next.delete(path);
+            } else {
+              next.add(path);
+            }
+          }
+        } else {
+          next.add(path);
+        }
+
         return next;
       });
     },
-    []
+    [data.tree, data.guidedTour]
+  );
+
+  const handleTourStepSelect = useCallback(
+    (index: number) => {
+      const step = data.guidedTour?.[index];
+      if (!step) return;
+      selectPath(step.path);
+    },
+    [data.guidedTour, selectPath]
+  );
+
+  const handleNodeClick = useCallback(
+    (node: ProjectTreeNode) => {
+      selectPath(node.path, { toggleFolder: true });
+    },
+    [selectPath]
+  );
+
+  const handleOverviewItemClick = useCallback(
+    (node: ProjectTreeNode) => {
+      selectPath(node.path);
+    },
+    [selectPath]
+  );
+
+  const handleSearchResultSelect = useCallback(
+    (path: string) => {
+      selectPath(path);
+    },
+    [selectPath]
   );
 
   return (
-    <div className="panel-card overflow-hidden">
-      <div className="border-b border-border-soft px-4 py-3 md:px-5">
+    <div id="project-analyzer" className="panel-card scroll-mt-24 overflow-hidden">
+      <div className="analyzer-card-header border-b border-border-soft px-4 py-2 md:px-5">
         <p className="font-mono text-meta uppercase tracking-wider text-muted">
           Project Analyzer
         </p>
-        <p className="mt-1 font-[family-name:var(--font-body-sc)] text-body text-muted">
-          {data.description}
-        </p>
+        {data.description ? (
+          <p className="analyzer-card-header__desc mt-0.5 font-[family-name:var(--font-body-sc)] text-muted">
+            {data.description}
+          </p>
+        ) : null}
       </div>
 
-      <div className="flex min-h-[32rem] flex-col lg:min-h-[36rem] lg:flex-row">
-        <aside className="flex max-h-64 flex-col border-b border-border-soft bg-surface/30 lg:max-h-none lg:w-[35%] lg:border-b-0 lg:border-r">
-          <div className="border-b border-border-soft px-4 py-2.5">
-            <span className="font-mono text-meta uppercase tracking-wider text-muted">
-              File Tree
-            </span>
+      {data.guidedTour && data.guidedTour.length > 0 && (
+        <GuidedTour
+          steps={data.guidedTour}
+          activeStepIndex={activeTourStep}
+          onStepSelect={handleTourStepSelect}
+        />
+      )}
+
+      <div className="analyzer-workspace min-h-[32rem] lg:min-h-[36rem]">
+        <aside className="analyzer-pane analyzer-pane--tree flex max-h-64 flex-col lg:max-h-none lg:w-[35%] lg:min-h-0">
+          <div className="analyzer-pane-header">
+            <div className="analyzer-pane-header__lead">
+              <span className="accent-bar mt-0.5" aria-hidden="true" />
+              <span className="analyzer-pane-header__label">File Tree</span>
+            </div>
+            <div className="tree-header-actions">
+              <button
+                type="button"
+                className="tree-header-action"
+                aria-label="Expand all folders"
+                onClick={handleExpandAll}
+              >
+                Expand
+              </button>
+              <button
+                type="button"
+                className="tree-header-action"
+                aria-label="Collapse all folders"
+                onClick={handleCollapseAll}
+              >
+                Collapse
+              </button>
+            </div>
           </div>
+          <FileTreeSearch
+            data={data}
+            selectedPath={selectedPath}
+            onResultSelect={handleSearchResultSelect}
+          />
           <FileTree
             tree={data.tree}
             selectedPath={selectedPath}
             expandedPaths={expandedPaths}
-            onSelect={handleSelect}
-            onToggle={handleToggle}
+            onNodeClick={handleNodeClick}
           />
         </aside>
 
-        <div className="flex min-h-0 flex-1 flex-col lg:w-[65%]">
-          <div className="min-h-[12rem] flex-1 border-b border-border-soft lg:min-h-0 lg:max-h-[45%]">
-            <FileAnalysisPanel entry={entry} />
+        <div className="analyzer-pane-stack min-h-0 flex-1 lg:w-[65%]">
+          <div className="analyzer-pane analyzer-pane--analysis">
+            <FileAnalysisPanel entry={entry} onPathSelect={selectPath} />
           </div>
 
-          <div className="min-h-[14rem] flex-1 lg:min-h-0">
+          <div className="analyzer-pane analyzer-pane--detail">
             {isFolder ? (
-              <FolderOverview path={selectedPath} items={directChildren} />
+              <FolderOverview
+                path={selectedPath}
+                items={directChildren}
+                selectedPath={selectedPath}
+                getEntry={getEntry}
+                onItemClick={handleOverviewItemClick}
+              />
             ) : (
               <CodePreview entry={entry} />
             )}
           </div>
         </div>
       </div>
+
+      {PROJECT_ARCHITECTURE_ENABLED &&
+        data.pipeline &&
+        data.pipeline.length > 0 && (
+        <ProjectArchitecture
+          pipeline={data.pipeline}
+          selectedPath={selectedPath}
+          onNodeClick={selectPath}
+        />
+      )}
     </div>
   );
 }
