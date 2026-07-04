@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import type { ProjectAnalysisEntry } from "@/data/projects/types";
 import { hasStructuredAnalysis } from "@/data/projects";
+import { ReviewBadge } from "./ReviewBadge";
 
 interface FileAnalysisPanelProps {
   entry: ProjectAnalysisEntry;
@@ -191,7 +192,6 @@ function FileStructuredAnalysis({
 
 export function FileAnalysisPanel({ entry, onPathSelect }: FileAnalysisPanelProps) {
   const structured = hasStructuredAnalysis(entry);
-  const reviewStatus = entry.analysis?.reviewStatus;
 
   return (
     <section className="file-analysis-panel flex min-h-0 flex-col">
@@ -217,11 +217,7 @@ export function FileAnalysisPanel({ entry, onPathSelect }: FileAnalysisPanelProp
               Fixed architecture note
             </span>
           )}
-          {reviewStatus && (
-            <span className="border border-border-soft px-2 py-0.5 font-mono text-meta uppercase tracking-wider text-muted">
-              {reviewStatus}
-            </span>
-          )}
+          <ReviewBadge review={entry.review} />
         </div>
       </div>
 

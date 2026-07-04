@@ -1,18 +1,47 @@
 import type {
-  ProjectCodeSnippet,
   ProjectGuidedTourStep,
   ProjectPipelineNode,
   ProjectSkillHighlight,
   ProjectStructuredAnalysis,
   ProjectTechnicalDecision,
+  ProjectTemplateId,
+  ReviewMeta,
 } from "./types";
+
+export type SnippetSuggestion = {
+  id: string;
+  filePath: string;
+  title: string;
+  startLine: number;
+  endLine: number;
+  reason?: string;
+  confidence?: "high" | "low";
+  annotations?: Array<{ line: number; note: string }>;
+};
+
+export type SourceBackedSnippet = {
+  id: string;
+  title: string;
+  filePath: string;
+  startLine: number;
+  endLine: number;
+  reason?: string;
+  code: string;
+  annotations?: Array<{ line: number; note: string }>;
+  validationStatus: "valid" | "invalid";
+  validationReason?: string;
+  confidence?: "high" | "low";
+  review?: ReviewMeta;
+};
 
 export type AiDraftEntry = {
   path: string;
   type: "file" | "folder";
   analysis?: ProjectStructuredAnalysis;
-  snippets?: ProjectCodeSnippet[];
+  snippetSuggestions?: SnippetSuggestion[];
+  snippets?: SourceBackedSnippet[];
   summary?: string;
+  review?: ReviewMeta;
 };
 
 export type AiDraftProjectAnalysis = {
@@ -21,6 +50,29 @@ export type AiDraftProjectAnalysis = {
   suggestedGuidedTour?: ProjectGuidedTourStep[];
   technicalDecisions?: ProjectTechnicalDecision[];
   skills?: ProjectSkillHighlight[];
+};
+
+export type SelectionReportItem = {
+  path: string;
+  score: number;
+  reasons: string[];
+  category: "file" | "folder" | "test";
+};
+
+export type SelectionReport = {
+  selectedFiles: SelectionReportItem[];
+  selectedFolders: SelectionReportItem[];
+  selectedTests: SelectionReportItem[];
+  skippedFiles: Array<{ path: string; reason: string }>;
+  warnings: string[];
+  templateId?: ProjectTemplateId;
+  stageChecklist: string[];
+};
+
+export type ValidationReport = {
+  validSnippets: number;
+  invalidSnippets: number;
+  warnings: string[];
 };
 
 export type AiDraft = {
@@ -33,4 +85,7 @@ export type AiDraft = {
   projectAnalysis: AiDraftProjectAnalysis;
   entries: Record<string, AiDraftEntry>;
   warnings: string[];
+  selectionReport: SelectionReport;
+  validationReport: ValidationReport;
+  review?: ReviewMeta;
 };

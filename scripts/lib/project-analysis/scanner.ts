@@ -6,6 +6,7 @@ import type {
   ProjectAnalyzerGeneratedMetadata,
   ProjectTreeNode,
 } from "../../../src/data/projects/types.js";
+import { GENERATED_REVIEW } from "../../../src/data/projects/reviewMeta.js";
 import type { ScannerConfig } from "./types.js";
 import {
   getFileExtension,
@@ -137,6 +138,7 @@ function buildFileEntry(
     language,
     sizeBytes,
     generated: true,
+    review: GENERATED_REVIEW,
   };
 
   if (tooLarge) {
@@ -155,6 +157,7 @@ function buildFolderEntry(relativePath: string, name: string): ProjectAnalysisEn
     title: name,
     summary: folderSummary(relativePath),
     generated: true,
+    review: GENERATED_REVIEW,
   };
 }
 

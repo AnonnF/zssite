@@ -30,9 +30,21 @@ export type {
   ProjectTemplate,
   ProjectTemplateId,
   ProjectTreeNode,
+  ReviewMeta,
+  ReviewSource,
+  ReviewStatus,
 } from "./types";
 export { getProjectTemplate, projectTemplates } from "./templates";
-export { applyTemplateDefaults, applyTemplateEntryHints, resolveProjectAnalyzerData } from "./applyProjectTemplate";
+export {
+  applyTemplateDefaults,
+  applyTemplateEntryHints,
+  resolveProjectAnalyzerData,
+} from "./applyProjectTemplate";
+export {
+  getReviewBadgeClass,
+  getReviewLabel,
+  getReviewTitle,
+} from "./reviewMeta";
 export type { AiDraft, AiDraftEntry, AiDraftProjectAnalysis } from "./ai-draft-types";
 
 function registerAnalyzer(manual: ProjectManualAnalysisData): ProjectAnalyzerData {

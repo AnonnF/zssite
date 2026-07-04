@@ -6,8 +6,13 @@ import type {
   ProjectStructuredAnalysis,
   ProjectTemplate,
 } from "./types";
-import { mergeProjectAnalysis } from "./mergeProjectAnalysis";
+import {
+  applyTemplateReviewToEntry,
+  mergeProjectAnalysis,
+  stripTemplateId,
+} from "./mergeProjectAnalysis";
 import { getProjectTemplate } from "./templates";
+import { TEMPLATE_REVIEW, withTemplateReview } from "./reviewMeta";
 
 function hasAnalysisContent(analysis: ProjectStructuredAnalysis): boolean {
   return Object.entries(analysis).some(([key, value]) => {
@@ -21,34 +26,33 @@ function hasStructuredAnalysis(entry: ProjectAnalysisEntry): boolean {
   return Boolean(entry.analysis && hasAnalysisContent(entry.analysis));
 }
 
-function stripTemplateId(manual: ProjectManualAnalysisData): ProjectAnalyzerData {
-  const { templateId: _templateId, ...data } = manual;
-  return data;
-}
-
 export function applyTemplateDefaults(
   manual: ProjectManualAnalysisData,
   template: ProjectTemplate
 ): ProjectAnalyzerData {
   const base = stripTemplateId(manual);
 
-  const pipeline =
-    (base.pipeline?.length ?? 0) > 0 ? base.pipeline : template.defaultPipeline;
+  const pipelineFromTemplate = (base.pipeline?.length ?? 0) === 0;
+  const guidedTourFromTemplate = (base.guidedTour?.length ?? 0) === 0;
+  const decisionsFromTemplate =
+    (base.narrative?.technicalDecisions?.length ?? 0) === 0;
+  const skillsFromTemplate = (base.narrative?.skills?.length ?? 0) === 0;
 
-  const guidedTour =
-    (base.guidedTour?.length ?? 0) > 0
-      ? base.guidedTour
-      : template.defaultGuidedTour;
+  const pipeline = pipelineFromTemplate
+    ? template.defaultPipeline
+    : base.pipeline;
 
-  const technicalDecisions =
-    (base.narrative?.technicalDecisions?.length ?? 0) > 0
-      ? base.narrative!.technicalDecisions
-      : template.suggestedTechnicalDecisions;
+  const guidedTour = guidedTourFromTemplate
+    ? template.defaultGuidedTour
+    : base.guidedTour;
 
-  const skills =
-    (base.narrative?.skills?.length ?? 0) > 0
-      ? base.narrative!.skills
-      : template.suggestedSkills;
+  const technicalDecisions = decisionsFromTemplate
+    ? template.suggestedTechnicalDecisions.map(withTemplateReview)
+    : base.narrative!.technicalDecisions;
+
+  const skills = skillsFromTemplate
+    ? template.suggestedSkills.map(withTemplateReview)
+    : base.narrative!.skills;
 
   const narrative =
     (technicalDecisions?.length ?? 0) > 0 || (skills?.length ?? 0) > 0
@@ -60,6 +64,7 @@ export function applyTemplateDefaults(
     pipeline,
     guidedTour,
     narrative,
+    review: base.review,
   };
 }
 
@@ -123,10 +128,11 @@ export function applyTemplateEntryHints(
       continue;
     }
 
-    entries[path] = {
+    entries[path] = applyTemplateReviewToEntry({
       ...entry,
       summary: buildTemplateEntrySummary(entry, template, hint),
-    };
+      review: entry.review ?? TEMPLATE_REVIEW,
+    });
   }
 
   return { ...data, entries };

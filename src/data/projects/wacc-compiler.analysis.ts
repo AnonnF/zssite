@@ -1,6 +1,82 @@
-import type { ProjectManualAnalysisData } from "./types";
+import type { ProjectManualAnalysisData, ReviewMeta } from "./types";
 
-export const waccCompilerAnalysis: ProjectManualAnalysisData = {
+const PROJECT_REVIEW: ReviewMeta = {
+  status: "human-reviewed",
+  source: "manual",
+  reviewedAt: "2026-07-04",
+  note: "Manual production data curated after AI draft comparison.",
+};
+
+const HUMAN_REVIEWED: ReviewMeta = {
+  status: "human-reviewed",
+  source: "manual",
+  reviewedAt: "2026-07-04",
+};
+
+const NEEDS_REVIEW: ReviewMeta = {
+  status: "needs-review",
+  source: "manual",
+  note: "Summary only; structured analysis pending.",
+};
+
+function resolveEntryReview(path: string, entry: ProjectManualAnalysisData["entries"][string]): ReviewMeta {
+  if (entry.review) return entry.review;
+
+  if (
+    path === "README.md" ||
+    path === "src/test/wacc/ParserTests.scala" ||
+    path === "src/test/wacc/TypeCheckerTests.scala"
+  ) {
+    return NEEDS_REVIEW;
+  }
+
+  if (entry.fixed || entry.analysis || (entry.snippets?.length ?? 0) > 0) {
+    return HUMAN_REVIEWED;
+  }
+
+  return {
+    status: "manual",
+    source: "manual",
+  };
+}
+
+function enrichManualReview(data: ProjectManualAnalysisData): ProjectManualAnalysisData {
+  const entries = Object.fromEntries(
+    Object.entries(data.entries).map(([path, entry]) => [
+      path,
+      {
+        ...entry,
+        review: resolveEntryReview(path, entry),
+        snippets: entry.snippets?.map((snippet) => ({
+          ...snippet,
+          review: snippet.review ?? HUMAN_REVIEWED,
+        })),
+      },
+    ])
+  );
+
+  const narrative = data.narrative
+    ? {
+        technicalDecisions: data.narrative.technicalDecisions?.map((item) => ({
+          ...item,
+          review: item.review ?? HUMAN_REVIEWED,
+        })),
+        skills: data.narrative.skills?.map((item) => ({
+          ...item,
+          review: item.review ?? HUMAN_REVIEWED,
+        })),
+      }
+    : undefined;
+
+  return {
+    ...data,
+    review: data.review ?? PROJECT_REVIEW,
+    entries,
+    narrative,
+  };
+}
+
+const waccCompilerAnalysisBase: ProjectManualAnalysisData = {
   projectId: "wacc-compiler",
   templateId: "compiler-pipeline",
   title: "WACC Compiler",
@@ -644,3 +720,5 @@ export const waccCompilerAnalysis: ProjectManualAnalysisData = {
     ],
   },
 };
+
+export const waccCompilerAnalysis = enrichManualReview(waccCompilerAnalysisBase);

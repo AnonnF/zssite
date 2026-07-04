@@ -10,6 +10,29 @@ export type ProjectCodeSnippetAnnotation = {
   note: string;
 };
 
+export type ReviewStatus =
+  | "generated"
+  | "template"
+  | "ai-draft"
+  | "manual"
+  | "human-reviewed"
+  | "needs-review";
+
+export type ReviewSource =
+  | "generated"
+  | "template"
+  | "ai-draft"
+  | "manual"
+  | "mixed";
+
+export type ReviewMeta = {
+  status: ReviewStatus;
+  source?: ReviewSource;
+  reviewedAt?: string;
+  reviewer?: string;
+  note?: string;
+};
+
 export type ProjectCodeSnippet = {
   id: string;
   title: string;
@@ -18,6 +41,7 @@ export type ProjectCodeSnippet = {
   reason?: string;
   code: string;
   annotations?: ProjectCodeSnippetAnnotation[];
+  review?: ReviewMeta;
 };
 
 export type ProjectStructuredAnalysis = {
@@ -47,6 +71,7 @@ export type ProjectAnalysisEntry = {
   generated?: boolean;
   sizeBytes?: number;
   tooLarge?: boolean;
+  review?: ReviewMeta;
 };
 
 export type ProjectPipelineNode = {
@@ -72,11 +97,13 @@ export type ProjectTechnicalDecision = {
   decision: string;
   rationale: string;
   impact: string;
+  review?: ReviewMeta;
 };
 
 export type ProjectSkillHighlight = {
   title: string;
   description: string;
+  review?: ReviewMeta;
 };
 
 export type ProjectNarrative = {
@@ -93,6 +120,7 @@ export type ProjectAnalyzerData = {
   pipeline?: ProjectPipelineNode[];
   guidedTour?: ProjectGuidedTourStep[];
   narrative?: ProjectNarrative;
+  review?: ReviewMeta;
 };
 
 export type ProjectAnalyzerGeneratedMetadata = {

@@ -116,6 +116,7 @@ export function processAiDraftResponse(
         : undefined,
       snippetSuggestions: snippetSuggestions.length ? snippetSuggestions : undefined,
       snippets: snippets.length ? snippets : undefined,
+      review: { status: "ai-draft", source: "ai-draft" },
     };
 
     entries[path] = entry;

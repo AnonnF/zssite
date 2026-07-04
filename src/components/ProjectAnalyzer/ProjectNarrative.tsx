@@ -1,4 +1,5 @@
-import type { ProjectNarrative } from "@/data/projects/types";
+import type { ProjectNarrative, ProjectSkillHighlight, ProjectTechnicalDecision } from "@/data/projects/types";
+import { ReviewBadge } from "./ReviewBadge";
 
 interface ProjectNarrativeProps {
   narrative: ProjectNarrative;
@@ -10,17 +11,16 @@ function DecisionItem({
   decision,
   rationale,
   impact,
-}: {
-  title: string;
-  decision: string;
-  rationale: string;
-  impact: string;
-}) {
+  review,
+}: ProjectTechnicalDecision) {
   return (
     <article className="narrative-item py-5 first:pt-0 last:pb-0">
-      <h4 className="font-display text-body font-bold leading-snug text-text">
-        {title}
-      </h4>
+      <div className="narrative-item__header">
+        <h4 className="font-display text-body font-bold leading-snug text-text">
+          {title}
+        </h4>
+        <ReviewBadge review={review} />
+      </div>
       <dl className="mt-3 space-y-3">
         <div>
           <dt className="font-mono text-meta uppercase tracking-wider text-muted">
@@ -51,12 +51,15 @@ function DecisionItem({
   );
 }
 
-function SkillItem({ title, description }: { title: string; description: string }) {
+function SkillItem({ title, description, review }: ProjectSkillHighlight) {
   return (
     <article className="narrative-item py-5 first:pt-0 last:pb-0">
-      <h4 className="font-display text-body font-bold leading-snug text-text">
-        {title}
-      </h4>
+      <div className="narrative-item__header">
+        <h4 className="font-display text-body font-bold leading-snug text-text">
+          {title}
+        </h4>
+        <ReviewBadge review={review} />
+      </div>
       <p className="mt-2 font-[family-name:var(--font-body-sc)] text-body leading-relaxed text-muted">
         {description}
       </p>

@@ -7,6 +7,7 @@ import type {
 } from "@/data/projects/types";
 import { HighlightedCodeBlock } from "./HighlightedCodeBlock";
 import { resolveHighlightLanguage } from "./resolveHighlightLanguage";
+import { ReviewBadge } from "./ReviewBadge";
 
 interface CodePreviewProps {
   entry: ProjectAnalysisEntry;
@@ -45,7 +46,10 @@ function SnippetCard({
   return (
     <article className="snippet-card">
       <div className="snippet-card__header">
-        <h4 className="snippet-card__title">{snippet.title}</h4>
+        <div className="snippet-card__header-main">
+          <h4 className="snippet-card__title">{snippet.title}</h4>
+          <ReviewBadge review={snippet.review} className="snippet-card__review" />
+        </div>
         {lineRange && (
           <span className="snippet-card__lines font-mono text-meta uppercase tracking-wider">
             {lineRange}
