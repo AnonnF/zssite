@@ -1,0 +1,13 @@
+{
+  "priorityPaths": [
+    "src/main/wacc/Main.scala",
+    "src/main/wacc/CFG.scala"
+  ],
+  "priorityPatterns": [
+    "**/*AST*",
+    "**/*CFG*",
+    "**/*TypeChecker*",
+    "**/*CodeGenerator*",
+    "**/*Test*"
+  ]
+}

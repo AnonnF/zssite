@@ -1,7 +1,8 @@
-import type { ProjectAnalyzerData } from "./types";
+import type { ProjectManualAnalysisData } from "./types";
 
-export const waccCompilerAnalysis: ProjectAnalyzerData = {
+export const waccCompilerAnalysis: ProjectManualAnalysisData = {
   projectId: "wacc-compiler",
+  templateId: "compiler-pipeline",
   title: "WACC Compiler",
   description: "词法 → 语法 → 语义 → CFG → ARM 代码生成的完整 WACC 编译器管线。",
   tree: [],

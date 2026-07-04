@@ -2,6 +2,7 @@ import type {
   ProjectAnalyzerData,
   ProjectAnalysisEntry,
   ProjectGuidedTourStep,
+  ProjectManualAnalysisData,
   ProjectNarrative,
   ProjectPipelineNode,
   ProjectStructuredAnalysis,
@@ -9,27 +10,34 @@ import type {
 } from "./types";
 import { waccCompilerAnalysis } from "./wacc-compiler.analysis";
 import { generatedRegistry } from "./generated/registry";
-import { mergeProjectAnalysis } from "./mergeProjectAnalysis";
+import { resolveProjectAnalyzerData } from "./applyProjectTemplate";
 
 export type {
   ProjectAnalyzerData,
   ProjectAnalysisEntry,
+  ProjectAnalysisChecklist,
   ProjectAnalyzerGeneratedData,
   ProjectAnalyzerGeneratedMetadata,
   ProjectCodeSnippet,
   ProjectCodeSnippetAnnotation,
   ProjectGuidedTourStep,
+  ProjectManualAnalysisData,
   ProjectNarrative,
   ProjectPipelineNode,
   ProjectSkillHighlight,
   ProjectStructuredAnalysis,
   ProjectTechnicalDecision,
+  ProjectTemplate,
+  ProjectTemplateId,
   ProjectTreeNode,
 } from "./types";
+export { getProjectTemplate, projectTemplates } from "./templates";
+export { applyTemplateDefaults, applyTemplateEntryHints, resolveProjectAnalyzerData } from "./applyProjectTemplate";
+export type { AiDraft, AiDraftEntry, AiDraftProjectAnalysis } from "./ai-draft-types";
 
-function registerAnalyzer(manual: ProjectAnalyzerData): ProjectAnalyzerData {
+function registerAnalyzer(manual: ProjectManualAnalysisData): ProjectAnalyzerData {
   const generated = generatedRegistry[manual.projectId];
-  return generated ? mergeProjectAnalysis(generated, manual) : manual;
+  return resolveProjectAnalyzerData(manual, generated);
 }
 
 const analyzerRegistry: Record<string, ProjectAnalyzerData> = {

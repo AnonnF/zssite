@@ -112,3 +112,31 @@ export type ProjectAnalyzerGeneratedData = {
   tree: ProjectTreeNode[];
   entries: Record<string, ProjectAnalysisEntry>;
 };
+
+export type ProjectTemplateId =
+  | "compiler-pipeline"
+  | "systems-project"
+  | "fullstack-web"
+  | "ai-pipeline";
+
+export type ProjectAnalysisChecklist = {
+  folder: string[];
+  file: string[];
+};
+
+export type ProjectTemplate = {
+  templateId: ProjectTemplateId;
+  label: string;
+  description: string;
+  defaultPipeline: ProjectPipelineNode[];
+  defaultGuidedTour: ProjectGuidedTourStep[];
+  folderRoleHints: Record<string, string>;
+  analysisChecklist: ProjectAnalysisChecklist;
+  suggestedSkills: ProjectSkillHighlight[];
+  suggestedTechnicalDecisions: ProjectTechnicalDecision[];
+};
+
+/** Manual analysis files only; templateId is stripped before UI consumption. */
+export type ProjectManualAnalysisData = ProjectAnalyzerData & {
+  templateId?: ProjectTemplateId;
+};
