@@ -1,0 +1,15 @@
+{
+  "projectId": "wacc-compiler",
+  "title": "WACC Compiler",
+  "include": [
+    "README.md",
+    "project.scala",
+    "compile",
+    "Makefile",
+    "src/main/wacc",
+    "src/test/wacc"
+  ],
+  "exclude": ["*.target", "scripts"],
+  "maxFileSizeKb": 100,
+  "readCode": true
+}

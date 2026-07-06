@@ -1,0 +1,292 @@
+{
+  "projectId": "wacc-compiler",
+  "generatedAt": "2025-03-31T00:00:00Z",
+  "source": "ai-draft",
+  "provider": "deepseek",
+  "model": "deepseek-chat",
+  "confidence": "draft",
+  "projectAnalysis": {
+    "overview": "WACC 编译器项目，使用 Scala 3 实现，将 WACC 源代码经过词法分析、语法分析、语义检查、控制流图生成，最终转化为 ARM 32 位汇编代码。模块化程度高，支持多线程、消息传递等高级语言特性。",
+    "suggestedPipeline": [
+      { "id": "source", "label": "Source Code", "path": "README.md", "language": "markdown", "role": "项目说明与仓库结构" },
+      { "id": "lexer", "label": "Lexer", "path": "src/main/wacc/lexer.scala", "language": "scala", "role": "词法分析：将源文本转换为 Token 流" },
+      { "id": "parser", "label": "Parser", "path": "src/main/wacc/parser.scala", "language": "scala", "role": "语法分析：根据 Token 构建抽象语法树" },
+      { "id": "ast", "label": "AST", "path": "src/main/wacc/ast.scala", "language": "scala", "role": "抽象语法树定义，供后续阶段共享" },
+      { "id": "semantic", "label": "Type Checker", "path": "src/main/wacc/typeChecker.scala", "language": "scala", "role": "语义检查：类型检查、作用域与程序规则验证" },
+      { "id": "cfg", "label": "CFG Generation", "path": "src/main/wacc/CFG.scala", "language": "scala", "role": "生成控制流图，用于优化与代码生成" },
+      { "id": "codegen", "label": "ARM Code Generator", "path": "src/main/wacc/backend/arm/ARMCodeGenerator.scala", "language": "scala", "role": "将 CFG 降低为 ARM 汇编指令序列" }
+    ],
+    "suggestedGuidedTour": [
+      { "id": "overview", "label": "Overview", "path": "README.md", "title": "项目概述", "description": "项目说明、构建方式与 WACC 实验背景" },
+      { "id": "lexer", "label": "Lexer", "path": "src/main/wacc/lexer.scala", "title": "词法分析", "description": "基于 Parsley 的词法分析器，定义关键字、运算符、字面量 Token" },
+      { "id": "parser", "label": "Parser", "path": "src/main/wacc/parser.scala", "title": "语法分析", "description": "Parsley 组合子解析器，构建 Program AST" },
+      { "id": "ast", "label": "AST", "path": "src/main/wacc/ast.scala", "title": "抽象语法树", "description": "WACC 语言 AST 定义，包括类型、表达式、语句、函数" },
+      { "id": "semantic", "label": "Type Checker", "path": "src/main/wacc/typeChecker.scala", "title": "语义检查", "description": "遍历 AST 进行类型和作用域检查，支持多线程特性" },
+      { "id": "cfg", "label": "CFG", "path": "src/main/wacc/CFG.scala", "title": "控制流图", "description": "将 AST 转化为 CFG，便于优化与代码生成" },
+      { "id": "codegen", "label": "ARM Code Generator", "path": "src/main/wacc/backend/arm/ARMCodeGenerator.scala", "title": "ARM 代码生成", "description": "将 CFG 转化为 ARM 汇编，包括寄存器分配、栈帧管理" },
+      { "id": "liveness", "label": "Liveness Analysis", "path": "src/main/wacc/backend/arm/Liveness.scala", "title": "活跃性分析", "description": "数据流分析计算变量活跃性，辅助寄存器分配" },
+      { "id": "regalloc", "label": "Register Allocation", "path": "src/main/wacc/backend/arm/RegAlloc.scala", "title": "寄存器分配（图染色）", "description": "基于图染色的寄存器分配，支持溢出" },
+      { "id": "tests", "label": "Tests", "path": "src/test/wacc", "title": "测试体系", "description": "ScalaTest 测试，覆盖各阶段与集成测试" }
+    ],
+    "technicalDecisions": [
+      {
+        "title": "使用 Parsley 解析器组合子",
+        "decision": "采用 Parsley 库实现词法分析与语法分析，利用其组合子 API 和错误报告机制。",
+        "rationale": "Parsley 是 Scala 3 原生支持的解析器组合子库，提供良好错误信息与位置追踪，适合教学编译器。",
+        "impact": "提高了解析器的可读性与可维护性，但组合子性能略低于手写递归下降。"
+      },
+      {
+        "title": "使用 Cats Chain 表示指令序列",
+        "decision": "在 ARM 代码生成中使用 cats.data.Chain 存储指令，支持高效拼接。",
+        "rationale": "Chain 提供常量时间前后追加，适合编译器增量构建指令序列。",
+        "impact": "相比 List，减少了拼接时的复制开销。"
+      },
+      {
+        "title": "图染色寄存器分配",
+        "decision": "实现基于图染色的寄存器分配算法（RegAlloc.scala），同时提供朴素分配（RegAllocNaive.scala）作为备选。",
+        "rationale": "图染色分配能更有效地利用有限寄存器，减少栈溢出。朴素分配实现简单，用于调试。",
+        "impact": "图染色分配提升了代码质量，但算法复杂度较高。"
+      },
+      {
+        "title": "支持并发与消息传递",
+        "decision": "AST 和类型检查器支持 fork、par、send、recv 等并发原语。",
+        "rationale": "WACC 语言扩展包含多线程与消息传递，编译器需完整支持。",
+        "impact": "增加了编译器复杂度，但覆盖了教学语言的重要特性。"
+      }
+    ],
+    "skills": [
+      { "title": "编译器构建", "description": "完整经历词法分析、语法分析、语义分析、中间表示、代码生成各阶段" },
+      { "title": "函数式编程", "description": "使用 Scala 3 特性，如 ADT、模式匹配、不可变集合、高阶函数" },
+      { "title": "ARM 汇编与后端", "description": "生成 ARM 32 位指令，管理栈帧、寄存器分配、运行时支持" },
+      { "title": "数据流分析", "description": "活跃性分析实现，用于优化和寄存器分配" },
+      { "title": "测试驱动开发", "description": "ScalaTest 编写单元测试与集成测试，覆盖各模块" }
+    ]
+  },
+  "entries": {
+    "src": {
+      "path": "src",
+      "type": "folder",
+      "summary": "项目源码根目录，包含编译器主代码与测试代码。",
+      "analysis": {
+        "purpose": "组织所有源代码文件。",
+        "responsibilities": [],
+        "input": "",
+        "output": "",
+        "role": "源码根目录",
+        "keyLogic": [],
+        "relatedModules": [],
+        "relatedPaths": ["src/main", "src/test"],
+        "usedBy": [],
+        "notes": []
+      }
+    },
+    "src/main/wacc": {
+      "path": "src/main/wacc",
+      "type": "folder",
+      "summary": "编译器核心源码目录，所有编译阶段模块均在此包下。",
+      "analysis": {
+        "purpose": "存放编译器前端与后端的主要 Scala 源文件。",
+        "responsibilities": ["词法分析", "语法分析", "AST 定义", "语义检查", "控制流图", "代码生成"],
+        "input": "",
+        "output": "",
+        "role": "核心源码包",
+        "keyLogic": [],
+        "relatedModules": [],
+        "relatedPaths": ["src/main/wacc/lexer.scala", "src/main/wacc/parser.scala", "src/main/wacc/ast.scala", "src/main/wacc/typeChecker.scala", "src/main/wacc/CFG.scala", "src/main/wacc/backend"],
+        "usedBy": [],
+        "notes": []
+      }
+    },
+    "src/main": {
+      "path": "src/main",
+      "type": "folder",
+      "summary": "主源码目录，包含 wacc 包与测试资源。",
+      "analysis": {
+        "purpose": "标准 Maven/SBT 项目结构下的主源码目录。",
+        "responsibilities": [],
+        "input": "",
+        "output": "",
+        "role": "主代码目录",
+        "keyLogic": [],
+        "relatedModules": [],
+        "relatedPaths": ["src/main/wacc"],
+        "usedBy": [],
+        "notes": []
+      }
+    },
+    "src/main/wacc/ast.scala": {
+      "path": "src/main/wacc/ast.scala",
+      "type": "file",
+      "summary": "WACC 抽象语法树（AST）的 ADT 定义，涵盖类型、表达式、语句、函数及 Program 根节点。",
+      "analysis": {
+        "purpose": "为编译器的后续阶段（语义分析、代码生成）提供统一的中间表示。",
+        "responsibilities": ["定义所有 AST 节点类型", "提供与解析器的桥接（ParserBridge）", "支持类型推断标记（HasInferredType）"],
+        "input": "Parsley 解析器产生的 AST 节点",
+        "output": "供类型检查器和代码生成器使用的 AST 树",
+        "role": "中间表示核心",
+        "keyLogic": ["使用 sealed trait 和 case class 定义代数数据类型", "包含 RenamedVar 等用于重命名阶段的特殊节点", "支持并发和消息传递相关节点（Fork, Par, Send, Recv）"],
+        "relatedModules": ["parser.scala", "typeChecker.scala", "CFG.scala", "backend/arm/ARMCodeGenerator.scala"],
+        "relatedPaths": ["src/main/wacc/parser.scala", "src/main/wacc/typeChecker.scala", "src/main/wacc/CFG.scala", "src/main/wacc/backend/arm/ARMCodeGenerator.scala"],
+        "usedBy": ["parser.scala", "typeChecker.scala", "CFG.scala", "backend/arm/ARMCodeGenerator.scala"],
+        "notes": ["AST 节点通过 Bridge 模式与 Parsley 集成，自动提取源代码位置信息。"]
+      },
+      "snippets": [
+        {
+          "id": "ast-types",
+          "title": "基础类型和表达式定义",
+          "startLine": 11,
+          "endLine": 35,
+          "reason": "展示 AST 的核心类型体系，包括 IntType、BoolType、CharType、StringType、ArrayType、PairType 等。",
+          "code": "sealed trait Type\n\ncase object IntType extends Type\ncase object BoolType extends Type\ncase object CharType extends Type\ncase object StringType extends Type\n\nfinal case class ArrayType(elemType: Type) extends Type\nfinal case class PairType(fstType: PairElemType, sndType: PairElemType) extends Type",
+          "annotations": []
+        }
+      ]
+    },
+    "src/main/wacc/lexer.scala": {
+      "path": "src/main/wacc/lexer.scala",
+      "type": "file",
+      "summary": "词法分析模块，基于 Parsley 词法生成器定义 WACC 关键字、标识符、字面量与运算符的 Token 规则。",
+      "analysis": {
+        "purpose": "将源字符序列转换为 Token 流，供语法分析器使用。",
+        "responsibilities": ["定义语言关键字（如 begin, end, if, while）", "定义操作符与分隔符", "处理整数、字符、字符串等字面量", "组合成完整的 Token 解析器"],
+        "input": "WACC 源文件字符串",
+        "output": "Token 流（内部类型）",
+        "role": "编译前端第一阶段",
+        "keyLogic": ["利用 Parsley 的 Lexer 框架", "支持嵌套注释与位置追踪"],
+        "relatedModules": ["parser.scala"],
+        "relatedPaths": ["src/main/wacc/parser.scala"],
+        "usedBy": ["parser.scala"],
+        "notes": ["代码未提供完整内容，但根据项目结构推断为词法分析入口。"]
+      }
+    },
+    "src/main/wacc/parser.scala": {
+      "path": "src/main/wacc/parser.scala",
+      "type": "file",
+      "summary": "语法分析主文件，使用 Parsley 组合子解析 WACC 程序、函数、语句与表达式，构建 Program AST。",
+      "analysis": {
+        "purpose": "根据 Token 流构建符合语法规则的抽象语法树。",
+        "responsibilities": ["解析顶层程序结构（import, func, main）", "解析函数定义与参数列表", "解析各种语句（声明、赋值、控制流等）", "解析表达式（算术、比较、逻辑、一元操作）", "处理运算符优先级与结合性", "进行简单的语法导向分析（如检查函数是否返回）"],
+        "input": "Token 流或源字符串（通过 fully 组合子）",
+        "output": "Program AST",
+        "role": "编译前端第二阶段",
+        "keyLogic": ["使用 Parsley precedence 组合子处理表达式优先级", "利用 atomic 实现错误恢复", "checkReturning 函数在解析时检验函数返回路径"],
+        "relatedModules": ["lexer.scala", "ast.scala"],
+        "relatedPaths": ["src/main/wacc/lexer.scala", "src/main/wacc/ast.scala"],
+        "usedBy": ["Main.scala"],
+        "notes": []
+      }
+    },
+    "src/main/wacc/typeChecker.scala": {
+      "path": "src/main/wacc/typeChecker.scala",
+      "type": "file",
+      "summary": "静态语义分析入口，维护函数/变量环境，遍历 AST 报告类型不匹配、作用域与返回路径错误。",
+      "analysis": {
+        "purpose": "验证程序语义正确性，为代码生成提供类型信息。",
+        "responsibilities": ["构建函数签名环境", "类型检查所有表达式与语句", "维护作用域栈", "检查函数返回路径", "处理重载与类型兼容性", "支持并发特性（fork, par, send, recv）的语义检查"],
+        "input": "Program AST（可能经过重命名阶段）",
+        "output": "TypeCheckResult（包含类型化 AST 与环境）或错误列表",
+        "role": "编译前端第三阶段",
+        "keyLogic": ["使用隐含参数传递环境和函数签名", "递归下降遍历 AST", "类型兼容性规则（如 pair 交换条件）", "通过 RenamedVar 解决变量重名问题"],
+        "relatedModules": ["ast.scala", "CFG.scala"],
+        "relatedPaths": ["src/main/wacc/ast.scala", "src/main/wacc/CFG.scala"],
+        "usedBy": ["Main.scala"],
+        "notes": ["代码量大（约 37KB），包含多个辅助函数与错误诊断。"]
+      }
+    },
+    "src/main/wacc/backend/arm": {
+      "path": "src/main/wacc/backend/arm",
+      "type": "folder",
+      "summary": "ARM 32 位后端目录，包含代码生成、指令定义、寄存器分配、活跃性分析与打印机。",
+      "analysis": {
+        "purpose": "将 CFG 中间表示降低为 ARM 32 位汇编指令。",
+        "responsibilities": ["ARM 指令生成", "寄存器分配（图染色与朴素）", "活跃性分析", "指令序列打印为汇编文本", "运行时辅助函数定义"],
+        "input": "",
+        "output": "",
+        "role": "后端模块",
+        "keyLogic": [],
+        "relatedModules": [],
+        "relatedPaths": ["src/main/wacc/backend/arm/ARMCodeGenerator.scala", "src/main/wacc/backend/arm/ARMInstruction.scala", "src/main/wacc/backend/arm/Liveness.scala", "src/main/wacc/backend/arm/RegAlloc.scala", "src/main/wacc/backend/arm/Printer.scala"],
+        "usedBy": [],
+        "notes": []
+      }
+    },
+    "": {
+      "path": "",
+      "type": "folder",
+      "summary": "项目根目录，包含构建文件（Makefile, project.scala）、编译脚本（compile）与说明文档。",
+      "analysis": {
+        "purpose": "项目顶级目录，存放构建配置与用户文档。",
+        "responsibilities": ["构建配置", "编译入口脚本", "项目说明"],
+        "input": "",
+        "output": "",
+        "role": "项目根",
+        "keyLogic": [],
+        "relatedModules": [],
+        "relatedPaths": ["README.md", "Makefile", "project.scala", "compile"],
+        "usedBy": [],
+        "notes": []
+      }
+    },
+    "README.md": {
+      "path": "README.md",
+      "type": "file",
+      "summary": "项目说明文档，介绍仓库结构、构建方式与 WACC 实验背景。",
+      "analysis": {
+        "purpose": "向开发者与使用者提供项目基本信息。",
+        "responsibilities": ["描述目录结构", "说明构建与运行方法", "提供实验背景"],
+        "input": "",
+        "output": "",
+        "role": "项目文档",
+        "keyLogic": [],
+        "relatedModules": [],
+        "relatedPaths": [],
+        "usedBy": [],
+        "notes": []
+      }
+    },
+    "src/main/wacc/backend/arm/ARMCodeGenerator.scala": {
+      "path": "src/main/wacc/backend/arm/ARMCodeGenerator.scala",
+      "type": "file",
+      "summary": "ARM 32 位代码生成器，将 CFGProgram 降低为 ARM 指令链，包含寄存器分配、栈帧管理与运行时辅助。",
+      "analysis": {
+        "purpose": "将 CFG 中间表示转换为可汇编的 ARM 指令序列。",
+        "responsibilities": ["根据 CFG 生成每个函数的 ARM 指令", "管理栈帧（保存/恢复寄存器）", "调用寄存器分配算法", "生成函数序言与结尾", "处理内联数组字面量、配对、并发原语等"],
+        "input": "CFGProgram（由前端生成）",
+        "output": "Chain[Instr[PhysicalReg]]（已分配物理寄存器的指令链）",
+        "role": "后端核心",
+        "keyLogic": ["使用 FunctionGenerator 内部类管理每个函数的状态", "基于图染色或朴素寄存器分配", "字面量通过 DataManager 存入 .rodata 段"],
+        "relatedModules": ["CFG.scala", "ARMInstruction.scala", "Liveness.scala", "RegAlloc.scala"],
+        "relatedPaths": ["src/main/wacc/CFG.scala", "src/main/wacc/backend/arm/ARMInstruction.scala", "src/main/wacc/backend/arm/Liveness.scala", "src/main/wacc/backend/arm/RegAlloc.scala"],
+        "usedBy": ["Main.scala"],
+        "notes": ["代码量大（约 46KB），是后端最复杂的文件。"]
+      },
+      "snippets": [
+        {
+          "id": "codegen-entry",
+          "title": "生成入口函数 generate",
+          "startLine": 60,
+          "endLine": 75,
+          "reason": "展示代码生成器的总体流程：生成函数块、主块、运行时支持，然后拼接汇编文本段。",
+          "code": "def generate(prog: CFGProgram[Stmt, Expr], optimize: Boolean = true): Chain[Instr[PhysicalReg]] = {\n  val header = Chain(SyntaxUnified)\n  val functionBlocks = concatBlocks(prog.funcs.toList.sortBy(_._1)) { case (name, cfg) =>\n    FunctionGenerator(name, cfg, optimize).generate()\n  }\n  val mainBlocks = FunctionGenerator(\"main\", prog.main, optimize).generate()\n  val allBlocks = functionBlocks ++ mainBlocks ++ runtime.helperDefinitions\n  val textSection = Chain(Text, Global(\"main\")) ++ LabeledBlock.flatten(allBlocks)\n  (header ++ Chain.fromSeq(runtime.externs) ++ runtime.bssDefinitions ++ textSection)\n}",
+          "annotations": []
+        }
+      ]
+    },
+    "src/main/wacc/backend": {
+      "path": "src/main/wacc/backend",
+      "type": "folder",
+      "summary": "后端代码生成目录，当前仅包含 ARM 子目录。",
+      "analysis": {
+        "purpose": "存放目标代码生成相关模块，支持不同后端架构。",
+        "responsibilities": ["提供代码生成器接口", "组织各后端实现"],
+        "input": "",
+        "output": "",
+        "role": "后端模块目录",
+        "keyLogic": [],
+        "relatedModules": [],
+        "relatedPaths": ["src/main/wacc/backend/arm"],
+        "usedBy": [],
+        "notes": ["目前只有 ARM 后端，未来可扩展其他架构。"]
+      }
+    },
+    "src/test/wacc":

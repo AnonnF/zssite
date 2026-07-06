@@ -1,0 +1,1059 @@
+{
+  "projectId": "wacc-compiler",
+  "generatedAt": "2026-07-04T05:42:49.673Z",
+  "source": "ai-draft",
+  "provider": "deepseek",
+  "model": "deepseek-v4-flash",
+  "confidence": "draft",
+  "projectAnalysis": {
+    "overview": "WACC 编译器项目是一个完整的编译管线实现，使用 Scala 3 编写，从源代码开始依次经过词法分析、语法分析、抽象语法树构建、语义检查、CFG 中间表示生成、常量传播优化和目标 ARM 代码生成。项目还包含并发支持（fork/par/join）、解释器、寄存器分配（图着色和朴素分配）以及丰富的测试套件。",
+    "suggestedPipeline": [
+      {
+        "id": "lexer",
+        "label": "Lexer",
+        "path": "src/main/wacc/lexer.scala",
+        "language": "scala",
+        "role": "源文本转换为 token 序列"
+      },
+      {
+        "id": "parser",
+        "label": "Parser",
+        "path": "src/main/wacc/parser.scala",
+        "language": "scala",
+        "role": "构建抽象语法树 (AST)"
+      },
+      {
+        "id": "ast",
+        "label": "AST",
+        "path": "src/main/wacc/ast.scala",
+        "language": "scala",
+        "role": "共享的 AST 节点定义"
+      },
+      {
+        "id": "renamer",
+        "label": "Renamer",
+        "path": "src/main/wacc/scope.scala",
+        "language": "scala",
+        "role": "变量重命名以支持作用域区分"
+      },
+      {
+        "id": "typechecker",
+        "label": "Type Checker",
+        "path": "src/main/wacc/typeChecker.scala",
+        "language": "scala",
+        "role": "类型检查与语义分析"
+      },
+      {
+        "id": "cfg",
+        "label": "CFG",
+        "path": "src/main/wacc/CFG.scala",
+        "language": "scala",
+        "role": "控制流图中间表示构建"
+      },
+      {
+        "id": "optimization",
+        "label": "Constant Propagation",
+        "path": "src/main/wacc/ConstantPropagation.scala",
+        "language": "scala",
+        "role": "常量传播优化"
+      },
+      {
+        "id": "codegen",
+        "label": "ARM Code Generator",
+        "path": "src/main/wacc/backend/arm/ARMCodeGenerator.scala",
+        "language": "scala",
+        "role": "ARM 32 位代码生成"
+      },
+      {
+        "id": "regalloc",
+        "label": "Register Allocation",
+        "path": "src/main/wacc/backend/arm/RegAlloc.scala",
+        "language": "scala",
+        "role": "图着色寄存器分配"
+      },
+      {
+        "id": "entry",
+        "label": "Main Entry",
+        "path": "src/main/wacc/Main.scala",
+        "language": "scala",
+        "role": "编译器入口，支持编译、解释和REPL"
+      },
+      {
+        "id": "tests",
+        "label": "Tests",
+        "path": "src/test/wacc",
+        "language": "scala",
+        "role": "各阶段与集成测试"
+      }
+    ],
+    "suggestedGuidedTour": [
+      {
+        "id": "overview",
+        "label": "Overview",
+        "path": "README.md",
+        "title": "项目概述",
+        "description": "项目说明、构建方式和实验背景。"
+      },
+      {
+        "id": "lexer",
+        "label": "Lexer",
+        "path": "src/main/wacc/lexer.scala",
+        "title": "词法分析",
+        "description": "使用 Parsley 库定义 WACC 语言的 token 规则。"
+      },
+      {
+        "id": "parser",
+        "label": "Parser",
+        "path": "src/main/wacc/parser.scala",
+        "title": "语法分析",
+        "description": "基于 Parsley 组合子解析 program、function、stmt 和 expr。"
+      },
+      {
+        "id": "ast",
+        "label": "AST",
+        "path": "src/main/wacc/ast.scala",
+        "title": "抽象语法树",
+        "description": "类型、表达式、语句的 ADT 定义。"
+      },
+      {
+        "id": "typechecker",
+        "label": "Type Checker",
+        "path": "src/main/wacc/typeChecker.scala",
+        "title": "类型检查",
+        "description": "维护类型环境，检查类型匹配、作用域和函数签名。"
+      },
+      {
+        "id": "cfg",
+        "label": "CFG",
+        "path": "src/main/wacc/CFG.scala",
+        "title": "控制流图",
+        "description": "从 AST 构建 CFG 中间表示，支持基本块和跳转。"
+      },
+      {
+        "id": "codegen",
+        "label": "Code Generation",
+        "path": "src/main/wacc/backend/arm/ARMCodeGenerator.scala",
+        "title": "ARM 代码生成",
+        "description": "将 CFG 降低为 ARM 汇编，包含栈帧管理和寄存器分配。"
+      },
+      {
+        "id": "tests",
+        "label": "Tests",
+        "path": "src/test/wacc",
+        "title": "测试",
+        "description": "ScalaTest 测试套件，覆盖 lexer、parser、typeChecker、codegen 和集成测试。"
+      }
+    ],
+    "technicalDecisions": [
+      {
+        "title": "使用 Parsley 解析库",
+        "decision": "采用 Parsley 作为解析器组合子库",
+        "rationale": "团队经验丰富，Parsley 提供灵活的组合子和错误报告",
+        "impact": "简化了词法和语法分析的实现，错误消息友好"
+      },
+      {
+        "title": "CFG 作为中间表示",
+        "decision": "构建控制流图作为语义分析和代码生成之间的桥梁",
+        "rationale": "便于优化和寄存器分配，分离前端和后端",
+        "impact": "后端可独立优化 CFG，支持常量传播、活性分析等"
+      },
+      {
+        "title": "图着色寄存器分配",
+        "decision": "实现完整的图着色分配算法，并保留朴素分配作为备用",
+        "rationale": "图着色能产生更优的寄存器分配，朴素分配简单可靠",
+        "impact": "优化时使用图着色，未优化时使用朴素分配以保证正确性"
+      }
+    ],
+    "skills": [
+      {
+        "title": "编译器前端实现",
+        "description": "词法分析、语法分析、AST 构建、语义检查、类型系统"
+      },
+      {
+        "title": "中间表示设计",
+        "description": "控制流图构建、基本块划分、终结符设计"
+      },
+      {
+        "title": "代码生成",
+        "description": "ARM 32 位汇编生成、栈帧管理、函数调用约定"
+      },
+      {
+        "title": "优化",
+        "description": "常量传播、活性分析、寄存器分配（图着色）"
+      },
+      {
+        "title": "并发支持",
+        "description": "fork、par、join 语句编译支持，线程管理运行时"
+      },
+      {
+        "title": "测试",
+        "description": "多层次测试：单元测试、集成测试、分阶段验证"
+      }
+    ]
+  },
+  "entries": {
+    "": {
+      "path": "",
+      "type": "folder",
+      "summary": "WACC 编译器根目录，包含源码、测试、构建脚本和文档。",
+      "analysis": {
+        "purpose": "项目根目录",
+        "responsibilities": [],
+        "input": "",
+        "output": "",
+        "role": "",
+        "keyLogic": [],
+        "relatedModules": [],
+        "relatedPaths": [],
+        "usedBy": [],
+        "notes": []
+      }
+    },
+    "src/main/wacc/lexer.scala": {
+      "path": "src/main/wacc/lexer.scala",
+      "type": "file",
+      "summary": "词法分析器，使用 Parsley Lexer 定义关键字、标识符、字面量和运算符。",
+      "analysis": {
+        "purpose": "将 WACC 源码转换为 token 序列",
+        "responsibilities": [
+          "指定基础词法描述（空白、注释、数字、标识符）",
+          "定义保留关键字和运算符集合",
+          "暴露 intLiteral、stringLiteral 等解析器"
+        ],
+        "input": "WACC 源代码字符串",
+        "output": "Parsley 解析器对象，可被 parser 组合",
+        "role": "pipeline 起始",
+        "keyLogic": [
+          "利用 Lexer 配置处理空白和注释",
+          "关键字匹配优先于标识符"
+        ],
+        "relatedModules": [
+          "parser",
+          "bridge"
+        ],
+        "relatedPaths": [
+          "src/main/wacc/parser.scala"
+        ],
+        "usedBy": [
+          "parser"
+        ],
+        "notes": []
+      },
+      "snippetSuggestions": [
+        {
+          "id": "lexer-keywords",
+          "filePath": "src/main/wacc/lexer.scala",
+          "title": "关键字定义",
+          "startLine": 9,
+          "endLine": 44,
+          "reason": "展示 WACC 语言保留字集合",
+          "annotations": [
+            {
+              "line": 15,
+              "note": "包含并发关键字 fork、par、join"
+            }
+          ]
+        }
+      ],
+      "snippets": [
+        {
+          "id": "lexer-keywords",
+          "title": "关键字定义",
+          "filePath": "src/main/wacc/lexer.scala",
+          "startLine": 9,
+          "endLine": 44,
+          "reason": "展示 WACC 语言保留字集合",
+          "code": "object lexer {\n    // reserved keywords, identidiers not able to have the same name\n    private val keywords = Set(\n        // types\n        \"int\",\n        \"char\",\n        \"bool\",\n        \"string\",\n        \"pair\",\n        \"newpair\",\n        \"call\",\n        \"fst\",\n        \"snd\",\n\n        // keywords\n        \"import\",\n        \"len\",\n        \"ord\",\n        \"chr\",\n        \"true\",\n        \"false\",\n        \"null\",\n        \"begin\",\n        \"end\", // Program\n        \"is\", // Function\n\n        // Stmt\n        \"skip\",\n        \"read\",\n        \"free\",\n        \"return\",\n        \"exit\",\n        \"print\",\n        \"println\",\n        \"if\",\n        \"then\",",
+          "annotations": [
+            {
+              "line": 15,
+              "note": "包含并发关键字 fork、par、join"
+            }
+          ],
+          "validationStatus": "valid"
+        }
+      ]
+    },
+    "src/main/wacc/parser.scala": {
+      "path": "src/main/wacc/parser.scala",
+      "type": "file",
+      "summary": "语法分析器，使用 Parsley 组合子解析程序、函数、语句和表达式。",
+      "analysis": {
+        "purpose": "根据文法规则构建抽象语法树 (AST)",
+        "responsibilities": [
+          "解析类型",
+          "解析表达式（支持优先级和结合性）",
+          "解析语句和函数定义",
+          "处理 import 声明"
+        ],
+        "input": "token 序列（由 lexer 提供）",
+        "output": "Program AST",
+        "role": "pipeline 第二阶段",
+        "keyLogic": [
+          "使用 precedence 组合子处理运算符优先级",
+          "利用 atomic 和 notFollowedBy 消除歧义"
+        ],
+        "relatedModules": [
+          "lexer",
+          "ast",
+          "bridge"
+        ],
+        "relatedPaths": [
+          "src/main/wacc/lexer.scala",
+          "src/main/wacc/ast.scala"
+        ],
+        "usedBy": [
+          "Main"
+        ],
+        "notes": []
+      },
+      "snippetSuggestions": [
+        {
+          "id": "parser-entry",
+          "filePath": "src/main/wacc/parser.scala",
+          "title": "解析器入口",
+          "startLine": 24,
+          "endLine": 26,
+          "reason": "公开的 parse 方法，供 Main 调用",
+          "confidence": "high",
+          "annotations": []
+        }
+      ],
+      "snippets": [
+        {
+          "id": "parser-entry",
+          "title": "解析器入口",
+          "filePath": "src/main/wacc/parser.scala",
+          "startLine": 24,
+          "endLine": 26,
+          "reason": "公开的 parse 方法，供 Main 调用",
+          "code": "\n    // Package-private parsers for testing\n    private[wacc] def parseType(input: String): Result[String, Type] =",
+          "annotations": [],
+          "validationStatus": "valid",
+          "confidence": "high"
+        }
+      ]
+    },
+    "src/main/wacc/ast.scala": {
+      "path": "src/main/wacc/ast.scala",
+      "type": "file",
+      "summary": "抽象语法树节点定义，包括类型、表达式、语句、函数和程序。",
+      "analysis": {
+        "purpose": "定义编译器内部 AST 数据结构",
+        "responsibilities": [
+          "定义所有语法元素的 case class",
+          "提供 ParserBridge 以方便解析器构造",
+          "包含并发扩展类型"
+        ],
+        "input": "由 parser 填充",
+        "output": "AST 实例",
+        "role": "pipeline 共享中间表示",
+        "keyLogic": [
+          "sealed trait 层次设计",
+          "inferredType 用于类型推断"
+        ],
+        "relatedModules": [
+          "parser",
+          "typeChecker",
+          "CFG"
+        ],
+        "relatedPaths": [
+          "src/main/wacc/parser.scala",
+          "src/main/wacc/typeChecker.scala"
+        ],
+        "usedBy": [
+          "parser",
+          "typeChecker",
+          "CFG",
+          "codegen"
+        ],
+        "notes": []
+      }
+    },
+    "src/main/wacc/typeChecker.scala": {
+      "path": "src/main/wacc/typeChecker.scala",
+      "type": "file",
+      "summary": "类型检查器，验证变量声明、类型兼容、函数签名和作用域规则。",
+      "analysis": {
+        "purpose": "执行静态语义分析，报告类型错误",
+        "responsibilities": [
+          "构建函数环境",
+          "管理作用域栈",
+          "检查表达式类型",
+          "检查语句合法性",
+          "支持并发原语的类型检查"
+        ],
+        "input": "重命名后的 AST",
+        "output": "TypeCheckResult，包含更新后的 AST 和类型环境",
+        "role": "pipeline 语义分析阶段",
+        "keyLogic": [
+          "递归下降类型检查",
+          "环境可扩展性",
+          "错误累积而非立即退出"
+        ],
+        "relatedModules": [
+          "ast",
+          "scope",
+          "diagnostics"
+        ],
+        "relatedPaths": [
+          "src/main/wacc/ast.scala",
+          "src/main/wacc/scope.scala"
+        ],
+        "usedBy": [
+          "Main"
+        ],
+        "notes": []
+      }
+    },
+    "src/main/wacc/CFG.scala": {
+      "path": "src/main/wacc/CFG.scala",
+      "type": "file",
+      "summary": "控制流图构建，从 AST 生成基本块和终结符。",
+      "analysis": {
+        "purpose": "构建 CFG 中间表示，便于优化和代码生成",
+        "responsibilities": [
+          "生成基本块",
+          "处理分支、循环、函数调用",
+          "提供块内语句排序和遍历"
+        ],
+        "input": "Program AST",
+        "output": "CFGProgram，包含函数和主程序的 CFG",
+        "role": "pipeline IR 生成阶段",
+        "keyLogic": [
+          "使用递归将嵌套语句展开为线性基本块",
+          "处理特殊终结符 Exit/Return/Jump/Branch"
+        ],
+        "relatedModules": [
+          "ast",
+          "backend"
+        ],
+        "relatedPaths": [
+          "src/main/wacc/ast.scala",
+          "src/main/wacc/backend/arm"
+        ],
+        "usedBy": [
+          "Main",
+          "ARMCodeGenerator"
+        ],
+        "notes": []
+      },
+      "snippetSuggestions": [
+        {
+          "id": "cfg-class",
+          "filePath": "src/main/wacc/CFG.scala",
+          "title": "CFG 类定义",
+          "startLine": 5,
+          "endLine": 70,
+          "reason": "展示 CFG 的核心结构和操作方法",
+          "confidence": "high",
+          "annotations": []
+        }
+      ],
+      "snippets": [
+        {
+          "id": "cfg-class",
+          "title": "CFG 类定义",
+          "filePath": "src/main/wacc/CFG.scala",
+          "startLine": 5,
+          "endLine": 70,
+          "reason": "展示 CFG 的核心结构和操作方法",
+          "code": "\nfinal case class CFG[A, E](\n    val name: Option[String] = None,\n    val params: Option[List[Param]] = None\n) {\n    import CFG._\n\n    private var nextBlockId = 0\n    def getNextBlockId(): BlockId = {\n        val id = nextBlockId\n        nextBlockId += 1\n        BlockId(id)\n    }\n    val entry = getNextBlockId()\n    val blocks = mutable.Map[BlockId, BasicBlock[A, E]]()\n    val index = CFGIndex(\n        succ = mutable.Map[BlockId, List[BlockId]](),\n        pred = mutable.Map[BlockId, List[BlockId]](),\n        order = Nil\n    )\n\n    def updateBlock(id: BlockId, block: BasicBlock[A, E]) = {\n        blocks(id) = block\n    }\n\n    def getBlockIdInOrder(): List[BlockId] = {\n        if (index.order.isEmpty) { // recompute order if stale\n            val rpo = ArrayBuffer[BlockId]()\n            dfsVisit(entry, mutable.Set.empty, rpo)\n            index.order =\n                rpo.toList.reverse // store the reverse-post-order traversal of cfg\n        }\n        index.order\n    }\n\n    def getBlocksInOrder(): List[BasicBlock[A, E]] = {\n        getBlockIdInOrder().map(id => blocks(id))\n    }\n\n    // traverse cfg in post-order to get reverse post-order\n    private def dfsVisit(\n        entry: BlockId,\n        visited: mutable.Set[BlockId],\n        out: ArrayBuffer[BlockId]\n    ): Unit = {\n        if (!visited.contains(entry)) {\n            visited.add(entry)\n            for (succ <- index.succ.getOrElse(entry, List.empty)) {\n                dfsVisit(succ, visited, out)\n            }\n            out += entry\n        }\n    }\n\n    def addBlock(\n        stmts: List[A],\n        terminator: Terminator[A, E],\n        pred: List[BlockId] = List.empty,\n        id: BlockId =\n            getNextBlockId() // allow passing pre-allocated id (e.g. if statement)\n    ): BlockId = {\n        val block = BasicBlock(id, stmts, terminator)\n        blocks(id) = block\n        index.succ(id) = index.succ.getOrElse(id, List.empty)\n        index.pred(id) = pred\n        for (p <- pred) {",
+          "annotations": [],
+          "validationStatus": "valid",
+          "confidence": "high"
+        }
+      ]
+    },
+    "src/main/wacc/backend/arm/ARMCodeGenerator.scala": {
+      "path": "src/main/wacc/backend/arm/ARMCodeGenerator.scala",
+      "type": "file",
+      "summary": "ARM 32 位代码生成器，将 CFG 降低为 ARM 汇编指令。",
+      "analysis": {
+        "purpose": "生成可汇编的 ARM 指令序列",
+        "responsibilities": [
+          "遍历 CFG 生成基本块指令",
+          "管理函数 prologue/epilogue",
+          "处理并发原语的运行时调用",
+          "调用寄存器分配"
+        ],
+        "input": "CFGProgram",
+        "output": "Chain[Instr[PhysicalReg]]",
+        "role": "pipeline 后端生成",
+        "keyLogic": [
+          "使用虚拟寄存器，后由 RegAlloc 物理化",
+          "运行时辅助函数通过 RuntimeProvider 生成"
+        ],
+        "relatedModules": [
+          "CFG",
+          "RegAlloc",
+          "Liveness",
+          "RuntimeProvider"
+        ],
+        "relatedPaths": [
+          "src/main/wacc/CFG.scala",
+          "src/main/wacc/backend/arm/RegAlloc.scala"
+        ],
+        "usedBy": [
+          "Main"
+        ],
+        "notes": [
+          "代码生成器包含对 fork/par/join 等并发的支持"
+        ]
+      }
+    },
+    "src/main/wacc/Main.scala": {
+      "path": "src/main/wacc/Main.scala",
+      "type": "file",
+      "summary": "编译器入口，提供 compile、interpret 和 REPL 命令。",
+      "analysis": {
+        "purpose": "提供命令行接口调用编译管线",
+        "responsibilities": [
+          "读取源文件",
+          "依次调用解析、语义分析、CFG 构建、代码生成",
+          "处理错误并设置退出码"
+        ],
+        "input": "命令行参数（文件路径）",
+        "output": "ARM 汇编文件或解释执行结果",
+        "role": "项目入口点",
+        "keyLogic": [
+          "管线编排",
+          "错误处理与退出码映射"
+        ],
+        "relatedModules": [
+          "parser",
+          "typeChecker",
+          "CFG",
+          "ARMCodeGenerator",
+          "Interpreter",
+          "ImportResolver"
+        ],
+        "relatedPaths": [
+          "src/main/wacc/parser.scala",
+          "src/main/wacc/typeChecker.scala"
+        ],
+        "usedBy": [],
+        "notes": []
+      },
+      "snippetSuggestions": [
+        {
+          "id": "compile-entry",
+          "filePath": "src/main/wacc/Main.scala",
+          "title": "编译命令主流程",
+          "startLine": 42,
+          "endLine": 65,
+          "reason": "展示编译管线调用顺序",
+          "confidence": "high",
+          "annotations": []
+        }
+      ],
+      "snippets": [
+        {
+          "id": "compile-entry",
+          "title": "编译命令主流程",
+          "filePath": "src/main/wacc/Main.scala",
+          "startLine": 42,
+          "endLine": 65,
+          "reason": "展示编译管线调用顺序",
+          "code": "\n        result match {\n            case Left(exitCode)                    => sys.exit(exitCode)\n            case Right(TypeCheckResult(ast, _, _)) =>\n                val cfg = CFG(ast)\n                val interpreter = new Interpreter(cfg)\n                val exitCode = interpreter.run()\n                sys.exit(exitCode)\n        }\n    }\n\n    @main\n    def compile(\n        @arg(\n            name = \"optimize\",\n            short = 'O',\n            doc = \"Enable optimizations\"\n        ) optimize: Flag = Flag(false),\n        @arg(doc = \"Path to the .wacc file\", positional = true) file: String\n    ): Unit = {\n        val path = os.Path(file, os.pwd)\n        val fileName = path.last\n        val asmName = fileName.stripSuffix(\".wacc\") + \".s\"\n",
+          "annotations": [],
+          "validationStatus": "valid",
+          "confidence": "high"
+        }
+      ]
+    },
+    "src/test/wacc": {
+      "path": "src/test/wacc",
+      "type": "folder",
+      "summary": "测试目录，包含各阶段单元测试和集成测试。",
+      "analysis": {
+        "purpose": "验证编译器各阶段的正确性",
+        "responsibilities": [],
+        "input": "",
+        "output": "",
+        "role": "",
+        "keyLogic": [],
+        "relatedModules": [],
+        "relatedPaths": [],
+        "usedBy": [],
+        "notes": [
+          "测试覆盖 lexer、parser、typeChecker、CFG、codegen 和 integration"
+        ]
+      }
+    },
+    "README.md": {
+      "path": "README.md",
+      "type": "file",
+      "summary": "项目说明文档，介绍仓库结构和构建方式。",
+      "analysis": {
+        "purpose": "项目文档",
+        "responsibilities": [],
+        "input": "",
+        "output": "",
+        "role": "文档",
+        "keyLogic": [],
+        "relatedModules": [],
+        "relatedPaths": [],
+        "usedBy": [],
+        "notes": []
+      }
+    }
+  },
+  "warnings": [
+    "解释器模块 (src/main/wacc/interpreter) 存在但未在主线管线的代码生成中直接使用，仅在 interpret 命令中执行。",
+    "常量传播优化 (ConstantPropagation) 虽然集成，但仅作用于 CFG，缺少其他优化如死代码消除。",
+    "寄存器分配实现（图着色和朴素）两者并存，但图着色分配存在潜在 bug（注释中标注了 Liveness 分析暂未使用），可能影响优化效果。"
+  ],
+  "selectionReport": {
+    "selectedFiles": [
+      {
+        "path": "src/main/wacc/CFG.scala",
+        "score": 980,
+        "reasons": [
+          "priority path: src/main/wacc/CFG.scala",
+          "priority pattern: **/*CFG*",
+          "compiler-pipeline template: IR/CFG",
+          "core path: src/main",
+          "preferred text extension"
+        ],
+        "category": "file"
+      },
+      {
+        "path": "src/main/wacc/backend/arm/ARMCodeGenerator.scala",
+        "score": 790,
+        "reasons": [
+          "priority pattern: **/*CodeGenerator*",
+          "manual pipeline path",
+          "manual guided tour path",
+          "manual entry exists",
+          "compiler-pipeline template: code generation",
+          "core path: src/main",
+          "core path: backend",
+          "preferred text extension"
+        ],
+        "category": "file"
+      },
+      {
+        "path": "src/main/wacc/ast.scala",
+        "score": 745,
+        "reasons": [
+          "priority pattern: **/*AST*",
+          "manual pipeline path",
+          "manual guided tour path",
+          "manual entry exists",
+          "compiler-pipeline template: AST",
+          "core path: src/main",
+          "preferred text extension"
+        ],
+        "category": "file"
+      },
+      {
+        "path": "src/main/wacc/typeChecker.scala",
+        "score": 745,
+        "reasons": [
+          "priority pattern: **/*TypeChecker*",
+          "manual pipeline path",
+          "manual guided tour path",
+          "manual entry exists",
+          "compiler-pipeline template: semantic checker",
+          "core path: src/main",
+          "preferred text extension"
+        ],
+        "category": "file"
+      },
+      {
+        "path": "src/main/wacc/Main.scala",
+        "score": 680,
+        "reasons": [
+          "priority path: src/main/wacc/Main.scala",
+          "compiler-pipeline template: entry point",
+          "core path: src/main",
+          "preferred text extension"
+        ],
+        "category": "file"
+      },
+      {
+        "path": "src/main/wacc/backend/CodeGenerator.scala",
+        "score": 520,
+        "reasons": [
+          "priority pattern: **/*CodeGenerator*",
+          "compiler-pipeline template: code generation",
+          "core path: src/main",
+          "core path: backend",
+          "preferred text extension"
+        ],
+        "category": "file"
+      },
+      {
+        "path": "src/main/wacc/lexer.scala",
+        "score": 445,
+        "reasons": [
+          "manual pipeline path",
+          "manual guided tour path",
+          "manual entry exists",
+          "compiler-pipeline template: lexer",
+          "core path: src/main",
+          "preferred text extension"
+        ],
+        "category": "file"
+      },
+      {
+        "path": "src/main/wacc/parser.scala",
+        "score": 445,
+        "reasons": [
+          "manual pipeline path",
+          "manual guided tour path",
+          "manual entry exists",
+          "compiler-pipeline template: parser",
+          "core path: src/main",
+          "preferred text extension"
+        ],
+        "category": "file"
+      },
+      {
+        "path": "src/main/wacc/backend/arm/RegAlloc.scala",
+        "score": 300,
+        "reasons": [
+          "manual guided tour path",
+          "compiler-pipeline template: register allocation",
+          "core path: src/main",
+          "core path: backend",
+          "preferred text extension"
+        ],
+        "category": "file"
+      },
+      {
+        "path": "src/main/wacc/backend/arm/RegAllocNaive.scala",
+        "score": 300,
+        "reasons": [
+          "manual guided tour path",
+          "compiler-pipeline template: register allocation",
+          "core path: src/main",
+          "core path: backend",
+          "preferred text extension"
+        ],
+        "category": "file"
+      },
+      {
+        "path": "src/main/wacc/backend/arm/Liveness.scala",
+        "score": 295,
+        "reasons": [
+          "manual guided tour path",
+          "compiler-pipeline template: liveness analysis",
+          "core path: src/main",
+          "core path: backend",
+          "preferred text extension"
+        ],
+        "category": "file"
+      },
+      {
+        "path": "src/main/wacc/backend/arm/ARMInstruction.scala",
+        "score": 225,
+        "reasons": [
+          "manual guided tour path",
+          "core path: src/main",
+          "core path: backend",
+          "preferred text extension"
+        ],
+        "category": "file"
+      },
+      {
+        "path": "src/main/wacc/backend/arm/Printer.scala",
+        "score": 225,
+        "reasons": [
+          "manual guided tour path",
+          "core path: src/main",
+          "core path: backend",
+          "preferred text extension"
+        ],
+        "category": "file"
+      },
+      {
+        "path": "src/main/wacc/backend/arm/RuntimeProvider.scala",
+        "score": 225,
+        "reasons": [
+          "manual guided tour path",
+          "core path: src/main",
+          "core path: backend",
+          "preferred text extension"
+        ],
+        "category": "file"
+      },
+      {
+        "path": "README.md",
+        "score": 210,
+        "reasons": [
+          "manual pipeline path",
+          "README.md",
+          "preferred text extension"
+        ],
+        "category": "file"
+      },
+      {
+        "path": "src/main/wacc/backend/DataManager.scala",
+        "score": 135,
+        "reasons": [
+          "core path: src/main",
+          "core path: backend",
+          "preferred text extension"
+        ],
+        "category": "file"
+      },
+      {
+        "path": "src/main/wacc/backend/LabelManager.scala",
+        "score": 135,
+        "reasons": [
+          "core path: src/main",
+          "core path: backend",
+          "preferred text extension"
+        ],
+        "category": "file"
+      },
+      {
+        "path": "src/main/wacc/bridge.scala",
+        "score": 90,
+        "reasons": [
+          "core path: src/main",
+          "preferred text extension"
+        ],
+        "category": "file"
+      },
+      {
+        "path": "src/main/wacc/ConstantPropagation.scala",
+        "score": 90,
+        "reasons": [
+          "core path: src/main",
+          "preferred text extension"
+        ],
+        "category": "file"
+      },
+      {
+        "path": "src/main/wacc/diagnostics.scala",
+        "score": 90,
+        "reasons": [
+          "core path: src/main",
+          "preferred text extension"
+        ],
+        "category": "file"
+      }
+    ],
+    "selectedFolders": [
+      {
+        "path": "src",
+        "score": 1050,
+        "reasons": [
+          "manual pipeline path",
+          "manual guided tour path",
+          "folder in tree"
+        ],
+        "category": "folder"
+      },
+      {
+        "path": "src/main/wacc",
+        "score": 1040,
+        "reasons": [
+          "manual pipeline path",
+          "manual guided tour path",
+          "manual entry exists",
+          "folder in tree"
+        ],
+        "category": "folder"
+      },
+      {
+        "path": "src/main",
+        "score": 960,
+        "reasons": [
+          "manual pipeline path",
+          "manual guided tour path",
+          "folder in tree"
+        ],
+        "category": "folder"
+      },
+      {
+        "path": "src/test/wacc",
+        "score": 480,
+        "reasons": [
+          "priority pattern: **/*Test*",
+          "manual guided tour path",
+          "manual entry exists",
+          "folder in tree"
+        ],
+        "category": "folder"
+      },
+      {
+        "path": "src/test",
+        "score": 400,
+        "reasons": [
+          "priority pattern: **/*Test*",
+          "manual guided tour path",
+          "folder in tree"
+        ],
+        "category": "folder"
+      },
+      {
+        "path": "src/test/wacc/custom-integration",
+        "score": 400,
+        "reasons": [
+          "priority pattern: **/*Test*",
+          "manual guided tour path",
+          "folder in tree"
+        ],
+        "category": "folder"
+      },
+      {
+        "path": "src/test/wacc/imports",
+        "score": 400,
+        "reasons": [
+          "priority pattern: **/*Test*",
+          "manual guided tour path",
+          "folder in tree"
+        ],
+        "category": "folder"
+      },
+      {
+        "path": "src/test/wacc/imports/stdlib",
+        "score": 400,
+        "reasons": [
+          "priority pattern: **/*Test*",
+          "manual guided tour path",
+          "folder in tree"
+        ],
+        "category": "folder"
+      },
+      {
+        "path": "src/main/wacc/backend/arm",
+        "score": 280,
+        "reasons": [
+          "manual pipeline path",
+          "manual guided tour path",
+          "manual entry exists",
+          "folder in tree"
+        ],
+        "category": "folder"
+      },
+      {
+        "path": "src/main/wacc/backend",
+        "score": 200,
+        "reasons": [
+          "manual pipeline path",
+          "manual guided tour path",
+          "folder in tree"
+        ],
+        "category": "folder"
+      },
+      {
+        "path": "",
+        "score": 180,
+        "reasons": [
+          "manual guided tour path",
+          "manual entry exists",
+          "folder in tree"
+        ],
+        "category": "folder"
+      },
+      {
+        "path": "src/main/wacc/interpreter",
+        "score": 10,
+        "reasons": [
+          "folder in tree"
+        ],
+        "category": "folder"
+      }
+    ],
+    "selectedTests": [
+      {
+        "path": "src/test/wacc/CodeGeneratorTests.scala",
+        "score": 850,
+        "reasons": [
+          "priority pattern: **/*CodeGenerator*",
+          "priority pattern: **/*Test*",
+          "manual guided tour path",
+          "compiler-pipeline template: code generation",
+          "preferred text extension",
+          "test file"
+        ],
+        "category": "test"
+      },
+      {
+        "path": "src/test/wacc/TypeCheckerTests.scala",
+        "score": 850,
+        "reasons": [
+          "priority pattern: **/*TypeChecker*",
+          "priority pattern: **/*Test*",
+          "manual guided tour path",
+          "compiler-pipeline template: semantic checker",
+          "preferred text extension",
+          "test file"
+        ],
+        "category": "test"
+      },
+      {
+        "path": "src/test/wacc/CFGTests.scala",
+        "score": 765,
+        "reasons": [
+          "priority pattern: **/*CFG*",
+          "priority pattern: **/*Test*",
+          "manual guided tour path",
+          "preferred text extension",
+          "test file"
+        ],
+        "category": "test"
+      },
+      {
+        "path": "src/test/wacc/LexerTests.scala",
+        "score": 550,
+        "reasons": [
+          "priority pattern: **/*Test*",
+          "manual guided tour path",
+          "compiler-pipeline template: lexer",
+          "preferred text extension",
+          "test file"
+        ],
+        "category": "test"
+      },
+      {
+        "path": "src/test/wacc/ParserTests.scala",
+        "score": 550,
+        "reasons": [
+          "priority pattern: **/*Test*",
+          "manual guided tour path",
+          "compiler-pipeline template: parser",
+          "preferred text extension",
+          "test file"
+        ],
+        "category": "test"
+      }
+    ],
+    "skippedFiles": [
+      {
+        "path": "Makefile",
+        "reason": "config/lock/build artifact"
+      },
+      {
+        "path": "compile",
+        "reason": "config/lock/build artifact"
+      },
+      {
+        "path": "project.scala",
+        "reason": "config/lock/build artifact"
+      }
+    ],
+    "warnings": [],
+    "templateId": "compiler-pipeline",
+    "stageChecklist": [
+      "Lexer",
+      "Parser",
+      "AST",
+      "Semantic / Type Checker",
+      "IR or CFG",
+      "Codegen",
+      "Tests",
+      "Entry point (Main)"
+    ]
+  },
+  "validationReport": {
+    "validSnippets": 4,
+    "invalidSnippets": 0,
+    "warnings": []
+  }
+}

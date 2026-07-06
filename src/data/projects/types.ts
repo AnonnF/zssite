@@ -5,6 +5,60 @@ export type ProjectTreeNode = {
   children?: ProjectTreeNode[];
 };
 
+export type ProjectCodeSnippetAnnotation = {
+  line: number;
+  note: string;
+};
+
+export type ReviewStatus =
+  | "generated"
+  | "template"
+  | "ai-draft"
+  | "manual"
+  | "human-reviewed"
+  | "needs-review";
+
+export type ReviewSource =
+  | "generated"
+  | "template"
+  | "ai-draft"
+  | "manual"
+  | "mixed";
+
+export type ReviewMeta = {
+  status: ReviewStatus;
+  source?: ReviewSource;
+  reviewedAt?: string;
+  reviewer?: string;
+  note?: string;
+};
+
+export type ProjectCodeSnippet = {
+  id: string;
+  title: string;
+  startLine?: number;
+  endLine?: number;
+  reason?: string;
+  code: string;
+  annotations?: ProjectCodeSnippetAnnotation[];
+  review?: ReviewMeta;
+  highlightedHtml?: string;
+};
+
+export type ProjectStructuredAnalysis = {
+  purpose?: string;
+  responsibilities?: string[];
+  input?: string;
+  output?: string;
+  role?: string;
+  keyLogic?: string[];
+  relatedModules?: string[];
+  relatedPaths?: string[];
+  usedBy?: string[];
+  notes?: string[];
+  reviewStatus?: "draft" | "reviewed" | "verified";
+};
+
 export type ProjectAnalysisEntry = {
   path: string;
   type: "file" | "folder";
@@ -13,6 +67,50 @@ export type ProjectAnalysisEntry = {
   fixed?: boolean;
   language?: string;
   code?: string;
+  snippets?: ProjectCodeSnippet[];
+  analysis?: ProjectStructuredAnalysis;
+  generated?: boolean;
+  sizeBytes?: number;
+  tooLarge?: boolean;
+  review?: ReviewMeta;
+  highlightedHtml?: string;
+};
+
+export type ProjectPipelineNode = {
+  id: string;
+  label: string;
+  path: string;
+  language: string;
+  role: string;
+  kind?: string;
+};
+
+export type ProjectGuidedTourStep = {
+  id: string;
+  label: string;
+  path: string;
+  title: string;
+  description: string;
+  note?: string;
+};
+
+export type ProjectTechnicalDecision = {
+  title: string;
+  decision: string;
+  rationale: string;
+  impact: string;
+  review?: ReviewMeta;
+};
+
+export type ProjectSkillHighlight = {
+  title: string;
+  description: string;
+  review?: ReviewMeta;
+};
+
+export type ProjectNarrative = {
+  technicalDecisions?: ProjectTechnicalDecision[];
+  skills?: ProjectSkillHighlight[];
 };
 
 export type ProjectAnalyzerData = {
@@ -21,4 +119,54 @@ export type ProjectAnalyzerData = {
   description: string;
   tree: ProjectTreeNode[];
   entries: Record<string, ProjectAnalysisEntry>;
+  pipeline?: ProjectPipelineNode[];
+  guidedTour?: ProjectGuidedTourStep[];
+  narrative?: ProjectNarrative;
+  review?: ReviewMeta;
+};
+
+export type ProjectAnalyzerGeneratedMetadata = {
+  generatedAt: string;
+  source: "project-snapshots";
+  projectId: string;
+  rootDir: string;
+  fileCount: number;
+  folderCount: number;
+  includedFileCount: number;
+  skippedFileCount: number;
+};
+
+export type ProjectAnalyzerGeneratedData = {
+  projectId: string;
+  metadata: ProjectAnalyzerGeneratedMetadata;
+  tree: ProjectTreeNode[];
+  entries: Record<string, ProjectAnalysisEntry>;
+};
+
+export type ProjectTemplateId =
+  | "compiler-pipeline"
+  | "systems-project"
+  | "fullstack-web"
+  | "ai-pipeline";
+
+export type ProjectAnalysisChecklist = {
+  folder: string[];
+  file: string[];
+};
+
+export type ProjectTemplate = {
+  templateId: ProjectTemplateId;
+  label: string;
+  description: string;
+  defaultPipeline: ProjectPipelineNode[];
+  defaultGuidedTour: ProjectGuidedTourStep[];
+  folderRoleHints: Record<string, string>;
+  analysisChecklist: ProjectAnalysisChecklist;
+  suggestedSkills: ProjectSkillHighlight[];
+  suggestedTechnicalDecisions: ProjectTechnicalDecision[];
+};
+
+/** Manual analysis files only; templateId is stripped before UI consumption. */
+export type ProjectManualAnalysisData = ProjectAnalyzerData & {
+  templateId?: ProjectTemplateId;
 };

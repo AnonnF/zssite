@@ -1,36 +1,260 @@
-import type { ProjectAnalysisEntry } from "@/data/projects/types";
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+import type {
+  ProjectAnalysisEntry,
+  ProjectCodeSnippet,
+} from "@/data/projects/types";
+import { HighlightedCodeBlock } from "./HighlightedCodeBlock";
+import { resolveHighlightLanguage } from "./resolveHighlightLanguage";
+import { ReviewBadge } from "./ReviewBadge";
 
 interface CodePreviewProps {
   entry: ProjectAnalysisEntry;
+  projectId: string;
 }
 
-export function CodePreview({ entry }: CodePreviewProps) {
-  const hasCode = Boolean(entry.code?.trim());
+type PreviewMode = "snippets" | "full";
+
+function formatLineRange(
+  snippet: ProjectCodeSnippet,
+  lineCount: number
+): string | null {
+  if (snippet.startLine == null) return null;
+  const end = snippet.endLine ?? snippet.startLine + Math.max(lineCount - 1, 0);
+  return `Lines ${snippet.startLine}–${end}`;
+}
+
+function SnippetCard({
+  snippet,
+  language,
+}: {
+  snippet: ProjectCodeSnippet;
+  language: string;
+}) {
+  const code = snippet.code.trim();
+  const lineCount = code ? code.split("\n").length : 0;
+  const lineRange = formatLineRange(snippet, lineCount);
+
+  const annotations = useMemo(
+    () =>
+      (snippet.annotations ?? [])
+        .filter((item) => item.line != null && item.note?.trim())
+        .sort((a, b) => a.line - b.line),
+    [snippet.annotations]
+  );
+
+  return (
+    <article className="snippet-card">
+      <div className="snippet-card__header">
+        <div className="snippet-card__header-main">
+          <h4 className="snippet-card__title">{snippet.title}</h4>
+          <ReviewBadge review={snippet.review} className="snippet-card__review" />
+        </div>
+        {lineRange && (
+          <span className="snippet-card__lines font-mono text-meta uppercase tracking-wider">
+            {lineRange}
+          </span>
+        )}
+      </div>
+
+      {snippet.reason?.trim() && (
+        <p className="snippet-card__reason">{snippet.reason}</p>
+      )}
+
+      <div className="snippet-card__code bg-[#1c1b19] p-3 md:p-4">
+        <HighlightedCodeBlock
+          code={code}
+          language={language}
+          startLine={snippet.startLine ?? 1}
+          prebuiltHighlightedHtml={snippet.highlightedHtml}
+        />
+      </div>
+
+      {annotations.length > 0 && (
+        <div className="snippet-card__annotations">
+          <p className="snippet-card__annotations-label font-mono text-meta uppercase tracking-wider">
+            Annotations
+          </p>
+          <ul className="snippet-card__annotations-list">
+            {annotations.map((item) => (
+              <li key={`${snippet.id}-${item.line}`}>
+                <span className="snippet-card__annotation-line">Line {item.line}</span>
+                <span className="snippet-card__annotation-sep" aria-hidden="true">
+                  —
+                </span>
+                <span className="snippet-card__annotation-note">{item.note}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </article>
+  );
+}
+
+export function CodePreview({ entry, projectId }: CodePreviewProps) {
+  const [loadedEntry, setLoadedEntry] = useState<ProjectAnalysisEntry | null>(null);
+  const [isLoadingFull, setIsLoadingFull] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  const previewEntry = loadedEntry?.path === entry.path ? loadedEntry : entry;
+  const code = previewEntry.code?.trim() ?? "";
+  const snippets = useMemo(
+    () => previewEntry.snippets?.filter((snippet) => snippet.code?.trim()) ?? [],
+    [previewEntry.snippets]
+  );
+  const hasSnippets = snippets.length > 0;
+
+  const language = useMemo(
+    () => resolveHighlightLanguage(previewEntry.language, previewEntry.path),
+    [previewEntry.language, previewEntry.path]
+  );
+
+  const [mode, setMode] = useState<PreviewMode>("full");
+
+  useEffect(() => {
+    setLoadedEntry(null);
+    setLoadError(null);
+  }, [entry.path]);
+
+  useEffect(() => {
+    setMode(hasSnippets ? "snippets" : "full");
+  }, [entry.path, hasSnippets]);
+
+  useEffect(() => {
+    if (mode !== "full" || entry.type === "folder" || entry.tooLarge) {
+      return;
+    }
+
+    if (code) {
+      return;
+    }
+
+    let cancelled = false;
+    setIsLoadingFull(true);
+    setLoadError(null);
+
+    fetch(
+      `/api/projects/${encodeURIComponent(projectId)}/entry?path=${encodeURIComponent(entry.path)}`
+    )
+      .then(async (response) => {
+        if (!response.ok) {
+          throw new Error("Failed to load file contents.");
+        }
+        return response.json() as Promise<{ entry: ProjectAnalysisEntry }>;
+      })
+      .then(({ entry: fullEntry }) => {
+        if (!cancelled) {
+          setLoadedEntry(fullEntry);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setLoadError("无法加载完整文件内容。");
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setIsLoadingFull(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [mode, entry.path, entry.type, entry.tooLarge, code, projectId]);
+
+  const displayLanguage = previewEntry.language ?? language;
+  const showModeTabs = hasSnippets && !entry.tooLarge;
+  const showSnippets = hasSnippets && mode === "snippets";
+  const wantsFullFile = mode === "full" && entry.type === "file";
+  const showFull = wantsFullFile && !entry.tooLarge;
+  const showEmpty = !showSnippets && !showFull;
 
   return (
     <section className="flex h-full min-h-0 flex-col">
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border-soft bg-surface/40 px-4 py-2.5 md:px-5">
-        <span className="font-mono text-meta uppercase tracking-wider text-muted">
-          Code Preview
-        </span>
-        <div className="flex flex-wrap items-center gap-2 font-mono text-meta text-muted">
-          {entry.language && (
+      <div className="analyzer-pane-header">
+        <div className="analyzer-pane-header__lead">
+          <span className="accent-bar mt-0.5" aria-hidden="true" />
+          <span className="analyzer-pane-header__label">Code Preview</span>
+        </div>
+        <div className="analyzer-pane-header__meta">
+          {showModeTabs && (
+            <div className="tree-header-actions" role="tablist" aria-label="Code preview mode">
+              <button
+                type="button"
+                role="tab"
+                aria-selected={mode === "snippets"}
+                className={`code-preview-mode-tab tree-header-action ${
+                  mode === "snippets" ? "code-preview-mode-tab--active" : ""
+                }`}
+                onClick={() => setMode("snippets")}
+              >
+                Key Snippets
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={mode === "full"}
+                className={`code-preview-mode-tab tree-header-action ${
+                  mode === "full" ? "code-preview-mode-tab--active" : ""
+                }`}
+                onClick={() => setMode("full")}
+              >
+                Full File
+              </button>
+            </div>
+          )}
+          {displayLanguage && (
             <span className="border border-border-soft px-1.5 py-0.5 uppercase tracking-wider">
-              {entry.language}
+              {displayLanguage}
             </span>
           )}
-          <span className="truncate max-w-[12rem] md:max-w-xs">{entry.path}</span>
+          <span className="max-w-[12rem] truncate md:max-w-xs">{previewEntry.path}</span>
         </div>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-auto bg-[#1c1b19] p-4 md:p-5">
-        {hasCode ? (
-          <pre className="font-mono text-[0.8125rem] leading-relaxed text-[#e8e4dc]">
-            <code>{entry.code}</code>
-          </pre>
-        ) : (
-          <p className="font-mono text-meta uppercase tracking-wider text-[#8a857c]">
-            No code preview available for this file.
+      <div className="code-preview-scroll min-h-0 flex-1 overflow-auto">
+        {showSnippets && (
+          <div className="snippet-list flex flex-col gap-3 p-3 md:p-4">
+            {snippets.map((snippet) => (
+              <SnippetCard key={snippet.id} snippet={snippet} language={language} />
+            ))}
+          </div>
+        )}
+
+        {showFull && entry.tooLarge && (
+          <p className="p-4 font-mono text-meta uppercase tracking-wider text-muted md:p-5">
+            文件过大，暂不提供完整预览。
+          </p>
+        )}
+
+        {showFull && !entry.tooLarge && isLoadingFull && !code && (
+          <p className="p-4 font-mono text-meta uppercase tracking-wider text-muted md:p-5">
+            正在加载完整文件…
+          </p>
+        )}
+
+        {showFull && !entry.tooLarge && loadError && !code && (
+          <p className="p-4 font-mono text-meta uppercase tracking-wider text-muted md:p-5">
+            {loadError}
+          </p>
+        )}
+
+        {showFull && !entry.tooLarge && code && (
+          <div className="bg-[#1c1b19] p-4 md:p-5">
+            <HighlightedCodeBlock
+              code={code}
+              language={language}
+              startLine={1}
+            />
+          </div>
+        )}
+
+        {showEmpty && (
+          <p className="p-4 font-mono text-meta uppercase tracking-wider text-muted md:p-5">
+            暂无代码预览
           </p>
         )}
       </div>

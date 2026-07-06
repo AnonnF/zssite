@@ -1,0 +1,2604 @@
+{
+  "projectId": "read-any",
+  "generatedAt": "2026-07-04T14:12:55.383Z",
+  "source": "ai-draft",
+  "provider": "deepseek",
+  "model": "deepseek-v4-flash",
+  "confidence": "draft",
+  "projectAnalysis": {
+    "overview": "ReadAny 是一个跨平台的电子书阅读应用，支持桌面（Tauri）和移动端（Expo），使用 foliate-js 作为渲染引擎。核心功能包括多种格式阅读、AI 辅助（聊天、摘要、翻译）、本地向量化 RAG 搜索、多设备同步、阅读统计、TTS 语音朗读等。项目采用 monorepo 结构，核心逻辑封装在 @readany/core 包中，前端分桌面（React + shadcn/ui）和移动端（React Native）两套实现。",
+    "suggestedPipeline": [
+      {
+        "id": "entry-desktop",
+        "label": "桌面端入口",
+        "path": "packages/app/src/main.tsx",
+        "language": "TypeScript",
+        "role": "应用启动和初始化"
+      },
+      {
+        "id": "entry-mobile",
+        "label": "移动端入口",
+        "path": "packages/app-expo/src/App.tsx",
+        "language": "TSX",
+        "role": "Expo 应用根组件，引导启动"
+      },
+      {
+        "id": "app-shell-desktop",
+        "label": "桌面端外壳",
+        "path": "packages/app/src/App.tsx",
+        "language": "TSX",
+        "role": "桌面布局与同步适配器注册"
+      },
+      {
+        "id": "core-library",
+        "label": "核心库入口",
+        "path": "packages/core/src/index.ts",
+        "language": "TypeScript",
+        "role": "导出所有核心模块"
+      },
+      {
+        "id": "ai-module",
+        "label": "AI 模块",
+        "path": "packages/core/src/ai/index.ts",
+        "language": "TypeScript",
+        "role": "AI 推理、工具调用、RAG"
+      },
+      {
+        "id": "db-layer",
+        "label": "数据库层",
+        "path": "packages/core/src/db/index.ts",
+        "language": "TypeScript",
+        "role": "SQLite 数据持久化与查询"
+      },
+      {
+        "id": "sync-module",
+        "label": "同步模块",
+        "path": "packages/core/src/sync/__tests__/schema-filtering.test.ts",
+        "language": "TypeScript",
+        "role": "多设备同步冲突处理（测试）"
+      },
+      {
+        "id": "i18n-setup",
+        "label": "国际化",
+        "path": "packages/core/src/i18n/index.ts",
+        "language": "TypeScript",
+        "role": "i18n 初始化和语言切换"
+      },
+      {
+        "id": "reader-engine",
+        "label": "阅读引擎",
+        "path": "packages/foliate-js/view.js",
+        "language": "JavaScript",
+        "role": "foliate-js 渲染核心"
+      },
+      {
+        "id": "test-config",
+        "label": "测试配置",
+        "path": "packages/core/vitest.config.ts",
+        "language": "TypeScript",
+        "role": "Vitest 单元测试配置"
+      }
+    ],
+    "suggestedGuidedTour": [
+      {
+        "id": "tour-entry-desktop",
+        "label": "桌面端启动流程",
+        "path": "packages/app/src/main.tsx",
+        "title": "桌面应用启动引导",
+        "description": "查看桌面端如何初始化平台服务、向量数据库、嵌入模型，并挂载 React 应用。"
+      },
+      {
+        "id": "tour-entry-mobile",
+        "label": "移动端启动流程",
+        "path": "packages/app-expo/src/App.tsx",
+        "title": "移动应用启动引导",
+        "description": "查看 Expo 应用如何注册平台服务、初始化数据库和 TrackPlayer，并处理引导错误。"
+      },
+      {
+        "id": "tour-core-ai",
+        "label": "AI 工具注册",
+        "path": "packages/core/src/ai/tools/index.ts",
+        "title": "AI 工具注册与条件分发",
+        "description": "查看根据书籍是否向量化动态注册 RAG 工具、分析工具、回退内容工具的逻辑。"
+      },
+      {
+        "id": "tour-core-db",
+        "label": "数据库查询接口",
+        "path": "packages/core/src/db/index.ts",
+        "title": "核心数据查询 API",
+        "description": "查看 books、highlights、reading sessions 等实体的数据库操作导出。"
+      },
+      {
+        "id": "tour-core-i18n",
+        "label": "国际化实现",
+        "path": "packages/core/src/i18n/index.ts",
+        "title": "多语言支持框架",
+        "description": "查看 i18n 初始化、语言自动检测、持久化切换的实现。"
+      },
+      {
+        "id": "tour-stats-test",
+        "label": "统计视图模型测试",
+        "path": "packages/core/src/stats/view-model-builder.test.ts",
+        "title": "阅读统计测试用例",
+        "description": "查看周报、月报、生命周期的 ViewModel 构建测试。"
+      },
+      {
+        "id": "tour-sync-test",
+        "label": "同步过滤测试",
+        "path": "packages/core/src/sync/__tests__/schema-filtering.test.ts",
+        "title": "同步 schema 冲突处理测试",
+        "description": "查看远程列忽略、时间戳冲突解决等同步逻辑的单元测试。"
+      }
+    ],
+    "technicalDecisions": [
+      {
+        "title": "跨平台架构：Tauri + Expo",
+        "decision": "桌面端使用 Tauri v2（Rust + React），移动端使用 Expo（React Native），核心逻辑抽离为 @readany/core 共享包。",
+        "rationale": "Tauri 提供桌面原生性能和小体积打包；Expo 简化移动端开发流程；共享 core 包避免重复实现业务逻辑。",
+        "impact": "需要两套前端组件和平台适配层，但核心模块（数据、AI、同步）可复用，降低维护成本。"
+      },
+      {
+        "title": "阅读引擎：foliate-js",
+        "decision": "采用 foliate-js 作为电子书渲染引擎，支持 EPUB、PDF、MOBI、FB2、Comic Book 等格式。",
+        "rationale": "foliate-js 是成熟的电子书 JavaScript 渲染库，社区活跃，易于集成到 WebView 中。",
+        "impact": "提供了统一的阅读视图和交互事件（如分页、高亮），但需要桥接原生 TTS/音频。"
+      },
+      {
+        "title": "本地 AI：向量化 + RAG",
+        "decision": "使用本地嵌入模型实现书籍内容向量化，支持 RAG 搜索；集成 LangChain 进行工具调用和流式聊天。",
+        "rationale": "保护用户隐私，离线可用；利用 RAG 增强 AI 对书籍内容的上下文理解。",
+        "impact": "需要管理嵌入模型加载和设备资源，增加了启动复杂度，但提供了强大的 AI 辅助阅读功能。"
+      },
+      {
+        "title": "同步策略：基于时间戳的简单同步",
+        "decision": "采用本地 SQLite 数据库，同步时按 updated_at 时间戳和 deviceId 进行冲突解决，支持软删除。",
+        "rationale": "简单可靠，适合单人多设备场景；避免 CRDT 复杂性和冲突解决开销。",
+        "impact": "对于并发写冲突，以时间戳较晚者为准（相同时间戳远程优先），可能丢失少量数据，但实现简单。"
+      },
+      {
+        "title": "测试框架：Vitest",
+        "decision": "使用 Vitest 进行单元测试，配置 node 环境。",
+        "rationale": "与 Vite 生态集成好，速度快，支持 TypeScript 和 ESM。",
+        "impact": "测试主要集中在 core 包，确保核心逻辑稳定性。桌面和移动端前端测试较弱（未在本次分析中体现）。"
+      }
+    ],
+    "skills": [
+      {
+        "title": "多格式电子书阅读",
+        "description": "支持 EPUB、PDF、MOBI、FB2、CBZ/CBR 等格式的渲染和导航。"
+      },
+      {
+        "title": "AI 智能阅读助手",
+        "description": "通过大语言模型提供书籍摘要、实体提取、论点分析、名言查找、段落对比等功能；支持自定义技能。"
+      },
+      {
+        "title": "本地 RAG 搜索",
+        "description": "对书籍内容进行本地向量化，实现语义搜索和上下文问答。"
+      },
+      {
+        "title": "多设备同步",
+        "description": "基于 WebDAV 的自定义同步协议，支持阅读进度、书签、笔记等数据的跨设备同步。"
+      },
+      {
+        "title": "阅读统计与分析",
+        "description": "记录阅读时长、页数、连续阅读情况，生成周报、月报、年报告，提供阅读洞察。"
+      },
+      {
+        "title": "TTS 语音朗读",
+        "description": "集成系统 TTS（移动端）或自定义 TTS，支持实时语音朗读和进度控制。"
+      },
+      {
+        "title": "多语言国际化",
+        "description": "支持英文、简体中文、繁体中文、日文、韩文、法文、西班牙文，自动检测系统语言。"
+      },
+      {
+        "title": "实时反馈系统",
+        "description": "用户可以通过内置反馈模块提交问题、建议，支持日志收集和自动上传。"
+      }
+    ]
+  },
+  "entries": {
+    "packages/app-expo/app.config.js": {
+      "path": "packages/app-expo/app.config.js",
+      "type": "file",
+      "summary": "Expo 应用配置文件，定义构建变体、名称、版本、插件等。",
+      "analysis": {
+        "purpose": "配置 Expo 应用的基本信息、插件和平台特性。",
+        "responsibilities": [
+          "根据构建变体设置 app name 和 bundle identifier",
+          "配置 iOS 和 Android 的权限、图标、启动屏",
+          "注册 Expo 插件（expo-dev-client, expo-av, expo-camera 等）",
+          "设置 EAS projectId 和 scheme"
+        ],
+        "input": "getAppVariantConfig() 返回的变体配置",
+        "output": "Expo 配置对象",
+        "role": "构建配置",
+        "keyLogic": [
+          "通过脚本 app-variant.js 动态获取变体配置",
+          "iOS 后台音频模式、相机权限、本地网络描述",
+          "Android 自适应图标、软件键盘布局、清理字段"
+        ],
+        "relatedModules": [
+          "scripts/app-variant.js"
+        ],
+        "relatedPaths": [
+          "packages/app-expo/package.json",
+          "packages/app-expo/scripts/"
+        ],
+        "usedBy": [
+          "expo-cli eas build"
+        ],
+        "notes": []
+      },
+      "snippetSuggestions": [
+        {
+          "id": "expo-config-variant",
+          "filePath": "packages/app-expo/app.config.js",
+          "title": "应用变体配置",
+          "startLine": 1,
+          "endLine": 3,
+          "reason": "展示了如何根据构建变体动态调整名称和标识符",
+          "confidence": "high",
+          "annotations": [
+            {
+              "line": 1,
+              "note": "导入变体配置获取函数"
+            },
+            {
+              "line": 3,
+              "note": "提取变体配置"
+            }
+          ]
+        },
+        {
+          "id": "expo-plugins",
+          "filePath": "packages/app-expo/app.config.js",
+          "title": "Expo 插件注册",
+          "startLine": 53,
+          "endLine": 72,
+          "reason": "展示了多个常用 Expo 插件的配置，包括权限描述和构建属性",
+          "confidence": "high",
+          "annotations": [
+            {
+              "line": 56,
+              "note": "expo-dev-client 配置"
+            },
+            {
+              "line": 68,
+              "note": "expo-camera 权限描述"
+            }
+          ]
+        }
+      ],
+      "snippets": [
+        {
+          "id": "expo-config-variant",
+          "title": "应用变体配置",
+          "filePath": "packages/app-expo/app.config.js",
+          "startLine": 1,
+          "endLine": 3,
+          "reason": "展示了如何根据构建变体动态调整名称和标识符",
+          "code": "const { getAppVariantConfig } = require(\"./scripts/app-variant\");\n\nconst variant = getAppVariantConfig();",
+          "annotations": [
+            {
+              "line": 1,
+              "note": "导入变体配置获取函数"
+            },
+            {
+              "line": 3,
+              "note": "提取变体配置"
+            }
+          ],
+          "validationStatus": "valid",
+          "confidence": "high"
+        },
+        {
+          "id": "expo-plugins",
+          "title": "Expo 插件注册",
+          "filePath": "packages/app-expo/app.config.js",
+          "startLine": 53,
+          "endLine": 72,
+          "reason": "展示了多个常用 Expo 插件的配置，包括权限描述和构建属性",
+          "code": "      [\n        \"expo-av\",\n        {\n          microphonePermission: false,\n        },\n      ],\n      [\n        \"expo-build-properties\",\n        {\n          android: {\n            enableProguardInReleaseBuilds: true,\n            enableShrinkResourcesInReleaseBuilds: true,\n            enableMinifyInReleaseBuilds: true,\n            usesCleartextTraffic: true,\n          },\n        },\n      ],\n      \"expo-font\",\n      [\n        \"expo-image-picker\",",
+          "annotations": [
+            {
+              "line": 56,
+              "note": "expo-dev-client 配置"
+            },
+            {
+              "line": 68,
+              "note": "expo-camera 权限描述"
+            }
+          ],
+          "validationStatus": "valid",
+          "confidence": "high"
+        }
+      ],
+      "review": {
+        "status": "ai-draft",
+        "source": "ai-draft"
+      }
+    },
+    "packages/app-expo/modules/system-tts-synthesis/index.ts": {
+      "path": "packages/app-expo/modules/system-tts-synthesis/index.ts",
+      "type": "file",
+      "summary": "系统 TTS 合成模块的 TypeScript 接口，封装原生模块调用。",
+      "analysis": {
+        "purpose": "提供跨平台的系统 TTS 合成功能，支持 Android 和 iOS。",
+        "responsibilities": [
+          "声明原生模块 synthesizeToFile 方法",
+          "实现模块解析与回退（noop）",
+          "导出可用性检查函数 isSystemTtsSynthesisAvailable"
+        ],
+        "input": "文本字符串和选项（速率、音调、语言、声音）",
+        "output": "合成的音频文件路径（Promise<string>）",
+        "role": "原生桥接层",
+        "keyLogic": [
+          "使用 requireNativeModule 获取原生模块",
+          "在非 Android/iOS 或模块不存在时提供 noop 回退"
+        ],
+        "relatedModules": [
+          "packages/app-expo/modules/system-tts-synthesis"
+        ],
+        "relatedPaths": [
+          "packages/app-expo/src/stores/tts-store.ts",
+          "packages/app-expo/src/components/tts/"
+        ],
+        "usedBy": [
+          "TTS store 和服务"
+        ],
+        "notes": []
+      },
+      "snippetSuggestions": [
+        {
+          "id": "tts-module-resolve",
+          "filePath": "packages/app-expo/modules/system-tts-synthesis/index.ts",
+          "title": "原生 TTS 模块解析",
+          "startLine": 16,
+          "endLine": 26,
+          "reason": "展示了优雅的模块回退机制",
+          "confidence": "high",
+          "annotations": [
+            {
+              "line": 16,
+              "note": "noop 实现，防止未找到模块时报错"
+            },
+            {
+              "line": 21,
+              "note": "仅在 Android/iOS 下尝试加载"
+            }
+          ]
+        }
+      ],
+      "snippets": [
+        {
+          "id": "tts-module-resolve",
+          "title": "原生 TTS 模块解析",
+          "filePath": "packages/app-expo/modules/system-tts-synthesis/index.ts",
+          "startLine": 16,
+          "endLine": 26,
+          "reason": "展示了优雅的模块回退机制",
+          "code": "const noop = {\n  synthesizeToFile: async () => {\n    throw new Error(\"SystemTtsSynthesis module is unavailable\");\n  },\n} as unknown as SystemTtsSynthesisModule;\n\nfunction resolveModule(): SystemTtsSynthesisModule {\n  if (Platform.OS !== \"android\" && Platform.OS !== \"ios\") return noop;\n  try {\n    return requireNativeModule<SystemTtsSynthesisModule>(\"SystemTtsSynthesis\");\n  } catch {",
+          "annotations": [
+            {
+              "line": 16,
+              "note": "noop 实现，防止未找到模块时报错"
+            },
+            {
+              "line": 21,
+              "note": "仅在 Android/iOS 下尝试加载"
+            }
+          ],
+          "validationStatus": "valid",
+          "confidence": "high"
+        }
+      ],
+      "review": {
+        "status": "ai-draft",
+        "source": "ai-draft"
+      }
+    },
+    "packages/app-expo/modules/volume-key-paging/index.ts": {
+      "path": "packages/app-expo/modules/volume-key-paging/index.ts",
+      "type": "file",
+      "summary": "音量键翻页模块的 TypeScript 接口，仅在 Android 下生效。",
+      "analysis": {
+        "purpose": "通过音量键控制翻页（上一页/下一页）。",
+        "responsibilities": [
+          "声明原生模块 VolumeKeyPagingModule",
+          "提供 setEnabled 方法控制开关",
+          "事件订阅 VolumeKeyPaging（方向 prev/next）"
+        ],
+        "input": "enable 布尔值",
+        "output": "无直接返回，通过事件传递翻页方向",
+        "role": "原生桥接层",
+        "keyLogic": [
+          "仅在 Android 平台下加载模块",
+          "使用 EventEmitter 模式传递翻页事件"
+        ],
+        "relatedModules": [
+          "packages/app-expo/plugins/withVolumeKeyPaging.js"
+        ],
+        "relatedPaths": [
+          "packages/app-expo/src/hooks/",
+          "packages/app-expo/src/screens/reader/"
+        ],
+        "usedBy": [
+          "阅读页面手势和快捷键处理"
+        ],
+        "notes": []
+      },
+      "review": {
+        "status": "ai-draft",
+        "source": "ai-draft"
+      }
+    },
+    "packages/app-expo/src/App.tsx": {
+      "path": "packages/app-expo/src/App.tsx",
+      "type": "file",
+      "summary": "移动端 Expo 应用根组件，负责启动引导、平台服务注册、导航挂载。",
+      "analysis": {
+        "purpose": "初始化移动端应用环境，挂载 React Navigation 和全局 UI 组件。",
+        "responsibilities": [
+          "Polyfill AbortSignal 和 navigator.userAgent（兼容 LangChain）",
+          "设置平台服务和同步适配器",
+          "初始化数据库和 i18n",
+          "配置 TrackPlayer 和音频模式",
+          "处理启动错误和 SplashScreen",
+          "挂载 ThemeProvider、NavigationContainer、UpdateDialog、FloatingTTSBubble"
+        ],
+        "input": "无",
+        "output": "渲染完整的应用 UI",
+        "role": "应用入口",
+        "keyLogic": [
+          "bootstrap 异步函数执行顺序：平台服务 → 数据库 → i18n → TrackPlayer",
+          "对 TrackPlayer 重复初始化异常的处理",
+          "远程事件（RemotePlay/RemotePause）桥接到 TTS store"
+        ],
+        "relatedModules": [
+          "@readany/core/db/database",
+          "@readany/core/i18n",
+          "@readany/core/feedback",
+          "@readany/core/sync",
+          "expo-av"
+        ],
+        "relatedPaths": [
+          "packages/app-expo/src/navigation/RootNavigator.tsx",
+          "packages/app-expo/src/stores/tts-store.ts",
+          "packages/app-expo/src/lib/platform/expo-platform-service.ts"
+        ],
+        "usedBy": [
+          "index.js（Expo 入口）"
+        ],
+        "notes": [
+          "注释解释了 iOS 新架构下 TurdoModuleManager 超时警告只是开发噪音"
+        ]
+      },
+      "snippetSuggestions": [
+        {
+          "id": "mobile-bootstrap",
+          "filePath": "packages/app-expo/src/App.tsx",
+          "title": "移动端启动引导序列",
+          "startLine": 83,
+          "endLine": 138,
+          "reason": "展示了完整的启动初始化流程，包括平台服务注册、数据库、i18n、TrackPlayer 等",
+          "confidence": "high",
+          "annotations": [
+            {
+              "line": 86,
+              "note": "注册 Expo 平台服务"
+            },
+            {
+              "line": 89,
+              "note": "注册移动端同步适配器"
+            },
+            {
+              "line": 116,
+              "note": "配置音频后台播放模式"
+            },
+            {
+              "line": 123,
+              "note": "处理 TrackPlayer 重复初始化异常"
+            }
+          ]
+        },
+        {
+          "id": "trackplayer-events",
+          "filePath": "packages/app-expo/src/App.tsx",
+          "title": "TrackPlayer 远程事件桥接",
+          "startLine": 147,
+          "endLine": 169,
+          "reason": "展示了如何将系统媒体控制事件转换为 TTS store 调用",
+          "confidence": "high",
+          "annotations": [
+            {
+              "line": 148,
+              "note": "远程播放→TTS resume"
+            },
+            {
+              "line": 155,
+              "note": "跳转下一段"
+            }
+          ]
+        }
+      ],
+      "snippets": [
+        {
+          "id": "mobile-bootstrap",
+          "title": "移动端启动引导序列",
+          "filePath": "packages/app-expo/src/App.tsx",
+          "startLine": 83,
+          "endLine": 138,
+          "reason": "展示了完整的启动初始化流程，包括平台服务注册、数据库、i18n、TrackPlayer 等",
+          "code": "export default function App() {\n  const [ready, setReady] = useState(false);\n  const [splashDone, setSplashDone] = useState(false);\n  const [bootError, setBootError] = useState<string | null>(null);\n\n  useEffect(() => {\n    async function bootstrap() {\n      try {\n        console.log(\"[App] bootstrap: register platform service\");\n        const platform = new ExpoPlatformService();\n        setPlatformService(platform);\n\n        console.log(\"[App] bootstrap: register sync adapter\");\n        setSyncAdapter(new MobileSyncAdapter());\n\n        console.log(\"[App] bootstrap: init database\");\n        await initDatabase();\n\n        console.log(\"[App] bootstrap: wait i18nReady\");\n        await i18nReady;\n        console.log(\"[App] i18n initialized successfully\");\n\n        console.log(\"[App] bootstrap: register RN session source\");\n        setSessionEventSource(rnSessionEventSource);\n\n        console.log(\"[App] bootstrap: init language\");\n        await initI18nLanguage();\n\n        console.log(\"[App] bootstrap: import expo/fetch\");\n        const { fetch: expoFetch } = await import(\"expo/fetch\");\n        setStreamingFetch(expoFetch as typeof globalThis.fetch);\n\n        console.log(\"[App] bootstrap: configure audio mode\");\n        await Audio.setAudioModeAsync({\n          playsInSilentModeIOS: true,\n          staysActiveInBackground: true,\n          shouldDuckAndroid: true,\n        });\n\n        console.log(\"[App] bootstrap: init react-native-track-player\");\n        // setupPlayer can only be called once per native process. On Android,\n        // a Configuration Change (e.g. Huawei tablet small-screen → fullscreen)\n        // restarts the Activity and re-runs this bootstrap, but the native\n        // singleton is still alive — so setupPlayer() throws\n        // \"The player has already been initialized via setupPlayer\".\n        // Treat that specific error as success so bootstrap can continue.\n        try {\n          await TrackPlayer.setupPlayer();\n        } catch (e) {\n          const msg = e instanceof Error ? e.message : String(e);\n          if (!/already been initialized/i.test(msg)) throw e;\n          console.log(\"[App] TrackPlayer already initialized — reusing existing native instance\");\n        }\n        await TrackPlayer.updateOptions({\n          android: {\n            appKilledPlaybackBehavior: AppKilledPlaybackBehavior.ContinuePlayback,",
+          "annotations": [
+            {
+              "line": 86,
+              "note": "注册 Expo 平台服务"
+            },
+            {
+              "line": 89,
+              "note": "注册移动端同步适配器"
+            },
+            {
+              "line": 116,
+              "note": "配置音频后台播放模式"
+            },
+            {
+              "line": 123,
+              "note": "处理 TrackPlayer 重复初始化异常"
+            }
+          ],
+          "validationStatus": "valid",
+          "confidence": "high"
+        },
+        {
+          "id": "trackplayer-events",
+          "title": "TrackPlayer 远程事件桥接",
+          "filePath": "packages/app-expo/src/App.tsx",
+          "startLine": 147,
+          "endLine": 169,
+          "reason": "展示了如何将系统媒体控制事件转换为 TTS store 调用",
+          "code": "            Capability.SkipToPrevious,\n          ],\n          compactCapabilities: [Capability.Play, Capability.Pause],\n          notificationCapabilities: [\n            Capability.Play,\n            Capability.Pause,\n            Capability.Stop,\n            Capability.SkipToNext,\n            Capability.SkipToPrevious,\n          ],\n        });\n\n        // Remote event → TTS store bridge\n        const { useTTSStore: ttsStore } = await import(\"@/stores/tts-store\");\n        TrackPlayer.addEventListener(TrackEvent.RemotePlay, () => {\n          ttsStore.getState().resume();\n        });\n        TrackPlayer.addEventListener(TrackEvent.RemotePause, () => {\n          ttsStore.getState().pause();\n        });\n        TrackPlayer.addEventListener(TrackEvent.RemoteStop, () => {\n          ttsStore.getState().stop();\n        });",
+          "annotations": [
+            {
+              "line": 148,
+              "note": "远程播放→TTS resume"
+            },
+            {
+              "line": 155,
+              "note": "跳转下一段"
+            }
+          ],
+          "validationStatus": "valid",
+          "confidence": "high"
+        }
+      ],
+      "review": {
+        "status": "ai-draft",
+        "source": "ai-draft"
+      }
+    },
+    "packages/app-expo/src/hooks/index.ts": {
+      "path": "packages/app-expo/src/hooks/index.ts",
+      "type": "file",
+      "summary": "移动端 Hooks 导出索引，重新导出 core 和本地 hooks。",
+      "analysis": {
+        "purpose": "提供移动端专属和复用的自定义 Hooks。",
+        "responsibilities": [
+          "导出 @readany/core 的 useStreamingChat 和类型",
+          "导出本地 useDebounce、useThrottledValue 等工具 hooks",
+          "导出 rnSessionEventSource"
+        ],
+        "input": "无",
+        "output": "Hook 导出",
+        "role": "模块接口",
+        "keyLogic": [],
+        "relatedModules": [
+          "@readany/core/hooks/use-streaming-chat"
+        ],
+        "relatedPaths": [
+          "packages/app-expo/src/hooks/use-debounce.ts",
+          "packages/app-expo/src/hooks/use-throttled-value.ts"
+        ],
+        "usedBy": [
+          "移动端各页面组件"
+        ],
+        "notes": []
+      },
+      "review": {
+        "status": "ai-draft",
+        "source": "ai-draft"
+      }
+    },
+    "packages/app-expo/src/screens/reader/styles/index.ts": {
+      "path": "packages/app-expo/src/screens/reader/styles/index.ts",
+      "type": "file",
+      "summary": "阅读器样式导出索引，聚合多个样式模块。",
+      "analysis": {
+        "purpose": "统一导出阅读器相关样式函数和常量。",
+        "responsibilities": [
+          "导出工具栏样式、底部弹窗样式、笔记样式"
+        ],
+        "input": "无",
+        "output": "样式函数",
+        "role": "样式入口",
+        "keyLogic": [],
+        "relatedModules": [
+          "packages/app-expo/src/screens/reader/styles/reader-base-styles.ts",
+          "packages/app-expo/src/screens/reader/styles/reader-sheet-styles.ts",
+          "packages/app-expo/src/screens/reader/styles/reader-note-styles.ts"
+        ],
+        "relatedPaths": [],
+        "usedBy": [
+          "阅读器组件"
+        ],
+        "notes": []
+      },
+      "review": {
+        "status": "ai-draft",
+        "source": "ai-draft"
+      }
+    },
+    "packages/app-expo/src/stores/index.ts": {
+      "path": "packages/app-expo/src/stores/index.ts",
+      "type": "file",
+      "summary": "移动端状态管理导出索引，聚合多个 Zustand store。",
+      "analysis": {
+        "purpose": "集中导出移动端和 core 的状态存储。",
+        "responsibilities": [
+          "导出 reader、settings、TTS、annotation 等 store"
+        ],
+        "input": "无",
+        "output": "Store 和类型导出",
+        "role": "状态管理入口",
+        "keyLogic": [],
+        "relatedModules": [
+          "packages/app-expo/src/stores/app-store.ts",
+          "packages/app-expo/src/stores/reader-store.ts",
+          "packages/app-expo/src/stores/tts-store.ts",
+          "packages/app-expo/src/stores/persist.ts"
+        ],
+        "relatedPaths": [
+          "packages/app-expo/src/stores/"
+        ],
+        "usedBy": [
+          "移动端组件"
+        ],
+        "notes": []
+      },
+      "review": {
+        "status": "ai-draft",
+        "source": "ai-draft"
+      }
+    },
+    "packages/app/index.html": {
+      "path": "packages/app/index.html",
+      "type": "file",
+      "summary": "桌面端 HTML 入口文件，挂载 React 应用。",
+      "analysis": {
+        "purpose": "提供 Web/Tauri 应用的 HTML 容器。",
+        "responsibilities": [
+          "设置 meta viewport 和 favicon",
+          "包含 root 容器和脚本入口"
+        ],
+        "input": "无",
+        "output": "HTML 页面",
+        "role": "Web 入口",
+        "keyLogic": [
+          "使用 type=\"module\" 加载 main.tsx"
+        ],
+        "relatedModules": [
+          "packages/app/src/main.tsx"
+        ],
+        "relatedPaths": [],
+        "usedBy": [
+          "Tauri 或 Vite dev server"
+        ],
+        "notes": []
+      },
+      "review": {
+        "status": "ai-draft",
+        "source": "ai-draft"
+      }
+    },
+    "packages/app/src-tauri/src/main.rs": {
+      "path": "packages/app/src-tauri/src/main.rs",
+      "type": "file",
+      "summary": "Tauri 桌面端 Rust 入口，调用 app_lib::run()。",
+      "analysis": {
+        "purpose": "Tauri 应用的 Rust 入口点。",
+        "responsibilities": [
+          "配置 Windows 子系统（release 下隐藏控制台）",
+          "调用 app_lib::run() 启动应用"
+        ],
+        "input": "无",
+        "output": "桌面窗口",
+        "role": "Rust 入口",
+        "keyLogic": [
+          "cfg_attr 指令在非 debug 模式下切换 Windows 子系统"
+        ],
+        "relatedModules": [
+          "packages/app/src-tauri/src/lib.rs"
+        ],
+        "relatedPaths": [],
+        "usedBy": [
+          "Tauri 构建系统"
+        ],
+        "notes": []
+      },
+      "review": {
+        "status": "ai-draft",
+        "source": "ai-draft"
+      }
+    },
+    "packages/app/src/App.tsx": {
+      "path": "packages/app/src/App.tsx",
+      "type": "file",
+      "summary": "桌面端应用根组件，标签页布局，注册同步适配器。",
+      "analysis": {
+        "purpose": "搭建桌面端主界面，挂载全局组件。",
+        "responsibilities": [
+          "注册桌面端同步适配器（模块级）",
+          "渲染 AppLayout（标签页布局）",
+          "添加 Toaster 通知组件和 UpdateNotification"
+        ],
+        "input": "无",
+        "output": "桌面端 UI",
+        "role": "桌面端布局入口",
+        "keyLogic": [
+          "setSyncAdapter 在模块加载时执行（非组件内）",
+          "所有标签页保持挂载，通过 CSS display 切换"
+        ],
+        "relatedModules": [
+          "@readany/core/sync",
+          "packages/app/src/components/layout/AppLayout",
+          "packages/app/src/lib/sync/sync-adapter-desktop"
+        ],
+        "relatedPaths": [],
+        "usedBy": [
+          "main.tsx 的 React 渲染"
+        ],
+        "notes": []
+      },
+      "review": {
+        "status": "ai-draft",
+        "source": "ai-draft"
+      }
+    },
+    "packages/app/src/lib/reader/index.ts": {
+      "path": "packages/app/src/lib/reader/index.ts",
+      "type": "file",
+      "summary": "桌面端阅读器库入口，导出 DocumentLoader 和事件处理。",
+      "analysis": {
+        "purpose": "提供阅读器模块的统一导出接口。",
+        "responsibilities": [
+          "导出 DocumentLoader 和类型（BookDoc, BookMetadata 等）",
+          "导出 iframe 事件注册函数"
+        ],
+        "input": "无",
+        "output": "模块导出",
+        "role": "阅读器层接口",
+        "keyLogic": [
+          "注释说明旧的渲染抽象已被 foliate-js 统一架构取代"
+        ],
+        "relatedModules": [
+          "packages/app/src/lib/reader/document-loader.ts",
+          "foliate-js"
+        ],
+        "relatedPaths": [
+          "packages/app/src/components/reader/"
+        ],
+        "usedBy": [
+          "桌面端阅读器组件"
+        ],
+        "notes": []
+      },
+      "review": {
+        "status": "ai-draft",
+        "source": "ai-draft"
+      }
+    },
+    "packages/app/src/main.tsx": {
+      "path": "packages/app/src/main.tsx",
+      "type": "file",
+      "summary": "桌面端应用启动脚本，初始化平台服务、向量数据库、嵌入模型、i18n 后渲染 React 根组件。",
+      "analysis": {
+        "purpose": "初始化桌面端运行环境，挂载 React 应用。",
+        "responsibilities": [
+          "加载 polyfills",
+          "注册 Tauri 平台服务和流式 fetch",
+          "设置嵌入工作线程和向量数据库",
+          "同步旧版桌面库根配置",
+          "根据 vector model 对齐向量维度",
+          "恢复主题和语言设置",
+          "注册 beforeunload 事件持久化 store",
+          "加载书籍列表和监听 AI 工具变更",
+          "预加载 foliate-js 核心模块",
+          "渲染 App 组件"
+        ],
+        "input": "无",
+        "output": "React 应用挂载",
+        "role": "应用入口（桌面端）",
+        "keyLogic": [
+          "使用 TauriVectorDB 并通过 setVectorDB 注册",
+          "嵌入工作线程使用 new URL() 显式指定 type: module",
+          "根据 selectedBuiltinModelId 调整向量维度",
+          "i18n 初始化完成后才渲染，确保文本可用"
+        ],
+        "relatedModules": [
+          "@readany/core/ai",
+          "@readany/core/rag",
+          "@readany/core/events/library-events",
+          "packages/app/src/lib/platform/tauri-platform-service",
+          "packages/app/src/lib/tauri-vector-db"
+        ],
+        "relatedPaths": [
+          "packages/app/src/App.tsx",
+          "packages/app/src/stores/",
+          "packages/app/src/lib/rag/fallback-content-provider.ts"
+        ],
+        "usedBy": [
+          "index.html 的 <script> 标签"
+        ],
+        "notes": [
+          "桌面端和移动端的启动流程差异较大，主要区别在平台服务和原生模块"
+        ]
+      },
+      "snippetSuggestions": [
+        {
+          "id": "desktop-bootstrap-sequence",
+          "filePath": "packages/app/src/main.tsx",
+          "title": "桌面端完整启动序列",
+          "startLine": 23,
+          "endLine": 64,
+          "reason": "展示了从 polyfill 到嵌入模型、向量数据库、语言恢复的全套初始化",
+          "confidence": "high",
+          "annotations": [
+            {
+              "line": 26,
+              "note": "注册 Tauri 平台服务"
+            },
+            {
+              "line": 33,
+              "note": "设置嵌入工作线程工厂"
+            },
+            {
+              "line": 37,
+              "note": "设置向量数据库引用"
+            },
+            {
+              "line": 48,
+              "note": "根据模型调整向量维度"
+            }
+          ]
+        },
+        {
+          "id": "i18n-theme-restore",
+          "filePath": "packages/app/src/main.tsx",
+          "title": "i18n 和主题恢复",
+          "startLine": 66,
+          "endLine": 85,
+          "reason": "展示了如何异步等待 i18n 就绪后恢复主题和语言",
+          "confidence": "high",
+          "annotations": [
+            {
+              "line": 69,
+              "note": "从 localStorage 恢复主题"
+            },
+            {
+              "line": 80,
+              "note": "从 KV 存储恢复语言"
+            }
+          ]
+        }
+      ],
+      "snippets": [
+        {
+          "id": "desktop-bootstrap-sequence",
+          "title": "桌面端完整启动序列",
+          "filePath": "packages/app/src/main.tsx",
+          "startLine": 23,
+          "endLine": 64,
+          "reason": "展示了从 polyfill 到嵌入模型、向量数据库、语言恢复的全套初始化",
+          "code": "import { flushAllWrites } from \"./stores/persist\";\nimport { useVectorModelStore } from \"./stores/vector-model-store\";\n\ninstallFeedbackLogCapture();\n\nconst FEEDBACK_WORKER_FALLBACK = \"https://feedback.readany.top\";\nconst feedbackWorkerUrl = import.meta.env.VITE_FEEDBACK_WORKER_URL?.trim() || FEEDBACK_WORKER_FALLBACK;\nsetFeedbackWorkerUrl(feedbackWorkerUrl);\n\n// Register platform service before any database/core operations\nconst tauriPlatform = new TauriPlatformService();\ntauriPlatform.initSync().catch(console.error);\nsetPlatformService(tauriPlatform);\nregisterDesktopFallbackContentProvider();\n\n// Set Tauri fetch for streaming AI requests (avoids CORS issues)\nsetStreamingFetch(tauriFetch as typeof globalThis.fetch);\n\n// Register embedding worker factory for Vite/Tauri\n// Must use `new URL(...)` + explicit `{ type: \"module\" }` so that\n// import.meta.url is available inside the worker (needed by @huggingface/transformers / onnxruntime-web)\nsetEmbeddingWorkerFactory(\n  () =>\n    new Worker(new URL(\"@readany/core/ai/embedding-worker\", import.meta.url), { type: \"module\" }),\n);\n\n// Set vector database reference (initialized in Rust setup)\nconst tauriVectorDB = new TauriVectorDB();\nsetVectorDB(tauriVectorDB);\nconsole.log(\"[VectorDB] TauriVectorDB reference set\");\n\nconst desktopDataRootReady = syncLegacyDesktopLibraryRootConfig().catch(console.error);\n\n// Align vector DB dimension with the currently selected model\n(async () => {\n  try {\n    await desktopDataRootReady;\n    const { vectorModelMode, selectedBuiltinModelId, getSelectedVectorModel } =\n      useVectorModelStore.getState();\n    let dimension: number | undefined;\n\n    if (vectorModelMode === \"builtin\" && selectedBuiltinModelId) {",
+          "annotations": [
+            {
+              "line": 26,
+              "note": "注册 Tauri 平台服务"
+            },
+            {
+              "line": 33,
+              "note": "设置嵌入工作线程工厂"
+            },
+            {
+              "line": 37,
+              "note": "设置向量数据库引用"
+            },
+            {
+              "line": 48,
+              "note": "根据模型调整向量维度"
+            }
+          ],
+          "validationStatus": "valid",
+          "confidence": "high"
+        },
+        {
+          "id": "i18n-theme-restore",
+          "title": "i18n 和主题恢复",
+          "filePath": "packages/app/src/main.tsx",
+          "startLine": 66,
+          "endLine": 85,
+          "reason": "展示了如何异步等待 i18n 就绪后恢复主题和语言",
+          "code": "      dimension = model?.dimension;\n    } else if (vectorModelMode === \"remote\") {\n      const remoteModel = getSelectedVectorModel();\n      dimension = remoteModel?.dimension;\n    }\n\n    if (dimension && dimension !== 384) {\n      await tauriVectorDB.reinit(dimension);\n      console.log(`[VectorDB] Aligned dimension to ${dimension}`);\n    }\n  } catch (err) {\n    console.warn(\"[VectorDB] Failed to align dimension on startup:\", err);\n  }\n})();\n\n// Ensure i18n is fully initialized before rendering\ni18nReady.then(() => {\n  desktopDataRootReady.catch(console.error);\n\n  // Restore saved theme from localStorage",
+          "annotations": [
+            {
+              "line": 69,
+              "note": "从 localStorage 恢复主题"
+            },
+            {
+              "line": 80,
+              "note": "从 KV 存储恢复语言"
+            }
+          ],
+          "validationStatus": "valid",
+          "confidence": "high"
+        }
+      ],
+      "review": {
+        "status": "ai-draft",
+        "source": "ai-draft"
+      }
+    },
+    "packages/core/src/ai/index.ts": {
+      "path": "packages/core/src/ai/index.ts",
+      "type": "file",
+      "summary": "AI 模块导出索引，涵盖 LLM 提供者、工具、嵌入、聊天等。",
+      "analysis": {
+        "purpose": "集中导出 AI 子模块的所有公开 API。",
+        "responsibilities": [
+          "导出 LLM 创建和端点管理",
+          "导出消息处理管道",
+          "导出语义上下文提取",
+          "导出流式聊天和线程管理",
+          "导出嵌入模型和本地嵌入服务",
+          "导出工具注册和上下文工具",
+          "导出阅读上下文服务和回退内容服务"
+        ],
+        "input": "无",
+        "output": "模块导出",
+        "role": "AI 功能接口",
+        "keyLogic": [],
+        "relatedModules": [
+          "packages/core/src/ai/llm-provider.ts",
+          "packages/core/src/ai/tools/index.ts",
+          "packages/core/src/ai/local-embedding-service.ts",
+          "packages/core/src/ai/reading-context-service.ts"
+        ],
+        "relatedPaths": [
+          "packages/core/src/ai/"
+        ],
+        "usedBy": [
+          "桌面端和移动端的 AI 相关组件"
+        ],
+        "notes": []
+      },
+      "review": {
+        "status": "ai-draft",
+        "source": "ai-draft"
+      }
+    },
+    "packages/core/src/ai/skills/index.ts": {
+      "path": "packages/core/src/ai/skills/index.ts",
+      "type": "file",
+      "summary": "AI 技能模块导出，包括内置技能和技能执行器。",
+      "analysis": {
+        "purpose": "提供技能管理和执行能力。",
+        "responsibilities": [
+          "导出内置技能列表和检查函数",
+          "导出技能执行器类型和工厂"
+        ],
+        "input": "无",
+        "output": "技能相关导出",
+        "role": "技能管理接口",
+        "keyLogic": [],
+        "relatedModules": [
+          "packages/core/src/ai/skills/builtin-skills.ts",
+          "packages/core/src/ai/skills/skill-executor.ts"
+        ],
+        "relatedPaths": [
+          "packages/core/src/ai/tools/skill-tools.ts"
+        ],
+        "usedBy": [
+          "AI 工具注册"
+        ],
+        "notes": []
+      },
+      "review": {
+        "status": "ai-draft",
+        "source": "ai-draft"
+      }
+    },
+    "packages/core/src/ai/tools/index.ts": {
+      "path": "packages/core/src/ai/tools/index.ts",
+      "type": "file",
+      "summary": "AI 工具注册核心文件，根据书籍状态条件注册各类工具。",
+      "analysis": {
+        "purpose": "根据当前书籍的向量化状态，动态组合 RAG、分析、回退内容等工具集。",
+        "responsibilities": [
+          "定义工具分类：RAG、分析、注释、库、技能、思维导图、上下文",
+          "实现 getAvailableTools 函数，根据 bookId 和 isVectorized 返回工具列表"
+        ],
+        "input": "{ bookId, isVectorized, enabledSkills }",
+        "output": "ToolDefinition[]",
+        "role": "工具注册中心",
+        "keyLogic": [
+          "当 isVectorized 为 true 时注册 RAG 工具和分析工具",
+          "否则注册回退内容工具（目录、搜索、章节上下文）",
+          "通用工具（列表书籍、搜索高亮、统计等）始终可用",
+          "自定义技能通过 skillToTool 转换为工具"
+        ],
+        "relatedModules": [
+          "packages/core/src/ai/tools/rag-tools.ts",
+          "packages/core/src/ai/tools/analysis-tools.ts",
+          "packages/core/src/ai/tools/library-tools.ts",
+          "packages/core/src/ai/tools/context-tools.ts"
+        ],
+        "relatedPaths": [
+          "packages/core/src/ai/tools/"
+        ],
+        "usedBy": [
+          "AI 聊天和技能执行"
+        ],
+        "notes": []
+      },
+      "snippetSuggestions": [
+        {
+          "id": "tool-registration-logic",
+          "filePath": "packages/core/src/ai/tools/index.ts",
+          "title": "条件工具注册逻辑",
+          "startLine": 74,
+          "endLine": 108,
+          "reason": "展示了如何根据向量化状态区分 RAG 和回退内容工具",
+          "confidence": "high",
+          "annotations": [
+            {
+              "line": 76,
+              "note": "通用工具（无需 bookId）"
+            },
+            {
+              "line": 82,
+              "note": "上下文工具始终可用"
+            },
+            {
+              "line": 85,
+              "note": "向量化状态下注册 RAG 和分析工具"
+            },
+            {
+              "line": 93,
+              "note": "非向量化时使用回退内容工具"
+            }
+          ]
+        }
+      ],
+      "snippets": [
+        {
+          "id": "tool-registration-logic",
+          "title": "条件工具注册逻辑",
+          "filePath": "packages/core/src/ai/tools/index.ts",
+          "startLine": 74,
+          "endLine": 108,
+          "reason": "展示了如何根据向量化状态区分 RAG 和回退内容工具",
+          "code": "\n  // General tools are always available (no bookId required)\n  tools.push(...getGeneralTools());\n\n  if (options.bookId) {\n    // Context tools (always available when book is loaded)\n    tools.push(...getContextTools(options.bookId));\n\n    // RAG tools (require vectorization)\n    if (options.isVectorized) {\n      tools.push(\n        createRagSearchTool(options.bookId),\n        createRagTocTool(options.bookId),\n        createRagContextTool(options.bookId),\n      );\n\n      // Content analysis tools (require chunks from vectorization)\n      tools.push(\n        createSummarizeTool(options.bookId),\n        createExtractEntitiesTool(options.bookId),\n        createAnalyzeArgumentsTool(options.bookId),\n        createFindQuotesTool(options.bookId),\n        createCompareSectionsTool(options.bookId),\n      );\n    } else {\n      tools.push(\n        createFallbackTocTool(options.bookId),\n        createFallbackSearchTool(options.bookId),\n        createFallbackChapterContextTool(options.bookId),\n      );\n    }\n\n    // Citations are available for indexed chunks and for fallback sources that\n    // can be validated against concrete reader segments.\n    tools.push(createGetAnnotationsTool(options.bookId), createAddCitationTool(options.bookId));",
+          "annotations": [
+            {
+              "line": 76,
+              "note": "通用工具（无需 bookId）"
+            },
+            {
+              "line": 82,
+              "note": "上下文工具始终可用"
+            },
+            {
+              "line": 85,
+              "note": "向量化状态下注册 RAG 和分析工具"
+            },
+            {
+              "line": 93,
+              "note": "非向量化时使用回退内容工具"
+            }
+          ],
+          "validationStatus": "valid",
+          "confidence": "high"
+        }
+      ],
+      "review": {
+        "status": "ai-draft",
+        "source": "ai-draft"
+      }
+    },
+    "packages/core/src/db/index.ts": {
+      "path": "packages/core/src/db/index.ts",
+      "type": "file",
+      "summary": "数据库模块导出索引，提供所有数据实体的 CRUD 操作。",
+      "analysis": {
+        "purpose": "集中导出数据库初始化、查询和同步相关函数。",
+        "responsibilities": [
+          "导出数据库初始化函数（initDatabase, initLocalDatabase）",
+          "导出实体查询：books、groups、highlights、notes、bookmarks、threads、messages、reading sessions、chunks、skills",
+          "导出同步追踪工具（nextSyncVersion, insertTombstone）",
+          "导出序列化和嵌入工具"
+        ],
+        "input": "无",
+        "output": "函数和类型导出",
+        "role": "数据访问层接口",
+        "keyLogic": [],
+        "relatedModules": [
+          "packages/core/src/db/database.ts"
+        ],
+        "relatedPaths": [
+          "packages/core/src/sync/",
+          "packages/core/src/stores/"
+        ],
+        "usedBy": [
+          "core 内部模块和前端 store"
+        ],
+        "notes": []
+      },
+      "review": {
+        "status": "ai-draft",
+        "source": "ai-draft"
+      }
+    },
+    "packages/core/src/feedback/index.ts": {
+      "path": "packages/core/src/feedback/index.ts",
+      "type": "file",
+      "summary": "反馈系统模块导出，提供日志收集和提交功能。",
+      "analysis": {
+        "purpose": "导出反馈相关的类型和服务函数。",
+        "responsibilities": [
+          "导出反馈记录类型",
+          "导出日志收集、设备信息、提交等函数"
+        ],
+        "input": "无",
+        "output": "类型和函数导出",
+        "role": "反馈功能接口",
+        "keyLogic": [
+          "installFeedbackLogCapture 用于在应用启动时安装日志捕获"
+        ],
+        "relatedModules": [
+          "packages/core/src/feedback/feedback-service.ts"
+        ],
+        "relatedPaths": [
+          "packages/feedback-worker/"
+        ],
+        "usedBy": [
+          "桌面端和移动端启动脚本"
+        ],
+        "notes": []
+      },
+      "review": {
+        "status": "ai-draft",
+        "source": "ai-draft"
+      }
+    },
+    "packages/core/src/hooks/index.ts": {
+      "path": "packages/core/src/hooks/index.ts",
+      "type": "file",
+      "summary": "核心 Hooks 导出索引，包括通用 hooks 和阅读器 hooks。",
+      "analysis": {
+        "purpose": "提供可在多个平台使用的自定义 React Hooks。",
+        "responsibilities": [
+          "导出通用 hooks：useDebounce, useDrag, useThrottledValue 等",
+          "导出翻译相关 hooks",
+          "导出阅读会话和流式聊天 hooks",
+          "导出阅读器 hooks（FoliateView 封装、分页、快捷键）"
+        ],
+        "input": "无",
+        "output": "Hook 导出",
+        "role": "React Hooks 接口",
+        "keyLogic": [],
+        "relatedModules": [
+          "packages/core/src/hooks/reader/"
+        ],
+        "relatedPaths": [
+          "packages/core/src/hooks/"
+        ],
+        "usedBy": [
+          "桌面端和移动端组件"
+        ],
+        "notes": []
+      },
+      "review": {
+        "status": "ai-draft",
+        "source": "ai-draft"
+      }
+    },
+    "packages/core/src/hooks/reader/index.ts": {
+      "path": "packages/core/src/hooks/reader/index.ts",
+      "type": "file",
+      "summary": "阅读器子模块 Hooks 导出，封装 foliate-js 事件和分页。",
+      "analysis": {
+        "purpose": "提供与 foliate-js 交互的 React Hooks。",
+        "responsibilities": [
+          "导出 wrappedFoliateView 类型",
+          "导出 useFoliateEvents、usePagination、useBookShortcuts"
+        ],
+        "input": "无",
+        "output": "Hook 导出",
+        "role": "阅读器 Hook 接口",
+        "keyLogic": [],
+        "relatedModules": [
+          "packages/core/src/hooks/reader/useFoliateView.ts",
+          "packages/core/src/hooks/reader/useFoliateEvents.ts",
+          "packages/core/src/hooks/reader/usePagination.ts",
+          "packages/core/src/hooks/reader/useBookShortcuts.ts"
+        ],
+        "relatedPaths": [],
+        "usedBy": [
+          "桌面端阅读器组件"
+        ],
+        "notes": []
+      },
+      "review": {
+        "status": "ai-draft",
+        "source": "ai-draft"
+      }
+    },
+    "packages/core/src/i18n/index.ts": {
+      "path": "packages/core/src/i18n/index.ts",
+      "type": "file",
+      "summary": "国际化核心文件，初始化 i18next 并导出语言切换函数。",
+      "analysis": {
+        "purpose": "创建 i18n 实例，加载多语言资源，提供动态语言切换。",
+        "responsibilities": [
+          "导入 7 种语言的 JSON 资源文件",
+          "初始化 i18next 实例（i18nReady Promise）",
+          "实现 initI18nLanguage：优先读取平台 KV 存储的语言，否则检测系统语言",
+          "实现 changeAndPersistLanguage：切换语言并持久化到平台存储"
+        ],
+        "input": "语言代码",
+        "output": "i18n 实例和相关函数",
+        "role": "国际化服务",
+        "keyLogic": [
+          "通过 getPlatformService() 获取平台存储进行语言持久化",
+          "系统语言检测逻辑：zh-TW/zh-HK/zh-Hant -> zh-TW, zh -> zh, 其他前缀对应语言"
+        ],
+        "relatedModules": [
+          "@readany/core/services/platform"
+        ],
+        "relatedPaths": [
+          "packages/core/src/i18n/locales/"
+        ],
+        "usedBy": [
+          "桌面端和移动端启动脚本、组件"
+        ],
+        "notes": [
+          "资源文件较多，但代码结构清晰，易于扩展新语言"
+        ]
+      },
+      "snippetSuggestions": [
+        {
+          "id": "i18n-init-and-language-detection",
+          "filePath": "packages/core/src/i18n/index.ts",
+          "title": "i18n 初始化和系统语言检测",
+          "startLine": 73,
+          "endLine": 116,
+          "reason": "展示了如何使用平台服务持久化语言并检测系统区域",
+          "confidence": "high",
+          "annotations": [
+            {
+              "line": 76,
+              "note": "获取平台服务实例"
+            },
+            {
+              "line": 89,
+              "note": "系统语言映射逻辑"
+            }
+          ]
+        },
+        {
+          "id": "change-and-persist-language",
+          "filePath": "packages/core/src/i18n/index.ts",
+          "title": "语言切换与持久化",
+          "startLine": 119,
+          "endLine": 133,
+          "reason": "展示了切换语言并写入平台存储的完整流程",
+          "confidence": "high",
+          "annotations": [
+            {
+              "line": 122,
+              "note": "如果 i18n.changeLanguage 失败，直接赋值"
+            },
+            {
+              "line": 128,
+              "note": "持久化到平台 KV 存储"
+            }
+          ]
+        }
+      ],
+      "snippets": [
+        {
+          "id": "i18n-init-and-language-detection",
+          "title": "i18n 初始化和系统语言检测",
+          "filePath": "packages/core/src/i18n/index.ts",
+          "startLine": 73,
+          "endLine": 116,
+          "reason": "展示了如何使用平台服务持久化语言并检测系统区域",
+          "code": "\n// --- French ---\nimport fr_common from \"./locales/fr/common.json\";\nimport fr_library from \"./locales/fr/library.json\";\nimport fr_reader from \"./locales/fr/reader.json\";\nimport fr_chat from \"./locales/fr/chat.json\";\nimport fr_notes from \"./locales/fr/notes.json\";\nimport fr_settings from \"./locales/fr/settings.json\";\nimport fr_translation from \"./locales/fr/translation.json\";\nimport fr_tts from \"./locales/fr/tts.json\";\nimport fr_stats from \"./locales/fr/stats.json\";\nimport fr_onboarding from \"./locales/fr/onboarding.json\";\nimport fr_profile from \"./locales/fr/profile.json\";\nimport fr_misc from \"./locales/fr/misc.json\";\n\n// --- Spanish ---\nimport es_common from \"./locales/es/common.json\";\nimport es_library from \"./locales/es/library.json\";\nimport es_reader from \"./locales/es/reader.json\";\nimport es_chat from \"./locales/es/chat.json\";\nimport es_notes from \"./locales/es/notes.json\";\nimport es_settings from \"./locales/es/settings.json\";\nimport es_translation from \"./locales/es/translation.json\";\nimport es_tts from \"./locales/es/tts.json\";\nimport es_stats from \"./locales/es/stats.json\";\nimport es_onboarding from \"./locales/es/onboarding.json\";\nimport es_profile from \"./locales/es/profile.json\";\nimport es_misc from \"./locales/es/misc.json\";\n\n// --- Merge modules per language ---\nconst en = { ...en_common, ...en_library, ...en_reader, ...en_chat, ...en_notes, ...en_settings, ...en_translation, ...en_tts, ...en_stats, ...en_onboarding, ...en_profile, ...en_misc };\nconst zh = { ...zh_common, ...zh_library, ...zh_reader, ...zh_chat, ...zh_notes, ...zh_settings, ...zh_translation, ...zh_tts, ...zh_stats, ...zh_onboarding, ...zh_profile, ...zh_misc };\nconst zhTW = { ...zhTW_common, ...zhTW_library, ...zhTW_reader, ...zhTW_chat, ...zhTW_notes, ...zhTW_settings, ...zhTW_translation, ...zhTW_tts, ...zhTW_stats, ...zhTW_onboarding, ...zhTW_profile, ...zhTW_misc };\nconst ja = { ...ja_common, ...ja_library, ...ja_reader, ...ja_chat, ...ja_notes, ...ja_settings, ...ja_translation, ...ja_tts, ...ja_stats, ...ja_onboarding, ...ja_profile, ...ja_misc };\nconst ko = { ...ko_common, ...ko_library, ...ko_reader, ...ko_chat, ...ko_notes, ...ko_settings, ...ko_translation, ...ko_tts, ...ko_stats, ...ko_onboarding, ...ko_profile, ...ko_misc };\nconst fr = { ...fr_common, ...fr_library, ...fr_reader, ...fr_chat, ...fr_notes, ...fr_settings, ...fr_translation, ...fr_tts, ...fr_stats, ...fr_onboarding, ...fr_profile, ...fr_misc };\nconst es = { ...es_common, ...es_library, ...es_reader, ...es_chat, ...es_notes, ...es_settings, ...es_translation, ...es_tts, ...es_stats, ...es_onboarding, ...es_profile, ...es_misc };\n\n// Initialize with default \"en\". Each platform should call\n// `initI18nLanguage()` after setPlatformService() to restore the saved lang.\nexport const i18nReady = i18n\n  .use(initReactI18next)\n  .init({\n    resources: {",
+          "annotations": [
+            {
+              "line": 76,
+              "note": "获取平台服务实例"
+            },
+            {
+              "line": 89,
+              "note": "系统语言映射逻辑"
+            }
+          ],
+          "validationStatus": "valid",
+          "confidence": "high"
+        },
+        {
+          "id": "change-and-persist-language",
+          "title": "语言切换与持久化",
+          "filePath": "packages/core/src/i18n/index.ts",
+          "startLine": 119,
+          "endLine": 133,
+          "reason": "展示了切换语言并写入平台存储的完整流程",
+          "code": "      \"zh-TW\": { translation: zhTW },\n      ja: { translation: ja },\n      ko: { translation: ko },\n      fr: { translation: fr },\n      es: { translation: es },\n    },\n    lng: \"en\",\n    fallbackLng: \"en\",\n    interpolation: {\n      escapeValue: false,\n    },\n  });\n\n/**\n * Restore saved language from platform KV storage.",
+          "annotations": [
+            {
+              "line": 122,
+              "note": "如果 i18n.changeLanguage 失败，直接赋值"
+            },
+            {
+              "line": 128,
+              "note": "持久化到平台 KV 存储"
+            }
+          ],
+          "validationStatus": "valid",
+          "confidence": "high"
+        }
+      ],
+      "review": {
+        "status": "ai-draft",
+        "source": "ai-draft"
+      }
+    },
+    "packages/core/src/stats/view-model-builder.test.ts": {
+      "path": "packages/core/src/stats/view-model-builder.test.ts",
+      "type": "file",
+      "summary": "阅读统计 ViewModel 构建器的单元测试，验证周报、月报、生命周期报告的 UI 映射。",
+      "analysis": {
+        "purpose": "测试 buildStatsViewModel 函数正确生成 UI 友好的统计视图模型。",
+        "responsibilities": [
+          "验证周报：包含 header、heroMetrics、charts、top-books、insights 部分",
+          "验证月报：额外包含 reading-calendar 部分",
+          "验证生命周期报告：包含 milestones 部分"
+        ],
+        "input": "DailyReadingFact[] 和报告配置",
+        "output": "测试断言",
+        "role": "测试用例（集成级别）",
+        "keyLogic": [
+          "使用 buildWeekReport / buildMonthReport / buildLifetimeReport 生成报告后调用 buildStatsViewModel",
+          "检查 sections 的 id 数组是否符合预期"
+        ],
+        "relatedModules": [
+          "packages/core/src/stats/view-model-builder.ts",
+          "packages/core/src/stats/report-builder.ts",
+          "packages/core/src/stats/schema.ts"
+        ],
+        "relatedPaths": [
+          "packages/core/src/stats/"
+        ],
+        "usedBy": [
+          "手动或 CI 测试执行"
+        ],
+        "notes": []
+      },
+      "snippetSuggestions": [
+        {
+          "id": "stats-weekly-test",
+          "filePath": "packages/core/src/stats/view-model-builder.test.ts",
+          "title": "周报视图模型测试",
+          "startLine": 45,
+          "endLine": 54,
+          "reason": "展示了如何验证周报的 sections 结构",
+          "confidence": "high",
+          "annotations": [
+            {
+              "line": 46,
+              "note": "验证 header 标题"
+            },
+            {
+              "line": 52,
+              "note": "验证 sections 顺序"
+            }
+          ]
+        },
+        {
+          "id": "stats-monthly-calendar",
+          "filePath": "packages/core/src/stats/view-model-builder.test.ts",
+          "title": "月报阅读日历验证",
+          "startLine": 56,
+          "endLine": 65,
+          "reason": "展示了月报特有 reading-calendar section 的断言",
+          "confidence": "high",
+          "annotations": [
+            {
+              "line": 58,
+              "note": "周报不应该有 reading-calendar"
+            },
+            {
+              "line": 64,
+              "note": "月报应该包含 reading-calendar"
+            }
+          ]
+        }
+      ],
+      "snippets": [
+        {
+          "id": "stats-weekly-test",
+          "title": "周报视图模型测试",
+          "filePath": "packages/core/src/stats/view-model-builder.test.ts",
+          "startLine": 45,
+          "endLine": 54,
+          "reason": "展示了如何验证周报的 sections 结构",
+          "code": "    completedBooks: 0,\n    avgSessionTime: 22.5,\n    longestSessionTime: 25,\n    firstSessionAt: new Date(2026, 3, 14, 20, 0, 0).getTime(),\n    lastSessionAt: new Date(2026, 3, 14, 21, 0, 0).getTime(),\n    peakHour: 20,\n    hourlyDistribution: Array.from({ length: 24 }, (_, hour) => (hour === 20 ? 45 : 0)),\n    bookBreakdown: [\n      {\n        bookId: \"book-1\",",
+          "annotations": [
+            {
+              "line": 46,
+              "note": "验证 header 标题"
+            },
+            {
+              "line": 52,
+              "note": "验证 sections 顺序"
+            }
+          ],
+          "validationStatus": "valid",
+          "confidence": "high"
+        },
+        {
+          "id": "stats-monthly-calendar",
+          "title": "月报阅读日历验证",
+          "filePath": "packages/core/src/stats/view-model-builder.test.ts",
+          "startLine": 56,
+          "endLine": 65,
+          "reason": "展示了月报特有 reading-calendar section 的断言",
+          "code": "        tags: [\"Growth\"],\n        subjects: [\"Personal Growth\"],\n        totalTime: 45,\n        pagesRead: 14,\n        sessionsCount: 2,\n      },\n    ],\n  },\n];\n",
+          "annotations": [
+            {
+              "line": 58,
+              "note": "周报不应该有 reading-calendar"
+            },
+            {
+              "line": 64,
+              "note": "月报应该包含 reading-calendar"
+            }
+          ],
+          "validationStatus": "valid",
+          "confidence": "high"
+        }
+      ],
+      "review": {
+        "status": "ai-draft",
+        "source": "ai-draft"
+      }
+    },
+    "packages/core/src/sync/__tests__/schema-filtering.test.ts": {
+      "path": "packages/core/src/sync/__tests__/schema-filtering.test.ts",
+      "type": "file",
+      "summary": "同步模块 schema 过滤测试，验证远程列忽略和时间戳冲突逻辑。",
+      "analysis": {
+        "purpose": "测试简单同步策略中未知列过滤和软删除冲突解决。",
+        "responsibilities": [
+          "测试未知远程列被忽略（仅写入本地 schema 包含的列）",
+          "测试相同时间戳下远程软删除覆盖本地活记录",
+          "测试相同时间戳下本地软删除优先于远程活记录"
+        ],
+        "input": "模拟 applyChanges 调用",
+        "output": "测试断言",
+        "role": "测试用例（单元）",
+        "keyLogic": [
+          "通过 mockSelect 模拟 table_info 和本地数据查询",
+          "验证 SQL 语句中不包含未知列",
+          "验证 INSERT/跳过行为"
+        ],
+        "relatedModules": [
+          "packages/core/src/sync/simple-sync.ts"
+        ],
+        "relatedPaths": [
+          "packages/core/src/db/database.ts",
+          "packages/core/src/services/platform.ts"
+        ],
+        "usedBy": [
+          "CI 测试"
+        ],
+        "notes": []
+      },
+      "snippetSuggestions": [
+        {
+          "id": "sync-remote-column-filtering",
+          "filePath": "packages/core/src/sync/__tests__/schema-filtering.test.ts",
+          "title": "远程未知列过滤",
+          "startLine": 68,
+          "endLine": 84,
+          "reason": "展示了如何模拟 applyChanges 并验证未知列被排除",
+          "confidence": "high",
+          "annotations": [
+            {
+              "line": 73,
+              "note": "插入 SQL 不包含 reading_status"
+            },
+            {
+              "line": 75,
+              "note": "参数列表只有已知列"
+            }
+          ]
+        },
+        {
+          "id": "sync-tied-timestamp-conflict",
+          "filePath": "packages/core/src/sync/__tests__/schema-filtering.test.ts",
+          "title": "时间戳冲突解决",
+          "startLine": 87,
+          "endLine": 117,
+          "reason": "展示了相同时间戳下远程软删除和本地软删除的优先级逻辑",
+          "confidence": "high",
+          "annotations": [
+            {
+              "line": 101,
+              "note": "远程软删除更新本地 deleted_at"
+            },
+            {
+              "line": 114,
+              "note": "本地软删除优先，跳过远程活记录"
+            }
+          ]
+        }
+      ],
+      "snippets": [
+        {
+          "id": "sync-remote-column-filtering",
+          "title": "远程未知列过滤",
+          "filePath": "packages/core/src/sync/__tests__/schema-filtering.test.ts",
+          "startLine": 68,
+          "endLine": 84,
+          "reason": "展示了如何模拟 applyChanges 并验证未知列被排除",
+          "code": "  it(\"simple sync ignores unknown remote columns\", async () => {\n    const result = await applyChanges({\n      deviceId: \"device-remote\",\n      timestamp: Date.now(),\n      since: 0,\n      tables: {\n        books: {\n          records: [\n            {\n              id: \"book-1\",\n              title: \"Test Book\",\n              updated_at: 1000,\n              reading_status: \"reading\",\n            },\n          ],\n          deletedIds: [],\n        },",
+          "annotations": [
+            {
+              "line": 73,
+              "note": "插入 SQL 不包含 reading_status"
+            },
+            {
+              "line": 75,
+              "note": "参数列表只有已知列"
+            }
+          ],
+          "validationStatus": "valid",
+          "confidence": "high"
+        },
+        {
+          "id": "sync-tied-timestamp-conflict",
+          "title": "时间戳冲突解决",
+          "filePath": "packages/core/src/sync/__tests__/schema-filtering.test.ts",
+          "startLine": 87,
+          "endLine": 117,
+          "reason": "展示了相同时间戳下远程软删除和本地软删除的优先级逻辑",
+          "code": "\n    expect(result).toEqual({ applied: 1, skipped: 0 });\n    expect(mockExecute).toHaveBeenCalled();\n\n    const [sql, params] = mockExecute.mock.calls[0];\n    expect(sql).toContain(\"INSERT INTO books (id, title, updated_at)\");\n    expect(sql).not.toContain(\"reading_status\");\n    expect(params).toEqual([\"book-1\", \"Test Book\", 1000]);\n  });\n\n  it(\"simple sync applies a tied-timestamp remote soft delete\", async () => {\n    mockSelect.mockImplementation(async (sql: string) => {\n      if (sql.startsWith(\"PRAGMA table_info(books)\")) {\n        return [{ name: \"id\" }, { name: \"title\" }, { name: \"updated_at\" }, { name: \"deleted_at\" }];\n      }\n\n      if (\n        sql.startsWith(\"SELECT id AS id, updated_at AS timestamp\") &&\n        sql.includes(\"FROM books\")\n      ) {\n        return [{ id: \"book-1\", timestamp: 1000, deleted_at: null }];\n      }\n\n      return [];\n    });\n\n    const result = await applyChanges({\n      deviceId: \"device-remote\",\n      timestamp: Date.now(),\n      since: 0,\n      tables: {",
+          "annotations": [
+            {
+              "line": 101,
+              "note": "远程软删除更新本地 deleted_at"
+            },
+            {
+              "line": 114,
+              "note": "本地软删除优先，跳过远程活记录"
+            }
+          ],
+          "validationStatus": "valid",
+          "confidence": "high"
+        }
+      ],
+      "review": {
+        "status": "ai-draft",
+        "source": "ai-draft"
+      }
+    },
+    "packages/core/vitest.config.ts": {
+      "path": "packages/core/vitest.config.ts",
+      "type": "file",
+      "summary": "Vitest 单元测试配置文件。",
+      "analysis": {
+        "purpose": "配置 Vitest 测试运行器。",
+        "responsibilities": [
+          "设置测试环境为 node",
+          "指定测试文件匹配模式 src/**/*.test.ts",
+          "不允许无测试通过"
+        ],
+        "input": "无",
+        "output": "配置对象",
+        "role": "测试配置",
+        "keyLogic": [],
+        "relatedModules": [],
+        "relatedPaths": [],
+        "usedBy": [
+          "vitest 命令行"
+        ],
+        "notes": []
+      },
+      "review": {
+        "status": "ai-draft",
+        "source": "ai-draft"
+      }
+    },
+    "packages/core/src/ai/__tests__/chat-memory.test.ts": {
+      "path": "packages/core/src/ai/__tests__/chat-memory.test.ts",
+      "type": "file",
+      "summary": "AI 聊天记忆压缩窗口测试，验证 getCompressibleMessages 函数。",
+      "analysis": {
+        "purpose": "测试聊天历史压缩逻辑，确保只返回滑动窗口外的消息。",
+        "responsibilities": [
+          "验证窗口外消息被标记为可压缩",
+          "验证已汇总消息不计入可压缩范围"
+        ],
+        "input": "消息数组和窗口大小",
+        "output": "测试断言",
+        "role": "测试用例（单元）",
+        "keyLogic": [
+          "使用 thread 对象构造包含 memoryMessageCount 的上下文"
+        ],
+        "relatedModules": [
+          "packages/core/src/ai/chat-memory.ts"
+        ],
+        "relatedPaths": [],
+        "usedBy": [
+          "CI 测试"
+        ],
+        "notes": []
+      },
+      "review": {
+        "status": "ai-draft",
+        "source": "ai-draft"
+      }
+    },
+    "packages/core/src/ai/__tests__/llm-provider.test.ts": {
+      "path": "packages/core/src/ai/__tests__/llm-provider.test.ts",
+      "type": "file",
+      "summary": "LLM 提供者测试，验证 Gemini 思维签名注入。",
+      "analysis": {
+        "purpose": "测试 getEndpointFetch 对 Gemini 模型请求的修改。",
+        "responsibilities": [
+          "验证 Gemini 模型工具调用请求中自动添加 thought_signature 旁路",
+          "验证现有 thought_signature 不被覆盖",
+          "验证非 Gemini 模型请求不被修改"
+        ],
+        "input": "模拟工具调用请求体",
+        "output": "测试断言",
+        "role": "测试用例（单元）",
+        "keyLogic": [
+          "通过 captureRequestBody 拦截 fetch 调用分析请求体",
+          "检查 extra_content.google.thought_signature"
+        ],
+        "relatedModules": [
+          "packages/core/src/ai/llm-provider.ts"
+        ],
+        "relatedPaths": [],
+        "usedBy": [
+          "CI 测试"
+        ],
+        "notes": []
+      },
+      "snippetSuggestions": [
+        {
+          "id": "llm-gemini-thought-signature",
+          "filePath": "packages/core/src/ai/__tests__/llm-provider.test.ts",
+          "title": "Gemini 思维签名测试",
+          "startLine": 68,
+          "endLine": 83,
+          "reason": "展示了如何验证 Gemini 请求被自动注入 thought_signature",
+          "confidence": "high",
+          "annotations": [
+            {
+              "line": 72,
+              "note": "使用 gemini-3 模型触发旁路"
+            },
+            {
+              "line": 79,
+              "note": "验证 extra_content.google.thought_signature"
+            }
+          ]
+        }
+      ],
+      "snippets": [
+        {
+          "id": "llm-gemini-thought-signature",
+          "title": "Gemini 思维签名测试",
+          "filePath": "packages/core/src/ai/__tests__/llm-provider.test.ts",
+          "startLine": 68,
+          "endLine": 83,
+          "reason": "展示了如何验证 Gemini 请求被自动注入 thought_signature",
+          "code": "afterEach(() => {\n  globalThis.fetch = originalFetch;\n});\n\ndescribe(\"getEndpointFetch Gemini thought signatures\", () => {\n  it(\"adds a Gemini thought signature bypass for gemini-3 OpenAI-compatible tool calls\", async () => {\n    const patchedBody = await captureRequestBody(\n      makeEndpoint({ models: [\"gemini-3-flash-preview\"] }),\n      \"gemini-3-flash-preview\",\n      {\n        messages: [\n          {\n            role: \"assistant\",\n            content: \"\",\n            tool_calls: [makeToolCall()],\n          },",
+          "annotations": [
+            {
+              "line": 72,
+              "note": "使用 gemini-3 模型触发旁路"
+            },
+            {
+              "line": 79,
+              "note": "验证 extra_content.google.thought_signature"
+            }
+          ],
+          "validationStatus": "valid",
+          "confidence": "high"
+        }
+      ],
+      "review": {
+        "status": "ai-draft",
+        "source": "ai-draft"
+      }
+    },
+    "": {
+      "path": "",
+      "type": "folder",
+      "summary": "项目根目录，包含 monorepo 配置、文档和脚本。",
+      "analysis": {
+        "purpose": "项目根目录，管理整体配置和包依赖。",
+        "responsibilities": [
+          "monorepo 配置（pnpm-workspace.yaml, package.json）",
+          "全局 TypeScript 配置（tsconfig.json）",
+          "代码风格配置（biome.json）",
+          "版本脚本（scripts/）",
+          "许可证和 README"
+        ],
+        "input": "",
+        "output": "",
+        "role": "项目根",
+        "keyLogic": [],
+        "relatedModules": [],
+        "relatedPaths": [],
+        "usedBy": [],
+        "notes": [
+          "未深入分析根目录文件内容"
+        ]
+      },
+      "review": {
+        "status": "ai-draft",
+        "source": "ai-draft"
+      }
+    },
+    ".agents": {
+      "path": ".agents",
+      "type": "folder",
+      "summary": "Agent 技能和配置目录（claude 和 copilot 共享？）。",
+      "analysis": {
+        "purpose": "存储 AI 辅助开发技能定义和参考材料。",
+        "responsibilities": [
+          "包含 frontend-design、shadcn-ui、tauri-v2 等技能子目录"
+        ],
+        "input": "",
+        "output": "",
+        "role": "AI 辅助开发配置",
+        "keyLogic": [],
+        "relatedModules": [],
+        "relatedPaths": [],
+        "usedBy": [],
+        "notes": [
+          "仅目录结构，未深入内容"
+        ]
+      },
+      "review": {
+        "status": "ai-draft",
+        "source": "ai-draft"
+      }
+    },
+    ".agents/skills": {
+      "path": ".agents/skills",
+      "type": "folder",
+      "summary": "Agent 技能集合。",
+      "analysis": {
+        "purpose": "存放各种技能的 SKILL.md 文件和参考资料。",
+        "responsibilities": [],
+        "input": "",
+        "output": "",
+        "role": "技能集合",
+        "keyLogic": [],
+        "relatedModules": [],
+        "relatedPaths": [],
+        "usedBy": [],
+        "notes": []
+      },
+      "review": {
+        "status": "ai-draft",
+        "source": "ai-draft"
+      }
+    },
+    ".agents/skills/frontend-design": {
+      "path": ".agents/skills/frontend-design",
+      "type": "folder",
+      "summary": "前端设计技能，包含 SKILL.md。",
+      "analysis": {
+        "purpose": "定义前端设计相关的最佳实践和模式。",
+        "responsibilities": [],
+        "input": "",
+        "output": "",
+        "role": "设计技能",
+        "keyLogic": [],
+        "relatedModules": [],
+        "relatedPaths": [],
+        "usedBy": [],
+        "notes": []
+      },
+      "review": {
+        "status": "ai-draft",
+        "source": "ai-draft"
+      }
+    },
+    ".agents/skills/shadcn-ui": {
+      "path": ".agents/skills/shadcn-ui",
+      "type": "folder",
+      "summary": "shadcn/ui 组件库技能。",
+      "analysis": {
+        "purpose": "提供 shadcn/ui 组件的使用指南和参考。",
+        "responsibilities": [
+          "包含 references 子目录"
+        ],
+        "input": "",
+        "output": "",
+        "role": "UI 组件技能",
+        "keyLogic": [],
+        "relatedModules": [],
+        "relatedPaths": [],
+        "usedBy": [],
+        "notes": []
+      },
+      "review": {
+        "status": "ai-draft",
+        "source": "ai-draft"
+      }
+    },
+    ".agents/skills/shadcn-ui/references": {
+      "path": ".agents/skills/shadcn-ui/references",
+      "type": "folder",
+      "summary": "shadcn/ui 参考资料。",
+      "analysis": {
+        "purpose": "存放 shadcn/ui 相关的参考文档或示例。",
+        "responsibilities": [],
+        "input": "",
+        "output": "",
+        "role": "参考目录",
+        "keyLogic": [],
+        "relatedModules": [],
+        "relatedPaths": [],
+        "usedBy": [],
+        "notes": []
+      },
+      "review": {
+        "status": "ai-draft",
+        "source": "ai-draft"
+      }
+    },
+    ".agents/skills/tauri-v2": {
+      "path": ".agents/skills/tauri-v2",
+      "type": "folder",
+      "summary": "Tauri v2 开发技能。",
+      "analysis": {
+        "purpose": "提供 Tauri v2 开发指南和脚本。",
+        "responsibilities": [
+          "包含 assets、references、scripts 子目录"
+        ],
+        "input": "",
+        "output": "",
+        "role": "Tauri 技能",
+        "keyLogic": [],
+        "relatedModules": [],
+        "relatedPaths": [],
+        "usedBy": [],
+        "notes": []
+      },
+      "review": {
+        "status": "ai-draft",
+        "source": "ai-draft"
+      }
+    },
+    ".agents/skills/tauri-v2/assets": {
+      "path": ".agents/skills/tauri-v2/assets",
+      "type": "folder",
+      "summary": "Tauri v2 技能资源。",
+      "analysis": {
+        "purpose": "存放图标、图片等静态资源。",
+        "responsibilities": [],
+        "input": "",
+        "output": "",
+        "role": "资源目录",
+        "keyLogic": [],
+        "relatedModules": [],
+        "relatedPaths": [],
+        "usedBy": [],
+        "notes": []
+      },
+      "review": {
+        "status": "ai-draft",
+        "source": "ai-draft"
+      }
+    },
+    ".agents/skills/tauri-v2/references": {
+      "path": ".agents/skills/tauri-v2/references",
+      "type": "folder",
+      "summary": "Tauri v2 参考资料。",
+      "analysis": {
+        "purpose": "存放 Tauri v2 的参考文档。",
+        "responsibilities": [],
+        "input": "",
+        "output": "",
+        "role": "参考目录",
+        "keyLogic": [],
+        "relatedModules": [],
+        "relatedPaths": [],
+        "usedBy": [],
+        "notes": []
+      },
+      "review": {
+        "status": "ai-draft",
+        "source": "ai-draft"
+      }
+    },
+    ".agents/skills/tauri-v2/scripts": {
+      "path": ".agents/skills/tauri-v2/scripts",
+      "type": "folder",
+      "summary": "Tauri v2 开发脚本。",
+      "analysis": {
+        "purpose": "存放与 Tauri v2 构建或配置相关的脚本。",
+        "responsibilities": [],
+        "input": "",
+        "output": "",
+        "role": "脚本目录",
+        "keyLogic": [],
+        "relatedModules": [],
+        "relatedPaths": [],
+        "usedBy": [],
+        "notes": []
+      },
+      "review": {
+        "status": "ai-draft",
+        "source": "ai-draft"
+      }
+    },
+    ".claude": {
+      "path": ".claude",
+      "type": "folder",
+      "summary": "Claude 技能配置目录，类似 .agents。",
+      "analysis": {
+        "purpose": "存储 Claude 相关的技能和设置。",
+        "responsibilities": [
+          "包含 skills 子目录和 settings.local.json"
+        ],
+        "input": "",
+        "output": "",
+        "role": "AI 辅助开发配置（Claude）",
+        "keyLogic": [],
+        "relatedModules": [],
+        "relatedPaths": [],
+        "usedBy": [],
+        "notes": []
+      },
+      "review": {
+        "status": "ai-draft",
+        "source": "ai-draft"
+      }
+    },
+    ".claude/skills": {
+      "path": ".claude/skills",
+      "type": "folder",
+      "summary": "Claude 技能集合。",
+      "analysis": {
+        "purpose": "存放 Claude 可用的技能定义。",
+        "responsibilities": [
+          "包含 frontend-design、shadcn-ui、tauri-v2 子目录"
+        ],
+        "input": "",
+        "output": "",
+        "role": "技能集合",
+        "keyLogic": [],
+        "relatedModules": [],
+        "relatedPaths": [],
+        "usedBy": [],
+        "notes": []
+      },
+      "review": {
+        "status": "ai-draft",
+        "source": "ai-draft"
+      }
+    },
+    ".claude/skills/frontend-design": {
+      "path": ".claude/skills/frontend-design",
+      "type": "folder",
+      "summary": "前端设计技能（Claude 版本）。",
+      "analysis": {
+        "purpose": "提供前端设计指导。",
+        "responsibilities": [],
+        "input": "",
+        "output": "",
+        "role": "设计技能",
+        "keyLogic": [],
+        "relatedModules": [],
+        "relatedPaths": [],
+        "usedBy": [],
+        "notes": []
+      },
+      "review": {
+        "status": "ai-draft",
+        "source": "ai-draft"
+      }
+    },
+    ".claude/skills/shadcn-ui": {
+      "path": ".claude/skills/shadcn-ui",
+      "type": "folder",
+      "summary": "shadcn/ui 技能（Claude 版本）。",
+      "analysis": {
+        "purpose": "提供 shadcn/ui 组件指导。",
+        "responsibilities": [
+          "包含 references 子目录"
+        ],
+        "input": "",
+        "output": "",
+        "role": "UI 组件技能",
+        "keyLogic": [],
+        "relatedModules": [],
+        "relatedPaths": [],
+        "usedBy": [],
+        "notes": []
+      },
+      "review": {
+        "status": "ai-draft",
+        "source": "ai-draft"
+      }
+    },
+    ".claude/skills/shadcn-ui/references": {
+      "path": ".claude/skills/shadcn-ui/references",
+      "type": "folder",
+      "summary": "shadcn/ui 参考资料（Claude 版本）。",
+      "analysis": {
+        "purpose": "参考文档目录。",
+        "responsibilities": [],
+        "input": "",
+        "output": "",
+        "role": "参考目录",
+        "keyLogic": [],
+        "relatedModules": [],
+        "relatedPaths": [],
+        "usedBy": [],
+        "notes": []
+      },
+      "review": {
+        "status": "ai-draft",
+        "source": "ai-draft"
+      }
+    },
+    ".claude/skills/tauri-v2": {
+      "path": ".claude/skills/tauri-v2",
+      "type": "folder",
+      "summary": "Tauri v2 技能（Claude 版本）。",
+      "analysis": {
+        "purpose": "提供 Tauri v2 开发指导。",
+        "responsibilities": [
+          "包含 assets、references、scripts 子目录"
+        ],
+        "input": "",
+        "output": "",
+        "role": "Tauri 技能",
+        "keyLogic": [],
+        "relatedModules": [],
+        "relatedPaths": [],
+        "usedBy": [],
+        "notes": []
+      },
+      "review": {
+        "status": "ai-draft",
+        "source": "ai-draft"
+      }
+    },
+    ".claude/skills/tauri-v2/assets": {
+      "path": ".claude/skills/tauri-v2/assets",
+      "type": "folder",
+      "summary": "Tauri v2 资源（Claude 版本）。",
+      "analysis": {
+        "purpose": "静态资源目录。",
+        "responsibilities": [],
+        "input": "",
+        "output": "",
+        "role": "资源目录",
+        "keyLogic": [],
+        "relatedModules": [],
+        "relatedPaths": [],
+        "usedBy": [],
+        "notes": []
+      },
+      "review": {
+        "status": "ai-draft",
+        "source": "ai-draft"
+      }
+    },
+    ".claude/skills/tauri-v2/references": {
+      "path": ".claude/skills/tauri-v2/references",
+      "type": "folder",
+      "summary": "Tauri v2 参考资料（Claude 版本）。",
+      "analysis": {
+        "purpose": "参考文档目录。",
+        "responsibilities": [],
+        "input": "",
+        "output": "",
+        "role": "参考目录",
+        "keyLogic": [],
+        "relatedModules": [],
+        "relatedPaths": [],
+        "usedBy": [],
+        "notes": []
+      },
+      "review": {
+        "status": "ai-draft",
+        "source": "ai-draft"
+      }
+    },
+    ".claude/skills/tauri-v2/scripts": {
+      "path": ".claude/skills/tauri-v2/scripts",
+      "type": "folder",
+      "summary": "Tauri v2 脚本（Claude 版本）。",
+      "analysis": {
+        "purpose": "脚本目录。",
+        "responsibilities": [],
+        "input": "",
+        "output": "",
+        "role": "脚本目录",
+        "keyLogic": [],
+        "relatedModules": [],
+        "relatedPaths": [],
+        "usedBy": [],
+        "notes": []
+      },
+      "review": {
+        "status": "ai-draft",
+        "source": "ai-draft"
+      }
+    },
+    ".expo": {
+      "path": ".expo",
+      "type": "folder",
+      "summary": "Expo 本地缓存和配置目录。",
+      "analysis": {
+        "purpose": "存放 Expo 开发工具生成的临时设备列表和 README。",
+        "responsibilities": [],
+        "input": "",
+        "output": "",
+        "role": "Expo 工具配置",
+        "keyLogic": [],
+        "relatedModules": [],
+        "relatedPaths": [],
+        "usedBy": [],
+        "notes": []
+      },
+      "review": {
+        "status": "ai-draft",
+        "source": "ai-draft"
+      }
+    }
+  },
+  "warnings": [
+    "项目入口和核心模块已覆盖，但部分子模块（如 packages/core/src/reader/, packages/core/src/tts/）未提供详细源文件，分析不完整",
+    "桌面端和移动端前端组件目录（src/components/）未包含在选文件中，无法分析组件层级",
+    "tests 仅覆盖 core 包的部分模块，缺少对前端渲染、同步集成、移动端原生模块的测试",
+    "CI/CD 工作流（.github/workflows/）未分析",
+    "部分文件夹（如 .agents, .claude）仅基于名称推断，实际内容未知"
+  ],
+  "selectionReport": {
+    "selectedFiles": [
+      {
+        "path": "packages/app-expo/app.config.js",
+        "score": 155,
+        "reasons": [
+          "generic template: entry point",
+          "generic template: config",
+          "preferred text extension"
+        ],
+        "category": "file"
+      },
+      {
+        "path": "packages/app-expo/modules/system-tts-synthesis/index.ts",
+        "score": 125,
+        "reasons": [
+          "generic template: entry point",
+          "preferred text extension"
+        ],
+        "category": "file"
+      },
+      {
+        "path": "packages/app-expo/modules/volume-key-paging/index.ts",
+        "score": 125,
+        "reasons": [
+          "generic template: entry point",
+          "preferred text extension"
+        ],
+        "category": "file"
+      },
+      {
+        "path": "packages/app-expo/src/App.tsx",
+        "score": 125,
+        "reasons": [
+          "generic template: entry point",
+          "preferred text extension"
+        ],
+        "category": "file"
+      },
+      {
+        "path": "packages/app-expo/src/hooks/index.ts",
+        "score": 125,
+        "reasons": [
+          "generic template: entry point",
+          "preferred text extension"
+        ],
+        "category": "file"
+      },
+      {
+        "path": "packages/app-expo/src/screens/reader/styles/index.ts",
+        "score": 125,
+        "reasons": [
+          "generic template: entry point",
+          "preferred text extension"
+        ],
+        "category": "file"
+      },
+      {
+        "path": "packages/app-expo/src/stores/index.ts",
+        "score": 125,
+        "reasons": [
+          "generic template: entry point",
+          "preferred text extension"
+        ],
+        "category": "file"
+      },
+      {
+        "path": "packages/app/index.html",
+        "score": 125,
+        "reasons": [
+          "generic template: entry point",
+          "preferred text extension"
+        ],
+        "category": "file"
+      },
+      {
+        "path": "packages/app/src-tauri/src/main.rs",
+        "score": 125,
+        "reasons": [
+          "generic template: entry point",
+          "preferred text extension"
+        ],
+        "category": "file"
+      },
+      {
+        "path": "packages/app/src/App.tsx",
+        "score": 125,
+        "reasons": [
+          "generic template: entry point",
+          "preferred text extension"
+        ],
+        "category": "file"
+      },
+      {
+        "path": "packages/app/src/lib/reader/index.ts",
+        "score": 125,
+        "reasons": [
+          "generic template: entry point",
+          "preferred text extension"
+        ],
+        "category": "file"
+      },
+      {
+        "path": "packages/app/src/main.tsx",
+        "score": 125,
+        "reasons": [
+          "generic template: entry point",
+          "preferred text extension"
+        ],
+        "category": "file"
+      },
+      {
+        "path": "packages/core/src/ai/index.ts",
+        "score": 125,
+        "reasons": [
+          "generic template: entry point",
+          "preferred text extension"
+        ],
+        "category": "file"
+      },
+      {
+        "path": "packages/core/src/ai/skills/index.ts",
+        "score": 125,
+        "reasons": [
+          "generic template: entry point",
+          "preferred text extension"
+        ],
+        "category": "file"
+      },
+      {
+        "path": "packages/core/src/ai/tools/index.ts",
+        "score": 125,
+        "reasons": [
+          "generic template: entry point",
+          "preferred text extension"
+        ],
+        "category": "file"
+      },
+      {
+        "path": "packages/core/src/db/index.ts",
+        "score": 125,
+        "reasons": [
+          "generic template: entry point",
+          "preferred text extension"
+        ],
+        "category": "file"
+      },
+      {
+        "path": "packages/core/src/feedback/index.ts",
+        "score": 125,
+        "reasons": [
+          "generic template: entry point",
+          "preferred text extension"
+        ],
+        "category": "file"
+      },
+      {
+        "path": "packages/core/src/hooks/index.ts",
+        "score": 125,
+        "reasons": [
+          "generic template: entry point",
+          "preferred text extension"
+        ],
+        "category": "file"
+      },
+      {
+        "path": "packages/core/src/hooks/reader/index.ts",
+        "score": 125,
+        "reasons": [
+          "generic template: entry point",
+          "preferred text extension"
+        ],
+        "category": "file"
+      },
+      {
+        "path": "packages/core/src/i18n/index.ts",
+        "score": 125,
+        "reasons": [
+          "generic template: entry point",
+          "preferred text extension"
+        ],
+        "category": "file"
+      }
+    ],
+    "selectedFolders": [
+      {
+        "path": "",
+        "score": 10,
+        "reasons": [
+          "folder in tree"
+        ],
+        "category": "folder"
+      },
+      {
+        "path": ".agents",
+        "score": 10,
+        "reasons": [
+          "folder in tree"
+        ],
+        "category": "folder"
+      },
+      {
+        "path": ".agents/skills",
+        "score": 10,
+        "reasons": [
+          "folder in tree"
+        ],
+        "category": "folder"
+      },
+      {
+        "path": ".agents/skills/frontend-design",
+        "score": 10,
+        "reasons": [
+          "folder in tree"
+        ],
+        "category": "folder"
+      },
+      {
+        "path": ".agents/skills/shadcn-ui",
+        "score": 10,
+        "reasons": [
+          "folder in tree"
+        ],
+        "category": "folder"
+      },
+      {
+        "path": ".agents/skills/shadcn-ui/references",
+        "score": 10,
+        "reasons": [
+          "folder in tree"
+        ],
+        "category": "folder"
+      },
+      {
+        "path": ".agents/skills/tauri-v2",
+        "score": 10,
+        "reasons": [
+          "folder in tree"
+        ],
+        "category": "folder"
+      },
+      {
+        "path": ".agents/skills/tauri-v2/assets",
+        "score": 10,
+        "reasons": [
+          "folder in tree"
+        ],
+        "category": "folder"
+      },
+      {
+        "path": ".agents/skills/tauri-v2/references",
+        "score": 10,
+        "reasons": [
+          "folder in tree"
+        ],
+        "category": "folder"
+      },
+      {
+        "path": ".agents/skills/tauri-v2/scripts",
+        "score": 10,
+        "reasons": [
+          "folder in tree"
+        ],
+        "category": "folder"
+      },
+      {
+        "path": ".claude",
+        "score": 10,
+        "reasons": [
+          "folder in tree"
+        ],
+        "category": "folder"
+      },
+      {
+        "path": ".claude/skills",
+        "score": 10,
+        "reasons": [
+          "folder in tree"
+        ],
+        "category": "folder"
+      },
+      {
+        "path": ".claude/skills/frontend-design",
+        "score": 10,
+        "reasons": [
+          "folder in tree"
+        ],
+        "category": "folder"
+      },
+      {
+        "path": ".claude/skills/shadcn-ui",
+        "score": 10,
+        "reasons": [
+          "folder in tree"
+        ],
+        "category": "folder"
+      },
+      {
+        "path": ".claude/skills/shadcn-ui/references",
+        "score": 10,
+        "reasons": [
+          "folder in tree"
+        ],
+        "category": "folder"
+      },
+      {
+        "path": ".claude/skills/tauri-v2",
+        "score": 10,
+        "reasons": [
+          "folder in tree"
+        ],
+        "category": "folder"
+      },
+      {
+        "path": ".claude/skills/tauri-v2/assets",
+        "score": 10,
+        "reasons": [
+          "folder in tree"
+        ],
+        "category": "folder"
+      },
+      {
+        "path": ".claude/skills/tauri-v2/references",
+        "score": 10,
+        "reasons": [
+          "folder in tree"
+        ],
+        "category": "folder"
+      },
+      {
+        "path": ".claude/skills/tauri-v2/scripts",
+        "score": 10,
+        "reasons": [
+          "folder in tree"
+        ],
+        "category": "folder"
+      },
+      {
+        "path": ".expo",
+        "score": 10,
+        "reasons": [
+          "folder in tree"
+        ],
+        "category": "folder"
+      }
+    ],
+    "selectedTests": [
+      {
+        "path": "packages/core/src/stats/view-model-builder.test.ts",
+        "score": 145,
+        "reasons": [
+          "generic template: model/schema",
+          "preferred text extension",
+          "test file"
+        ],
+        "category": "test"
+      },
+      {
+        "path": "packages/core/src/sync/__tests__/schema-filtering.test.ts",
+        "score": 145,
+        "reasons": [
+          "generic template: model/schema",
+          "preferred text extension",
+          "test file"
+        ],
+        "category": "test"
+      },
+      {
+        "path": "packages/core/vitest.config.ts",
+        "score": 105,
+        "reasons": [
+          "generic template: config",
+          "preferred text extension",
+          "test file"
+        ],
+        "category": "test"
+      },
+      {
+        "path": "packages/core/src/ai/__tests__/chat-memory.test.ts",
+        "score": 75,
+        "reasons": [
+          "preferred text extension",
+          "test file"
+        ],
+        "category": "test"
+      },
+      {
+        "path": "packages/core/src/ai/__tests__/llm-provider.test.ts",
+        "score": 75,
+        "reasons": [
+          "preferred text extension",
+          "test file"
+        ],
+        "category": "test"
+      }
+    ],
+    "skippedFiles": [],
+    "warnings": [],
+    "stageChecklist": [
+      "Entry point",
+      "Core modules",
+      "Data / model layer",
+      "Tests"
+    ]
+  },
+  "validationReport": {
+    "validSnippets": 15,
+    "invalidSnippets": 0,
+    "warnings": []
+  }
+}
