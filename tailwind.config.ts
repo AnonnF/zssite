@@ -34,6 +34,7 @@ const config: Config = {
       },
       maxWidth: {
         content: "72rem",
+        "content-wide": "90rem",
       },
       spacing: {
         section: "5rem",
