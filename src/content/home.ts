@@ -28,7 +28,7 @@ export const homeContent: HomeContent = {
   entrySectionLabel: "MODULES",
   entrySectionTitle: "功能入口",
   entrySectionDescription: "个人站点功能入口 — 按需展开各模块",
-  entryCta: "Enter →",
+  entryCta: "ENTER ARCHIVE →",
   placeholderLabel: "MODULE / 04+",
   placeholderText: "更多功能入口即将添加",
   cards: [

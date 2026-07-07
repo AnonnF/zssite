@@ -39,14 +39,15 @@ export function AnalysisCard({
 
       <div className="pointer-events-none relative z-[1] flex flex-col lg:flex-row">
         <div className="flex items-center justify-between gap-4 border-b border-border-soft px-5 py-4 font-mono text-meta lg:w-44 lg:flex-col lg:items-start lg:border-b-0 lg:border-r lg:py-6">
-          <span className="text-3xl font-bold leading-none text-accent">
-            {displayNumber}
-          </span>
+          <div className="flex items-baseline gap-2 lg:flex-col lg:gap-1">
+            <span className="text-[0.5625rem] uppercase tracking-[0.16em] text-muted">
+              RECORD
+            </span>
+            <span className="archive-index text-4xl lg:text-5xl">{displayNumber}</span>
+          </div>
           <span className="font-semibold text-accent">{analysis.analyzedAt}</span>
           <span className="uppercase text-muted">{analysis.repoOwner}</span>
-          <span className="rounded-sm border border-border-soft px-1.5 py-0.5 uppercase text-muted transition-colors group-hover:border-accent/40 group-hover:text-text">
-            {analysis.reviewStatus}
-          </span>
+          <span className="status-tag">{analysis.reviewStatus}</span>
         </div>
 
         <div className="flex-1 p-5 md:p-6 lg:p-7">

@@ -119,8 +119,8 @@ export const siteContent: SiteContent = {
     label: "PROJECT ARCHIVE",
     description:
       "大学阶段完成的工程项目、AI 应用与 Web 产品。这里记录每个项目的目标、技术选择、结构分析和能力成长。",
-    detailComingSoon: "查看详情 →",
-    viewDetail: "查看项目 →",
+    detailComingSoon: "ENTER CASE →",
+    viewDetail: "ENTER CASE →",
   },
   projectDetail: {
     backToProjects: "返回项目列表",

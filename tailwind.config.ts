@@ -17,6 +17,7 @@ const config: Config = {
         "border-soft": "var(--color-border)",
         accent: "var(--color-accent)",
         "accent-muted": "var(--color-accent-muted)",
+        "accent-soft": "var(--color-accent-soft)",
         card: "var(--color-card)",
       },
       fontFamily: {

@@ -25,14 +25,21 @@ export function EntryCard({ card, ctaText }: EntryCardProps) {
 
       <div className="flex flex-col md:flex-row">
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-border-soft px-5 py-4 font-mono text-meta md:w-44 md:flex-col md:items-start md:border-b-0 md:border-r md:py-6">
-          <span className="text-2xl font-bold leading-none text-accent">{moduleNumber}</span>
-          {card.meta.map(({ key, value }) => (
-            <span key={key} className="text-muted">
-              <span className="text-text">{key}</span>
-              <span className="mx-1 text-border-soft">/</span>
-              <span className={key === "STATUS" ? "text-accent" : ""}>{value}</span>
+          <div className="flex items-baseline gap-2 md:flex-col md:gap-1">
+            <span className="text-[0.5625rem] uppercase tracking-[0.16em] text-muted">
+              MODULE
             </span>
-          ))}
+            <span className="archive-index text-3xl md:text-4xl">{moduleNumber}</span>
+          </div>
+          {card.meta
+            .filter(({ key }) => key !== "MODULE")
+            .map(({ key, value }) => (
+              <span key={key} className="text-muted">
+                <span className="text-text">{key}</span>
+                <span className="mx-1 text-border-soft">/</span>
+                <span className={key === "STATUS" ? "text-accent" : ""}>{value}</span>
+              </span>
+            ))}
         </div>
 
         <div className="flex-1 p-5 md:p-7 lg:p-8">

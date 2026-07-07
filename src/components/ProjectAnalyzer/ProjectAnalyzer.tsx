@@ -155,23 +155,32 @@ export function ProjectAnalyzer({
 
   return (
     <div id="project-analyzer" className="panel-card scroll-mt-24 overflow-hidden">
-      <div className="analyzer-card-header border-b border-border-soft px-4 py-2 md:px-5">
-        <div className="flex flex-wrap items-center gap-2">
-          <p className="font-mono text-meta uppercase tracking-wider text-muted">
-            {modeLabels.panel}
-          </p>
-          {data.review ? <ReviewBadge review={data.review} /> : null}
+      <div className="analyzer-card-header border-b border-border-soft bg-surface/30 px-4 py-3 md:px-5">
+        <div className="section-heading-row">
+          <span className="accent-bar mt-0.5" aria-hidden="true" />
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="font-mono text-meta uppercase tracking-wider text-muted">
+                {modeLabels.panel}
+              </p>
+              {data.review ? <ReviewBadge review={data.review} /> : null}
+            </div>
+            {data.review?.status === "ai-draft" ? (
+              <p className="mt-1 font-[family-name:var(--font-body-sc)] text-sm text-muted">
+                {data.review.note ?? "该分析由 AI 自动生成，尚未人工审核。"}
+              </p>
+            ) : null}
+            {data.description ? (
+              <p className="analyzer-card-header__desc mt-0.5 font-[family-name:var(--font-body-sc)] text-muted">
+                {data.description}
+              </p>
+            ) : (
+              <p className="analyzer-card-header__desc mt-0.5 font-[family-name:var(--font-body-sc)] text-muted">
+                {modeLabels.description}
+              </p>
+            )}
+          </div>
         </div>
-        {data.review?.status === "ai-draft" ? (
-          <p className="mt-1 font-[family-name:var(--font-body-sc)] text-sm text-muted">
-            {data.review.note ?? "该分析由 AI 自动生成，尚未人工审核。"}
-          </p>
-        ) : null}
-        {data.description ? (
-          <p className="analyzer-card-header__desc mt-0.5 font-[family-name:var(--font-body-sc)] text-muted">
-            {data.description}
-          </p>
-        ) : null}
       </div>
 
       {data.guidedTour && data.guidedTour.length > 0 && (

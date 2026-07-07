@@ -3,6 +3,10 @@ import type { PortfolioProject } from "@/content/projects";
 import { hasPortfolioWalkthrough } from "@/data/projects";
 import { Tag } from "@/components/ui/Tag";
 import { Divider } from "@/components/ui/Divider";
+import {
+  TechnicalThumbnail,
+  resolveTechnicalVisual,
+} from "@/components/ui/TechnicalThumbnail";
 
 interface ProjectCardProps {
   project: PortfolioProject;
@@ -20,6 +24,8 @@ export function ProjectCard({
   const displayNumber = String(index + 1).padStart(2, "0");
   const hasWalkthrough = hasPortfolioWalkthrough(project.slug);
   const footerLabel = hasWalkthrough ? viewDetail : detailComingSoon;
+  const visual = resolveTechnicalVisual(project.slug, project.type);
+  const isLive = project.status === "ongoing";
 
   const card = (
     <article className="panel-card panel-card-interactive group relative overflow-hidden">
@@ -27,12 +33,15 @@ export function ProjectCard({
 
       <div className="flex flex-col lg:flex-row">
         <div className="flex items-center justify-between gap-4 border-b border-border-soft px-5 py-4 font-mono text-meta lg:w-44 lg:flex-col lg:items-start lg:border-b-0 lg:border-r lg:py-6">
-          <span className="text-3xl font-bold leading-none text-accent">
-            {displayNumber}
-          </span>
+          <div className="flex items-baseline gap-2 lg:flex-col lg:gap-1">
+            <span className="text-[0.5625rem] uppercase tracking-[0.16em] text-muted">
+              CASE
+            </span>
+            <span className="archive-index text-4xl lg:text-5xl">{displayNumber}</span>
+          </div>
           <span className="font-semibold text-accent">{project.period}</span>
           <span className="uppercase text-muted">{project.type}</span>
-          <span className="rounded-sm border border-border-soft px-1.5 py-0.5 uppercase text-muted transition-colors group-hover:border-accent/40 group-hover:text-text">
+          <span className={`status-tag ${isLive ? "status-tag--live" : ""}`}>
             {project.status}
           </span>
         </div>
@@ -55,6 +64,12 @@ export function ProjectCard({
           </div>
 
           <p className="mt-2 font-mono text-meta text-muted">{project.context}</p>
+
+          <TechnicalThumbnail
+            variant={visual}
+            caption={project.ref}
+            className="mt-4 h-24 w-full md:h-28"
+          />
 
           <Divider accent className="my-4" />
 

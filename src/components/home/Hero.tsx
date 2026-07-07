@@ -9,7 +9,17 @@ export function Hero() {
   return (
     <section className="relative overflow-hidden border-b border-border-soft">
       <div className="stripe-bg absolute inset-0 opacity-50" aria-hidden="true" />
-      <div className="absolute right-6 top-6 hidden items-center gap-2 font-mono text-meta md:flex">
+
+      <span
+        className="signal-cross absolute left-4 top-4 md:left-6 md:top-6"
+        aria-hidden="true"
+      />
+      <span
+        className="signal-cross absolute bottom-4 right-4 md:bottom-6 md:right-6"
+        aria-hidden="true"
+      />
+
+      <div className="absolute right-8 top-6 hidden items-center gap-2 font-mono text-meta md:flex md:right-14 lg:right-[4.5rem]">
         <span className="accent-dot" aria-hidden="true" />
         <span className="text-muted">
           REF: <span className="text-accent">HOME-001</span>
