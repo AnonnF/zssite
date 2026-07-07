@@ -110,12 +110,12 @@ export function GitHubAnalyzerBar() {
   }, [commandPreview]);
 
   return (
-    <section className="mt-8 border border-border-soft bg-surface/30 md:mt-10">
+    <section className="border border-border-soft bg-surface/30">
       <div className="border-b border-border-soft px-5 py-4 md:px-6">
-        <SectionLabel>Repository Analyzer</SectionLabel>
+        <SectionLabel>Public Repository Analyzer</SectionLabel>
         <p className="mt-2 max-w-2xl font-[family-name:var(--font-body-sc)] text-sm leading-relaxed text-muted md:text-body">
-          粘贴公开 GitHub 仓库地址，生成本地 CLI 命令以导入并创建 AI Draft。
-          在本机终端运行命令后，项目会自动加入 AI Drafts，并带有 AI DRAFT 标记。
+          粘贴公开 GitHub 仓库地址，生成本地 CLI 命令以导入并分析仓库。命令需在本机终端运行；浏览器不会直接调用
+          GitHub / Supabase / LLM。分析结果将归入下方 Analysis Library。
         </p>
       </div>
 
@@ -176,11 +176,11 @@ export function GitHubAnalyzerBar() {
 
       <div className="border-t border-border-soft px-5 py-3 md:px-6">
         <p className="font-mono text-meta text-muted">
-          Public GitHub repos only · AI draft · Manual review flag supported
+          Public GitHub repos only · Local CLI · Analysis Library
         </p>
         {parsedPreview && !commandPreview ? (
           <p className="mt-2 font-mono text-meta text-muted">
-            projectId:{" "}
+            analysisId:{" "}
             <span className="text-accent">
               {inferProjectIdFromRepoName(parsedPreview.repo)}
             </span>
@@ -218,8 +218,8 @@ export function GitHubAnalyzerBar() {
           </pre>
 
           <p className="mt-3 font-[family-name:var(--font-body-sc)] text-sm text-muted">
-            运行命令后，项目会自动加入 AI Drafts，并带有 AI DRAFT 标记。命令需在本机终端运行；浏览器不会直接调用
-            GitHub / Supabase / DeepSeek。
+            运行命令后，分析记录会写入本地数据并出现在 Analysis Library。浏览器不会直接调用
+            GitHub / Supabase / LLM。
           </p>
           {copyState === "failed" ? (
             <p className="mt-2 font-mono text-meta text-muted">

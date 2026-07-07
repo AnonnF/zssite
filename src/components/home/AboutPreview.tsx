@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { siteContent } from "@/content/site";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { Divider } from "@/components/ui/Divider";
@@ -25,6 +26,10 @@ export function AboutPreview() {
             </li>
           ))}
         </ul>
+
+        <Link href="/about" className="enter-indicator mt-8 inline-block">
+          查看完整简历 →
+        </Link>
       </div>
     </section>
   );

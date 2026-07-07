@@ -8,7 +8,21 @@ import type {
   ProjectStructuredAnalysis,
   ProjectTreeNode,
 } from "./types";
-import { buildAnalyzerRegistry } from "./buildAnalyzerData";
+import {
+  buildAnalyzerDataForProject,
+  buildAnalyzerRegistry,
+  getProjectAnalyzerEntry,
+  inferAnalyzerSource,
+  listEnabledAnalyzerProjectIds,
+  stripAnalyzerDataForClient,
+} from "./buildAnalyzerData";
+import {
+  getPortfolioProjectBySlug,
+} from "@/content/projects";
+import {
+  getRepositoryAnalysisById,
+  reviewStatusToReviewMeta,
+} from "@/content/repositoryAnalyses";
 
 export type {
   ProjectAnalyzerData,
@@ -74,6 +88,61 @@ export function getProjectAnalyzerData(
 
 export function hasProjectAnalyzer(projectId: string): boolean {
   return projectId in analyzerRegistry;
+}
+
+export function getRepositoryAnalyzerData(
+  analysisId: string
+): ProjectAnalyzerData | undefined {
+  const analysis = getRepositoryAnalysisById(analysisId);
+  if (!analysis) {
+    return undefined;
+  }
+
+  const data = buildAnalyzerDataForProject(analysis.analyzerProjectId, {
+    includeHighlights: false,
+  });
+
+  if (!data) {
+    return undefined;
+  }
+
+  const review = reviewStatusToReviewMeta(analysis.reviewStatus);
+  return stripAnalyzerDataForClient({
+    ...data,
+    projectId: analysis.analysisId,
+    title: analysis.title,
+    description: analysis.summary,
+    review,
+  });
+}
+
+export function hasRepositoryAnalyzer(analysisId: string): boolean {
+  return Boolean(getRepositoryAnalyzerData(analysisId));
+}
+
+export function getPortfolioWalkthroughData(
+  slug: string
+): ProjectAnalyzerData | undefined {
+  const project = getPortfolioProjectBySlug(slug);
+  if (!project?.analysisId) {
+    return undefined;
+  }
+
+  const data = getRepositoryAnalyzerData(project.analysisId);
+  if (!data) {
+    return undefined;
+  }
+
+  return {
+    ...data,
+    projectId: project.slug,
+    title: project.title,
+    description: project.summary,
+  };
+}
+
+export function hasPortfolioWalkthrough(slug: string): boolean {
+  return Boolean(getPortfolioWalkthroughData(slug));
 }
 
 export function findTreeNode(
@@ -236,15 +305,21 @@ export type ProjectDetailNavSection = {
   label: string;
 };
 
+export type WalkthroughNavMode = "portfolio" | "repository";
+
 export function buildProjectDetailNavSections(
-  analyzerData?: ProjectAnalyzerData
+  analyzerData?: ProjectAnalyzerData,
+  mode: WalkthroughNavMode = "portfolio"
 ): ProjectDetailNavSection[] {
   const sections: ProjectDetailNavSection[] = [
     { id: "project-overview", label: "Overview" },
   ];
 
   if (analyzerData) {
-    sections.push({ id: "project-analyzer", label: "Analyzer" });
+    sections.push({
+      id: "project-analyzer",
+      label: mode === "portfolio" ? "Walkthrough" : "Analysis",
+    });
 
     if (
       PROJECT_ARCHITECTURE_ENABLED &&

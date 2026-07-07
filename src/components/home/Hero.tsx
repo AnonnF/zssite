@@ -4,7 +4,7 @@ import { Divider } from "@/components/ui/Divider";
 import { Tag } from "@/components/ui/Tag";
 
 export function Hero() {
-  const { title, subtitle, label, description, keywords } = siteContent.hero;
+  const { title, nameEn, subtitle, label, description, keywords } = siteContent.hero;
 
   return (
     <section className="relative overflow-hidden border-b border-border-soft">
@@ -25,7 +25,10 @@ export function Hero() {
             <h1 className="font-[family-name:var(--font-body-sc)] text-[3rem] font-black leading-none tracking-tight md:text-display lg:text-[5rem]">
               {title}
             </h1>
-            <p className="mt-2 font-display text-h2 font-semibold uppercase tracking-wide text-muted md:mt-3">
+            <p className="mt-2 font-display text-h3 font-semibold uppercase tracking-wide text-muted md:text-h2">
+              {nameEn}
+            </p>
+            <p className="mt-2 font-display text-h3 font-semibold uppercase tracking-wide text-muted md:text-h2">
               {subtitle}
             </p>
           </div>

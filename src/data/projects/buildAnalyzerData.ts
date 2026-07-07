@@ -1,4 +1,8 @@
-import { getProjectBySlug } from "@/content/projects";
+import { getPortfolioProjectBySlug } from "@/content/projects";
+import {
+  getRepositoryAnalysisByAnalyzerProjectId,
+  reviewStatusToReviewMeta,
+} from "@/content/repositoryAnalyses";
 import { aiDraftRegistry } from "./ai-drafts";
 import { applyPublicationReview } from "./applyPublicationReview";
 import { createAnalyzerDataFromAiDraft } from "./mergeAiDraftAnalysis";
@@ -33,7 +37,7 @@ function resolveGeneratedOnly(
     return undefined;
   }
 
-  const contentProject = getProjectBySlug(projectId);
+  const contentMeta = resolveAnalyzerContentMeta(projectId);
   const entries = Object.fromEntries(
     Object.entries(generated.entries).map(([path, entry]) => [
       path,
@@ -43,8 +47,8 @@ function resolveGeneratedOnly(
 
   let data: ProjectAnalyzerData = {
     projectId,
-    title: contentProject?.title ?? projectId,
-    description: contentProject?.summary ?? "",
+    title: contentMeta.title,
+    description: contentMeta.description,
     tree: generated.tree,
     entries,
   };
@@ -74,10 +78,10 @@ function resolveDraftAnalyzerData(
     return undefined;
   }
 
-  const contentProject = getProjectBySlug(projectId);
+  const contentMeta = resolveAnalyzerContentMeta(projectId);
   let data = createAnalyzerDataFromAiDraft(generated, aiDraft, {
-    title: contentProject?.title ?? projectId,
-    description: aiDraft.projectAnalysis.overview ?? contentProject?.summary,
+    title: contentMeta.title,
+    description: aiDraft.projectAnalysis.overview ?? contentMeta.description,
     templateId: flags.templateId,
   });
 
@@ -94,6 +98,23 @@ function resolveDraftAnalyzerData(
   }
 
   return data;
+}
+
+function resolveAnalyzerContentMeta(projectId: string): {
+  title: string;
+  description: string;
+} {
+  const portfolio = getPortfolioProjectBySlug(projectId);
+  if (portfolio) {
+    return { title: portfolio.title, description: portfolio.summary };
+  }
+
+  const analysis = getRepositoryAnalysisByAnalyzerProjectId(projectId);
+  if (analysis) {
+    return { title: analysis.title, description: analysis.summary };
+  }
+
+  return { title: projectId, description: "" };
 }
 
 function buildAnalyzerDataCore(

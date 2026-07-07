@@ -1,12 +1,13 @@
 import Link from "next/link";
 import {
   getProjectPublicationFlags,
-  hasProjectAnalyzer,
+  hasRepositoryAnalyzer,
   inferAnalyzerSource,
   listEnabledAnalyzerProjectIds,
   projectPublicationFlags,
 } from "@/data/projects";
-import { getProjectBySlug } from "@/content/projects";
+import { getPortfolioProjectBySlug } from "@/content/projects";
+import { getRepositoryAnalysisByAnalyzerProjectId } from "@/content/repositoryAnalyses";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 
 export default function ProjectReviewHelperPage() {
@@ -24,8 +25,8 @@ export default function ProjectReviewHelperPage() {
           Supabase。
         </p>
         <p className="mt-3 font-mono text-meta text-muted">
-          <Link href="/projects" className="enter-indicator">
-            ← Back to Projects
+          <Link href="/analyzer" className="enter-indicator">
+            ← Back to Analyzer
           </Link>
         </p>
       </header>
@@ -46,9 +47,12 @@ export default function ProjectReviewHelperPage() {
           <tbody>
             {projectIds.map((projectId) => {
               const flags = getProjectPublicationFlags(projectId);
-              const contentProject = getProjectBySlug(projectId);
+              const portfolio = getPortfolioProjectBySlug(projectId);
+              const analysis = getRepositoryAnalysisByAnalyzerProjectId(projectId);
               const source = inferAnalyzerSource(projectId);
-              const analyzerReady = hasProjectAnalyzer(projectId);
+              const analyzerReady = hasRepositoryAnalyzer(
+                analysis?.analysisId ?? projectId
+              );
 
               if (!flags) {
                 return null;
@@ -58,8 +62,10 @@ export default function ProjectReviewHelperPage() {
                 <tr key={projectId} className="border-b border-border-soft align-top">
                   <td className="px-4 py-4">
                     <div className="font-semibold text-text">{projectId}</div>
-                    {contentProject ? (
-                      <div className="mt-1 text-meta text-muted">{contentProject.title}</div>
+                    {portfolio ? (
+                      <div className="mt-1 text-meta text-muted">{portfolio.title}</div>
+                    ) : analysis ? (
+                      <div className="mt-1 text-meta text-muted">{analysis.title}</div>
                     ) : null}
                   </td>
                   <td className="px-4 py-4 text-muted">{source}</td>

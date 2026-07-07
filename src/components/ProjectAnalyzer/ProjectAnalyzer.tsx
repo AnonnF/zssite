@@ -24,11 +24,24 @@ import { ReviewBadge } from "./ReviewBadge";
 interface ProjectAnalyzerProps {
   data: ProjectAnalyzerData;
   defaultPath?: string;
+  mode?: "walkthrough" | "repository";
 }
+
+const MODE_LABELS = {
+  walkthrough: {
+    panel: "Code Walkthrough",
+    description: "项目代码导读 — 文件树、结构分析与关键片段。",
+  },
+  repository: {
+    panel: "Repository Analysis",
+    description: "公开仓库结构分析 — 文件树、模块解读与代码片段。",
+  },
+} as const;
 
 export function ProjectAnalyzer({
   data,
   defaultPath = "src",
+  mode = "walkthrough",
 }: ProjectAnalyzerProps) {
   const resolvedDefaultPath = data.guidedTour?.[0]?.path ?? defaultPath;
 
@@ -138,12 +151,14 @@ export function ProjectAnalyzer({
     [selectPath]
   );
 
+  const modeLabels = MODE_LABELS[mode];
+
   return (
     <div id="project-analyzer" className="panel-card scroll-mt-24 overflow-hidden">
       <div className="analyzer-card-header border-b border-border-soft px-4 py-2 md:px-5">
         <div className="flex flex-wrap items-center gap-2">
           <p className="font-mono text-meta uppercase tracking-wider text-muted">
-            Project Analyzer
+            {modeLabels.panel}
           </p>
           {data.review ? <ReviewBadge review={data.review} /> : null}
         </div>

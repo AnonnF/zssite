@@ -1,12 +1,13 @@
 import { siteContent } from "@/content/site";
-import { portfolioProjects } from "@/content/projects";
+import { repositoryAnalyses } from "@/content/repositoryAnalyses";
 import { SectionLabel } from "@/components/ui/SectionLabel";
-import { ProjectCard } from "@/components/projects/ProjectCard";
+import { GitHubAnalyzerBar } from "@/components/analyzer/GitHubAnalyzerBar";
+import { AnalysisCard } from "@/components/analyzer/AnalysisCard";
 import { BackToHomeLink } from "@/components/layout/BackToHomeLink";
 
-export default function ProjectsPage() {
-  const { title, label, description, detailComingSoon, viewDetail } =
-    siteContent.projectsPage;
+export default function AnalyzerPage() {
+  const { title, label, description, libraryLabel, libraryDescription, viewDetail, unavailable } =
+    siteContent.analyzerPage;
 
   return (
     <div className="mx-auto max-w-content px-6 py-section md:px-12 lg:px-16">
@@ -21,27 +22,31 @@ export default function ProjectsPage() {
           {description}
         </p>
         <p className="mt-5 font-mono text-meta text-muted">
-          TOTAL:{" "}
+          LIBRARY:{" "}
           <span className="font-semibold text-accent">
-            {String(portfolioProjects.length).padStart(2, "0")}
+            {String(repositoryAnalyses.length).padStart(2, "0")}
           </span>{" "}
-          ENTRIES
+          RECORDS
         </p>
       </header>
 
-      <section className="mt-10 md:mt-12">
-        <SectionLabel>Portfolio Projects</SectionLabel>
+      <div className="mt-8 md:mt-10">
+        <GitHubAnalyzerBar />
+      </div>
+
+      <section className="mt-12 md:mt-14">
+        <SectionLabel>{libraryLabel}</SectionLabel>
         <p className="mt-3 max-w-2xl font-[family-name:var(--font-body-sc)] text-body text-muted">
-          大学阶段完成的工程项目、AI 应用与 Web 产品。这里记录每个项目的目标、技术选择、结构分析和能力成长。
+          {libraryDescription}
         </p>
         <div className="mt-6 flex flex-col gap-5 md:gap-6">
-          {portfolioProjects.map((project, index) => (
-            <ProjectCard
-              key={project.slug}
-              project={project}
+          {repositoryAnalyses.map((analysis, index) => (
+            <AnalysisCard
+              key={analysis.analysisId}
+              analysis={analysis}
               index={index}
-              detailComingSoon={detailComingSoon}
               viewDetail={viewDetail}
+              unavailable={unavailable}
             />
           ))}
         </div>
