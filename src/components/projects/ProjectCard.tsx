@@ -67,7 +67,6 @@ export function ProjectCard({
 
           <TechnicalThumbnail
             variant={visual}
-            caption={project.ref}
             className="mt-4 h-24 w-full md:h-28"
           />
 

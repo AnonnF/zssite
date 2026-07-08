@@ -181,7 +181,6 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
               </figcaption>
               <TechnicalThumbnail
                 variant={visual}
-                caption={project.ref}
                 className="h-40 w-full md:h-48"
               />
             </figure>
