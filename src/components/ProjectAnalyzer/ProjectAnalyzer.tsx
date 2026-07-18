@@ -157,7 +157,7 @@ export function ProjectAnalyzer({
     <div id="project-analyzer" className="panel-card archive-frame scroll-mt-24 overflow-hidden">
       <div className="analyzer-card-header border-b border-border-soft bg-surface/50 px-4 py-3 md:px-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
               <span className="accent-bar" aria-hidden="true" />
               <p className="font-mono text-meta uppercase tracking-[0.12em] text-muted">

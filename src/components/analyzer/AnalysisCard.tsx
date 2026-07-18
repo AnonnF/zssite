@@ -40,19 +40,19 @@ export function AnalysisCard({
 
       <div className="pointer-events-none relative z-[1] flex flex-col xl:flex-row">
         <div className="panel-rail flex items-center justify-between gap-4 px-4 py-4 font-mono text-meta xl:w-48 xl:shrink-0 xl:flex-col xl:items-stretch xl:gap-3 xl:px-5 xl:py-6">
-          <span className="text-3xl font-bold leading-none tracking-normal text-accent">
-            {displayNumber}
-          </span>
+          <div className="flex items-baseline gap-2 xl:flex-col xl:gap-1">
+            <span className="text-[0.5625rem] uppercase tracking-[0.16em] text-muted">
+              RECORD
+            </span>
+            <span className="archive-index text-3xl xl:text-4xl">{displayNumber}</span>
+          </div>
           <span className="break-words font-semibold tracking-[0.04em] text-accent">
             {analysis.analyzedAt}
           </span>
           <span className="break-all uppercase tracking-[0.04em] text-muted">
             {analysis.repoOwner}
           </span>
-          <span className="status-chip w-fit group-hover:border-accent/40 group-hover:text-text">
-            <span className="status-chip__dot opacity-50 group-hover:bg-accent group-hover:opacity-100" />
-            {analysis.reviewStatus}
-          </span>
+          <span className="status-tag w-fit">{analysis.reviewStatus}</span>
         </div>
 
         <div className="flex min-w-0 flex-1 flex-col lg:flex-row">
@@ -116,12 +116,7 @@ export function AnalysisCard({
 
       <div className="panel-meta-strip pointer-events-none relative z-[1] flex items-center justify-between px-5 py-3.5 md:px-6">
         <span className="enter-indicator">{footerLabel}</span>
-        <span
-          className="font-mono text-lg text-accent transition-transform group-hover:translate-x-1"
-          aria-hidden="true"
-        >
-          →
-        </span>
+        <span className="accent-signal-line" aria-hidden="true" />
       </div>
     </article>
   );

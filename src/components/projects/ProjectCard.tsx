@@ -3,7 +3,10 @@ import type { PortfolioProject } from "@/content/projects";
 import { hasPortfolioWalkthrough } from "@/data/projects/analyzerAvailability";
 import { Tag } from "@/components/ui/Tag";
 import { Divider } from "@/components/ui/Divider";
-import { ProjectTechnicalVisual } from "@/components/ui/ProjectTechnicalVisual";
+import {
+  TechnicalThumbnail,
+  resolveTechnicalVisual,
+} from "@/components/ui/TechnicalThumbnail";
 
 interface ProjectCardProps {
   project: PortfolioProject;
@@ -21,6 +24,8 @@ export function ProjectCard({
   const displayNumber = String(index + 1).padStart(2, "0");
   const hasWalkthrough = hasPortfolioWalkthrough(project.slug);
   const footerLabel = hasWalkthrough ? viewDetail : detailComingSoon;
+  const visual = resolveTechnicalVisual(project.slug, project.type);
+  const isLive = project.status === "ongoing";
 
   return (
     <Link href={`/projects/${project.slug}`} className="block">
@@ -29,15 +34,17 @@ export function ProjectCard({
 
         <div className="flex flex-col xl:flex-row">
           <div className="panel-rail flex items-center justify-between gap-4 px-4 py-4 font-mono text-meta xl:w-48 xl:shrink-0 xl:flex-col xl:items-stretch xl:gap-3 xl:px-5 xl:py-6">
-            <span className="text-3xl font-bold leading-none tracking-normal text-accent">
-              {displayNumber}
-            </span>
+            <div className="flex items-baseline gap-2 xl:flex-col xl:gap-1">
+              <span className="text-[0.5625rem] uppercase tracking-[0.16em] text-muted">
+                CASE
+              </span>
+              <span className="archive-index text-3xl xl:text-4xl">{displayNumber}</span>
+            </div>
             <span className="break-words font-semibold tracking-[0.04em] text-accent">
               {project.period}
             </span>
             <span className="uppercase tracking-[0.04em] text-muted">{project.type}</span>
-            <span className="status-chip w-fit group-hover:border-accent/40 group-hover:text-text">
-              <span className="status-chip__dot opacity-50 group-hover:bg-accent group-hover:opacity-100" />
+            <span className={`status-tag w-fit ${isLive ? "status-tag--live" : ""}`}>
               {project.status}
             </span>
           </div>
@@ -90,9 +97,9 @@ export function ProjectCard({
               <p className="mb-2 font-mono text-[0.625rem] uppercase tracking-[0.1em] text-muted">
                 Structure Preview
               </p>
-              <ProjectTechnicalVisual
-                slug={project.slug}
-                className="h-[7rem] lg:h-[9.5rem]"
+              <TechnicalThumbnail
+                variant={visual}
+                className="h-[7rem] w-full lg:h-[9.5rem]"
               />
             </div>
           </div>
@@ -100,12 +107,7 @@ export function ProjectCard({
 
         <div className="panel-meta-strip flex items-center justify-between px-5 py-3.5 md:px-6">
           <span className="enter-indicator">{footerLabel}</span>
-          <span
-            className="font-mono text-lg text-accent transition-transform group-hover:translate-x-1"
-            aria-hidden="true"
-          >
-            →
-          </span>
+          <span className="accent-signal-line" aria-hidden="true" />
         </div>
       </article>
     </Link>

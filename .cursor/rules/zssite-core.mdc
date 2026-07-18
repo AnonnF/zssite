@@ -16,8 +16,14 @@ You are working on **ZSsite**, a Chinese-first personal website for **Zhan Shi /
 
 ## Visual direction (summary)
 
+## Visual direction (summary)
+
 - Beige + black, editorial, industrial, structured, archive-like.
-- Reference mood: ARC Raiders–inspired layout language (bold type, thin dividers, info panels) — **never** copy its logo, assets, copy, or exact graphics.
+- Internal design theme: **Golden Engineering Archive / Archive Sci-Fi**.
+- Reference mood: Destiny 2–inspired mythic sci-fi restraint + ARC Raiders–inspired industrial archive layout language.
+- Use these references only as mood references: bold type, thin dividers, technical panels, signal marks, modular information systems, and field-manual-like structure.
+- Never copy game logos, screenshots, characters, official art, UI layouts, copy, or exact graphics.
+- Prefer original CSS / SVG / technical diagrams over external decorative images.
 - Full spec: `docs/design/visual-style.md`
 
 ## Site structure

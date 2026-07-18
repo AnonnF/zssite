@@ -24,6 +24,29 @@ Apply this rule when designing or implementing **any UI, UX, layout, typography,
 - **Decorations:** optional low-contrast stripes only; must not dominate.
 - **Chinese-first:** main readable content in Chinese; English for small labels / metadata (e.g. `PROJECT ARCHIVE`, `SYSTEMS`).
 
+## Visual assets and imagery
+
+- Do not use Destiny 2, ARC Raiders, or other game screenshots, characters, logos, official concept art, or copied UI assets.
+- Do not search for random sci-fi wallpapers or large decorative background images.
+- Prefer original, project-specific visual systems:
+  - CSS-based subtle grids
+  - low-contrast noise or paper texture
+  - thin technical lines
+  - SVG diagrams
+  - archive labels
+  - project index numbers
+  - signal dots using `#F1AA1C`
+  - abstract technical thumbnails
+- Images and visuals should help explain engineering projects, not decorate the page randomly.
+- Project thumbnails should be abstract technical illustrations, for example:
+  - Compiler: lexer → parser → AST → semantic analysis → codegen pipeline
+  - ARM emulator: instruction bits, registers, memory blocks
+  - RAG agent: docs → chunks → vectors → retriever → LLM
+  - BridgeTalk: conversation nodes + five-axis scoring
+  - Unity RPG: tile map + FSM loop
+- Prefer SVG or CSS-generated visuals. Use bitmap images only when there is a clear reason.
+- The site should feel like a personal engineering archive or technical field manual, not a game fan site.
+
 ## Component direction
 
 | Area | Direction |
@@ -41,6 +64,9 @@ Details: see `visual-style.md` §6.
 - Blue / purple gradients, glassmorphism, excessive box-shadow, neon cyberpunk.
 - Generic portfolio templates (centered hero + skill percentage bars + round avatar).
 - **ARC Raiders** brand assets: logo, characters, official art, official copy, pixel-level UI clone.
+- Large sci-fi wallpapers, mech art, space backgrounds, or AI-generated concept-art banners.
+- Direct visual imitation of Destiny 2, ARC Raiders, Bungie, Embark Studios, or any existing game UI.
+- Overly gamified HUD effects, neon glow, particle backgrounds, scanline-heavy cyberpunk visuals.
 
 ## Implementation notes
 

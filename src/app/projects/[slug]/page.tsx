@@ -15,6 +15,10 @@ import { siteContent } from "@/content/site";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { Divider } from "@/components/ui/Divider";
 import { Tag } from "@/components/ui/Tag";
+import {
+  TechnicalThumbnail,
+  resolveTechnicalVisual,
+} from "@/components/ui/TechnicalThumbnail";
 import { ProjectAnalyzer } from "@/components/ProjectAnalyzer/ProjectAnalyzer";
 import { ProjectNarrative } from "@/components/ProjectAnalyzer/ProjectNarrative";
 import { ReviewBadge } from "@/components/ProjectAnalyzer/ReviewBadge";
@@ -80,6 +84,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
     notFound();
   }
 
+  const visual = resolveTechnicalVisual(project.slug, project.type);
   const walkthroughData = getPortfolioWalkthroughData(slug);
   const linkedAnalysis = project.analysisId
     ? getRepositoryAnalysisById(project.analysisId)
@@ -182,6 +187,16 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
                 </Tag>
               ))}
             </div>
+
+            <figure className="group mt-6">
+              <figcaption className="mb-2 font-mono text-meta uppercase tracking-wider text-muted">
+                <span className="text-accent">◆</span> Schematic — {project.type}
+              </figcaption>
+              <TechnicalThumbnail
+                variant={visual}
+                className="h-40 w-full md:h-48"
+              />
+            </figure>
 
             {project.sourceSnapshot ? (
               <p className="mt-4 font-mono text-meta text-muted">

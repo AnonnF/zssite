@@ -27,23 +27,28 @@ export function EntryCard({ card, ctaText }: EntryCardProps) {
 
       <div className="flex flex-col lg:flex-row">
         <div className="panel-rail flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-4 font-mono text-meta md:gap-y-3 lg:w-48 lg:shrink-0 lg:flex-col lg:items-stretch lg:px-5 lg:py-6">
-          <span className="text-2xl font-bold leading-none tracking-normal text-accent">
-            {moduleNumber}
-          </span>
-          {card.meta.map(({ key, value }) => (
-            <span
-              key={key}
-              className="flex w-full min-w-0 flex-wrap items-baseline gap-x-1 tracking-[0.04em] text-muted"
-            >
-              <span className="text-text">{key}</span>
-              <span className="text-border-soft" aria-hidden="true">
-                /
-              </span>
-              <span className={`break-all ${key === "STATUS" ? "text-accent" : ""}`}>
-                {value}
-              </span>
+          <div className="flex items-baseline gap-2 lg:flex-col lg:gap-1">
+            <span className="text-[0.5625rem] uppercase tracking-[0.16em] text-muted">
+              MODULE
             </span>
-          ))}
+            <span className="archive-index text-2xl lg:text-3xl">{moduleNumber}</span>
+          </div>
+          {card.meta
+            .filter(({ key }) => key !== "MODULE")
+            .map(({ key, value }) => (
+              <span
+                key={key}
+                className="flex w-full min-w-0 flex-wrap items-baseline gap-x-1 tracking-[0.04em] text-muted"
+              >
+                <span className="text-text">{key}</span>
+                <span className="text-border-soft" aria-hidden="true">
+                  /
+                </span>
+                <span className={`break-all ${key === "STATUS" ? "text-accent" : ""}`}>
+                  {value}
+                </span>
+              </span>
+            ))}
           {status === "ACTIVE" ? (
             <span className="status-chip status-chip--active mt-1 hidden w-fit lg:inline-flex">
               <span className="status-chip__dot" aria-hidden="true" />
@@ -79,7 +84,10 @@ export function EntryCard({ card, ctaText }: EntryCardProps) {
           </div>
 
           <div className="border-t border-border-soft p-4 md:w-52 md:border-l md:border-t-0 md:p-5 lg:w-56">
-            <ModuleTechnicalVisual moduleId={card.id} className="h-[7.5rem] md:h-full md:min-h-[9rem]" />
+            <ModuleTechnicalVisual
+              moduleId={card.id}
+              className="h-[7.5rem] md:h-full md:min-h-[9rem]"
+            />
           </div>
         </div>
       </div>

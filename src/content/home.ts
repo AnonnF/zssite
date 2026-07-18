@@ -28,7 +28,7 @@ export const homeContent: HomeContent = {
   entrySectionLabel: "ARCHIVE HUB",
   entrySectionTitle: "功能入口",
   entrySectionDescription: "个人工程档案入口 — 按模块展开，后续可持续扩展",
-  entryCta: "Enter Archive",
+  entryCta: "ENTER ARCHIVE",
   placeholderLabel: "MODULE / 04+",
   placeholderText: "更多功能入口即将添加",
   cards: [
