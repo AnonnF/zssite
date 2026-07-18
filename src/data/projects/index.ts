@@ -10,15 +10,9 @@ import type {
 } from "./types";
 import {
   buildAnalyzerDataForProject,
-  buildAnalyzerRegistry,
-  getProjectAnalyzerEntry,
-  inferAnalyzerSource,
-  listEnabledAnalyzerProjectIds,
   stripAnalyzerDataForClient,
 } from "./buildAnalyzerData";
-import {
-  getPortfolioProjectBySlug,
-} from "@/content/projects";
+import { getPortfolioProjectBySlug } from "@/content/projects";
 import {
   getRepositoryAnalysisById,
   reviewStatusToReviewMeta,
@@ -74,20 +68,37 @@ export {
   listEnabledAnalyzerProjectIds,
   stripAnalyzerDataForClient,
 } from "./buildAnalyzerData";
-
-const analyzerRegistry: Record<string, ProjectAnalyzerData> = buildAnalyzerRegistry();
+export {
+  hasPortfolioWalkthrough,
+  hasProjectAnalyzer,
+  hasRepositoryAnalyzer,
+} from "./analyzerAvailability";
 
 /** Temporary: hide pipeline bar while Guided Tour covers the reading path. */
 export const PROJECT_ARCHITECTURE_ENABLED = false;
 
+const analyzerDataCache = new Map<string, ProjectAnalyzerData>();
+
+function getCachedAnalyzerData(
+  projectId: string
+): ProjectAnalyzerData | undefined {
+  const cached = analyzerDataCache.get(projectId);
+  if (cached) return cached;
+
+  const data = buildAnalyzerDataForProject(projectId, {
+    includeHighlights: false,
+  });
+  if (!data) return undefined;
+
+  const stripped = stripAnalyzerDataForClient(data);
+  analyzerDataCache.set(projectId, stripped);
+  return stripped;
+}
+
 export function getProjectAnalyzerData(
   projectId: string
 ): ProjectAnalyzerData | undefined {
-  return analyzerRegistry[projectId];
-}
-
-export function hasProjectAnalyzer(projectId: string): boolean {
-  return projectId in analyzerRegistry;
+  return getCachedAnalyzerData(projectId);
 }
 
 export function getRepositoryAnalyzerData(
@@ -98,26 +109,19 @@ export function getRepositoryAnalyzerData(
     return undefined;
   }
 
-  const data = buildAnalyzerDataForProject(analysis.analyzerProjectId, {
-    includeHighlights: false,
-  });
-
+  const data = getCachedAnalyzerData(analysis.analyzerProjectId);
   if (!data) {
     return undefined;
   }
 
   const review = reviewStatusToReviewMeta(analysis.reviewStatus);
-  return stripAnalyzerDataForClient({
+  return {
     ...data,
     projectId: analysis.analysisId,
     title: analysis.title,
     description: analysis.summary,
     review,
-  });
-}
-
-export function hasRepositoryAnalyzer(analysisId: string): boolean {
-  return Boolean(getRepositoryAnalyzerData(analysisId));
+  };
 }
 
 export function getPortfolioWalkthroughData(
@@ -139,10 +143,6 @@ export function getPortfolioWalkthroughData(
     title: project.title,
     description: project.summary,
   };
-}
-
-export function hasPortfolioWalkthrough(slug: string): boolean {
-  return Boolean(getPortfolioWalkthroughData(slug));
 }
 
 export function findTreeNode(

@@ -2,16 +2,27 @@ import { siteContent } from "@/content/site";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { Divider } from "@/components/ui/Divider";
 import { Tag } from "@/components/ui/Tag";
+import { SystemStatus } from "@/components/ui/SystemStatus";
 
 export function Hero() {
   const { title, nameEn, subtitle, label, description, keywords } = siteContent.hero;
 
   return (
     <section className="relative overflow-hidden border-b border-border-soft">
-      <div className="stripe-bg absolute inset-0 opacity-50" aria-hidden="true" />
-      <div className="absolute right-6 top-6 hidden items-center gap-2 font-mono text-meta md:flex">
-        <span className="accent-dot" aria-hidden="true" />
-        <span className="text-muted">
+      <div className="stripe-bg absolute inset-0 opacity-40" aria-hidden="true" />
+      <div
+        className="pointer-events-none absolute -right-16 top-8 hidden h-56 w-56 rounded-full border border-border-soft md:block"
+        aria-hidden="true"
+        style={{ opacity: 0.35 }}
+      />
+      <div
+        className="pointer-events-none absolute -right-6 top-20 hidden h-32 w-32 rounded-full border border-accent/30 md:block"
+        aria-hidden="true"
+      />
+
+      <div className="absolute right-6 top-6 hidden items-center gap-3 md:flex">
+        <SystemStatus label="ARCHIVE" value="ACTIVE" />
+        <span className="font-mono text-meta text-muted">
           REF: <span className="text-accent">HOME-001</span>
         </span>
       </div>
@@ -20,15 +31,15 @@ export function Hero() {
         <SectionLabel withAccent>{label}</SectionLabel>
 
         <div className="mt-6 flex items-start gap-4 md:mt-8">
-          <span className="accent-bar mt-2 hidden h-12 md:block" aria-hidden="true" />
+          <span className="accent-bar mt-2 hidden h-14 md:block" aria-hidden="true" />
           <div>
             <h1 className="font-[family-name:var(--font-body-sc)] text-[3rem] font-black leading-none tracking-tight md:text-display lg:text-[5rem]">
               {title}
             </h1>
-            <p className="mt-2 font-display text-h3 font-semibold uppercase tracking-wide text-muted md:text-h2">
+            <p className="mt-2 font-display text-h3 font-semibold uppercase tracking-wide text-text-secondary md:text-h2">
               {nameEn}
             </p>
-            <p className="mt-2 font-display text-h3 font-semibold uppercase tracking-wide text-muted md:text-h2">
+            <p className="mt-1 font-display text-h3 font-semibold uppercase tracking-wide text-muted md:text-h2">
               {subtitle}
             </p>
           </div>
@@ -40,12 +51,15 @@ export function Hero() {
           {description}
         </p>
 
-        <div className="mt-8 flex flex-wrap gap-2 md:mt-10">
+        <div className="mt-8 flex flex-wrap items-center gap-3 md:mt-10">
           {keywords.map((keyword, i) => (
             <Tag key={keyword} variant={i === 0 ? "accent" : "default"}>
               {keyword}
             </Tag>
           ))}
+          <span className="ml-1 hidden font-mono text-meta uppercase tracking-[0.12em] text-muted sm:inline">
+            Engineering Dossier
+          </span>
         </div>
       </div>
     </section>

@@ -4,6 +4,7 @@ import { SectionLabel } from "@/components/ui/SectionLabel";
 import { GitHubAnalyzerBar } from "@/components/analyzer/GitHubAnalyzerBar";
 import { AnalysisCard } from "@/components/analyzer/AnalysisCard";
 import { BackToHomeLink } from "@/components/layout/BackToHomeLink";
+import { ArchivePath } from "@/components/ui/ArchivePath";
 
 export default function AnalyzerPage() {
   const { title, label, description, libraryLabel, libraryDescription, viewDetail, unavailable } =
@@ -11,7 +12,15 @@ export default function AnalyzerPage() {
 
   return (
     <div className="mx-auto max-w-content px-6 py-section md:px-12 lg:px-16">
-      <BackToHomeLink className="mb-6" />
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <BackToHomeLink />
+        <ArchivePath
+          segments={[
+            { label: "Archive", href: "/" },
+            { label: "Analyzer" },
+          ]}
+        />
+      </div>
 
       <header className="border-b border-border-soft pb-8 md:pb-10">
         <SectionLabel withAccent>{label}</SectionLabel>

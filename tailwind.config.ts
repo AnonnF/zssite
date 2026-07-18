@@ -10,14 +10,20 @@ const config: Config = {
     extend: {
       colors: {
         bg: "var(--color-bg)",
+        "bg-secondary": "var(--color-bg-secondary)",
         surface: "var(--color-surface)",
+        "surface-solid": "var(--color-surface-solid)",
         text: "var(--color-text)",
+        "text-secondary": "var(--color-text-secondary)",
         muted: "var(--color-muted)",
         border: "var(--color-border-strong)",
         "border-soft": "var(--color-border)",
         accent: "var(--color-accent)",
+        "accent-hover": "var(--color-accent-hover)",
         "accent-muted": "var(--color-accent-muted)",
+        "accent-soft": "var(--color-accent-soft)",
         card: "var(--color-card)",
+        "code-bg": "var(--color-code-bg)",
       },
       fontFamily: {
         display: ["var(--font-display)", "sans-serif"],

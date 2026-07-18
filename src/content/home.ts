@@ -25,10 +25,10 @@ export interface HomeContent {
 }
 
 export const homeContent: HomeContent = {
-  entrySectionLabel: "MODULES",
+  entrySectionLabel: "ARCHIVE HUB",
   entrySectionTitle: "功能入口",
-  entrySectionDescription: "个人站点功能入口 — 按需展开各模块",
-  entryCta: "Enter →",
+  entrySectionDescription: "个人工程档案入口 — 按模块展开，后续可持续扩展",
+  entryCta: "Enter Archive",
   placeholderLabel: "MODULE / 04+",
   placeholderText: "更多功能入口即将添加",
   cards: [

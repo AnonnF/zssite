@@ -62,7 +62,7 @@ function SnippetCard({
         <p className="snippet-card__reason">{snippet.reason}</p>
       )}
 
-      <div className="snippet-card__code bg-[#1c1b19] p-3 md:p-4">
+      <div className="snippet-card__code code-surface p-3 md:p-4">
         <HighlightedCodeBlock
           code={code}
           language={language}
@@ -243,7 +243,7 @@ export function CodePreview({ entry, projectId }: CodePreviewProps) {
         )}
 
         {showFull && !entry.tooLarge && code && (
-          <div className="bg-[#1c1b19] p-4 md:p-5">
+          <div className="code-surface p-4 md:p-5">
             <HighlightedCodeBlock
               code={code}
               language={language}

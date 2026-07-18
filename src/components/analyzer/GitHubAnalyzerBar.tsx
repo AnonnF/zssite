@@ -110,9 +110,9 @@ export function GitHubAnalyzerBar() {
   }, [commandPreview]);
 
   return (
-    <section className="border border-border-soft bg-surface/30">
-      <div className="border-b border-border-soft px-5 py-4 md:px-6">
-        <SectionLabel>Public Repository Analyzer</SectionLabel>
+    <section className="panel-card archive-frame overflow-hidden">
+      <div className="border-b border-border-soft bg-surface/50 px-5 py-4 md:px-6">
+        <SectionLabel withAccent>Public Repository Analyzer</SectionLabel>
         <p className="mt-2 max-w-2xl font-[family-name:var(--font-body-sc)] text-sm leading-relaxed text-muted md:text-body">
           粘贴公开 GitHub 仓库地址，生成本地 CLI 命令以导入并分析仓库。命令需在本机终端运行；浏览器不会直接调用
           GitHub / Supabase / LLM。分析结果将归入下方 Analysis Library。
@@ -136,7 +136,7 @@ export function GitHubAnalyzerBar() {
               setError(null);
             }}
             placeholder="https://github.com/owner/repository"
-            className="mt-2 w-full border border-border-soft bg-background px-3 py-2.5 font-mono text-sm text-text outline-none transition-colors focus:border-accent"
+            className="mt-2 w-full border border-border-soft bg-bg px-3 py-2.5 font-mono text-sm text-text outline-none transition-colors focus:border-accent"
             autoComplete="off"
             spellCheck={false}
           />
@@ -155,7 +155,7 @@ export function GitHubAnalyzerBar() {
             onChange={(event) =>
               setTemplateSelection(event.target.value as TemplateSelection)
             }
-            className="mt-2 w-full border border-border-soft bg-background px-3 py-2.5 font-mono text-sm text-text outline-none transition-colors focus:border-accent"
+            className="mt-2 w-full border border-border-soft bg-bg px-3 py-2.5 font-mono text-sm text-text outline-none transition-colors focus:border-accent"
           >
             {TEMPLATE_OPTIONS.map((option) => (
               <option key={option.value} value={option.value}>
@@ -168,13 +168,14 @@ export function GitHubAnalyzerBar() {
         <button
           type="button"
           onClick={handleAnalyze}
-          className="border border-accent bg-accent-muted px-5 py-2.5 font-mono text-meta font-semibold uppercase tracking-wider text-text transition-colors hover:border-accent hover:bg-accent hover:text-background md:shrink-0"
+          className="btn-archive md:shrink-0"
         >
           Analyze
+          <span aria-hidden="true">→</span>
         </button>
       </div>
 
-      <div className="border-t border-border-soft px-5 py-3 md:px-6">
+      <div className="panel-meta-strip px-5 py-3 md:px-6">
         <p className="font-mono text-meta text-muted">
           Public GitHub repos only · Local CLI · Analysis Library
         </p>
@@ -213,7 +214,7 @@ export function GitHubAnalyzerBar() {
             </button>
           </div>
 
-          <pre className="mt-3 overflow-x-auto border border-border-soft bg-background px-4 py-3 font-mono text-sm leading-relaxed text-text">
+          <pre className="mt-3 overflow-x-auto border border-border-soft bg-bg-secondary/50 px-4 py-3 font-mono text-sm leading-relaxed text-text">
             {commandPreview}
           </pre>
 

@@ -154,24 +154,44 @@ export function ProjectAnalyzer({
   const modeLabels = MODE_LABELS[mode];
 
   return (
-    <div id="project-analyzer" className="panel-card scroll-mt-24 overflow-hidden">
-      <div className="analyzer-card-header border-b border-border-soft px-4 py-2 md:px-5">
-        <div className="flex flex-wrap items-center gap-2">
-          <p className="font-mono text-meta uppercase tracking-wider text-muted">
-            {modeLabels.panel}
-          </p>
-          {data.review ? <ReviewBadge review={data.review} /> : null}
+    <div id="project-analyzer" className="panel-card archive-frame scroll-mt-24 overflow-hidden">
+      <div className="analyzer-card-header border-b border-border-soft bg-surface/50 px-4 py-3 md:px-5">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="accent-bar" aria-hidden="true" />
+              <p className="font-mono text-meta uppercase tracking-[0.12em] text-muted">
+                {modeLabels.panel}
+              </p>
+              {data.review ? <ReviewBadge review={data.review} /> : null}
+            </div>
+            {data.description ? (
+              <p className="analyzer-card-header__desc mt-2 font-[family-name:var(--font-body-sc)] text-muted">
+                {data.description}
+              </p>
+            ) : (
+              <p className="analyzer-card-header__desc mt-2 font-[family-name:var(--font-body-sc)] text-muted">
+                {modeLabels.description}
+              </p>
+            )}
+            {data.review?.status === "ai-draft" ? (
+              <p className="mt-2 font-[family-name:var(--font-body-sc)] text-sm text-muted">
+                {data.review.note ?? "该分析由 AI 自动生成，尚未人工审核。"}
+              </p>
+            ) : null}
+          </div>
+          <div className="flex flex-wrap items-center gap-2 font-mono text-meta text-muted">
+            <span className="status-chip">
+              <span className="status-chip__dot" aria-hidden="true" />
+              Case File
+            </span>
+            {data.projectId ? (
+              <span>
+                ID <span className="text-accent">{data.projectId}</span>
+              </span>
+            ) : null}
+          </div>
         </div>
-        {data.review?.status === "ai-draft" ? (
-          <p className="mt-1 font-[family-name:var(--font-body-sc)] text-sm text-muted">
-            {data.review.note ?? "该分析由 AI 自动生成，尚未人工审核。"}
-          </p>
-        ) : null}
-        {data.description ? (
-          <p className="analyzer-card-header__desc mt-0.5 font-[family-name:var(--font-body-sc)] text-muted">
-            {data.description}
-          </p>
-        ) : null}
       </div>
 
       {data.guidedTour && data.guidedTour.length > 0 && (

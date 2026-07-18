@@ -6,8 +6,7 @@ import {
 import { aiDraftRegistry } from "./ai-drafts";
 import { applyPublicationReview } from "./applyPublicationReview";
 import { createAnalyzerDataFromAiDraft } from "./mergeAiDraftAnalysis";
-import { generatedRegistry } from "./generated/registry";
-import { highlightedRegistry } from "./highlighted/registry";
+import { getGeneratedAnalyzer } from "./generated/registry";
 import { manualRegistry } from "./manual/registry";
 import {
   getProjectPublicationFlags,
@@ -19,7 +18,6 @@ import {
   applyTemplateEntryHints,
   resolveProjectAnalyzerData,
 } from "./applyProjectTemplate";
-import { mergeHighlightData } from "./mergeHighlightData";
 import { GENERATED_REVIEW } from "./reviewMeta";
 import { getProjectTemplate } from "./templates";
 import type {
@@ -32,7 +30,7 @@ function resolveGeneratedOnly(
   projectId: string,
   flags: ProjectPublicationFlag
 ): ProjectAnalyzerData | undefined {
-  const generated = generatedRegistry[projectId];
+  const generated = getGeneratedAnalyzer(projectId);
   if (!generated) {
     return undefined;
   }
@@ -72,7 +70,7 @@ function resolveDraftAnalyzerData(
   projectId: string,
   flags: ProjectPublicationFlag
 ): ProjectAnalyzerData | undefined {
-  const generated = generatedRegistry[projectId];
+  const generated = getGeneratedAnalyzer(projectId);
   const aiDraft = aiDraftRegistry[projectId];
   if (!generated || !aiDraft) {
     return undefined;
@@ -122,7 +120,7 @@ function buildAnalyzerDataCore(
   flags: ProjectPublicationFlag
 ): ProjectAnalyzerData | undefined {
   const manual = manualRegistry[projectId];
-  const generated = generatedRegistry[projectId];
+  const generated = getGeneratedAnalyzer(projectId);
 
   let data: ProjectAnalyzerData | undefined;
 
@@ -186,11 +184,15 @@ export function buildAnalyzerDataForProject(
     return undefined;
   }
 
-  if (options?.includeHighlights === false) {
-    return data;
+  // Highlight payloads are large (~37MB). Keep them out of the default web path.
+  // Scripts that need highlights should call mergeHighlightData explicitly.
+  if (options?.includeHighlights) {
+    const { highlightedRegistry } = require("./highlighted/registry") as typeof import("./highlighted/registry");
+    const { mergeHighlightData } = require("./mergeHighlightData") as typeof import("./mergeHighlightData");
+    return mergeHighlightData(data, highlightedRegistry[projectId]);
   }
 
-  return mergeHighlightData(data, highlightedRegistry[projectId]);
+  return data;
 }
 
 export function listEnabledAnalyzerProjectIds(): string[] {
@@ -217,7 +219,8 @@ export function buildAnalyzerRegistry(): Record<string, ProjectAnalyzerData> {
 
 export function inferAnalyzerSource(projectId: string): "manual" | "ai-draft" | "generated" | "none" {
   if (manualRegistry[projectId]) return "manual";
-  if (aiDraftRegistry[projectId] && generatedRegistry[projectId]) return "ai-draft";
-  if (generatedRegistry[projectId]) return "generated";
+  const generated = getGeneratedAnalyzer(projectId);
+  if (aiDraftRegistry[projectId] && generated) return "ai-draft";
+  if (generated) return "generated";
   return "none";
 }

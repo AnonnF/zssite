@@ -3,6 +3,7 @@ import { portfolioProjects } from "@/content/projects";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { ProjectCard } from "@/components/projects/ProjectCard";
 import { BackToHomeLink } from "@/components/layout/BackToHomeLink";
+import { ArchivePath } from "@/components/ui/ArchivePath";
 
 export default function ProjectsPage() {
   const { title, label, description, detailComingSoon, viewDetail } =
@@ -10,7 +11,15 @@ export default function ProjectsPage() {
 
   return (
     <div className="mx-auto max-w-content px-6 py-section md:px-12 lg:px-16">
-      <BackToHomeLink className="mb-6" />
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <BackToHomeLink />
+        <ArchivePath
+          segments={[
+            { label: "Archive", href: "/" },
+            { label: "Projects" },
+          ]}
+        />
+      </div>
 
       <header className="border-b border-border-soft pb-8 md:pb-10">
         <SectionLabel withAccent>{label}</SectionLabel>

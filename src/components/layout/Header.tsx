@@ -10,7 +10,7 @@ export function Header() {
   const { brand, nav, languageToggle } = siteContent;
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border-soft bg-bg/95 backdrop-blur-[2px]">
+    <header className="sticky top-0 z-50 border-b border-border-soft bg-bg/96 backdrop-blur-[2px]">
       <div className="mx-auto flex h-14 max-w-content items-center justify-between px-6 md:h-16 md:px-12 lg:px-16">
         <Link
           href="/"
@@ -27,6 +27,10 @@ export function Header() {
           <span className="font-mono text-meta font-medium text-muted transition-colors group-hover:text-accent">
             / {brand.secondary}
           </span>
+          <span
+            className="ml-1 hidden h-1.5 w-1.5 rounded-full bg-accent opacity-0 transition-opacity group-hover:opacity-100 sm:block"
+            aria-hidden="true"
+          />
         </Link>
 
         <nav className="flex items-center gap-6 md:gap-8">
@@ -40,13 +44,19 @@ export function Header() {
                 <li key={item.href}>
                   <Link
                     href={item.href}
-                    className={`font-body text-body font-medium transition-colors hover:text-text ${
+                    className={`relative font-body text-body font-medium transition-colors hover:text-text ${
                       isActive
                         ? "nav-link-active"
                         : "text-muted hover:underline hover:decoration-accent hover:underline-offset-4"
                     }`}
                   >
                     {item.label}
+                    {isActive ? (
+                      <span
+                        className="absolute -left-2.5 top-1/2 hidden h-1 w-1 -translate-y-1/2 rounded-full bg-accent md:block"
+                        aria-hidden="true"
+                      />
+                    ) : null}
                   </Link>
                 </li>
               );

@@ -47,27 +47,83 @@ export function updateGeneratedRegistry(repoRoot: string): void {
     .filter((name) => name.endsWith(".generated.ts"))
     .sort();
 
-  const imports: string[] = [];
-  const registryEntries: string[] = [];
+  const loaderEntries: string[] = [];
 
   for (const fileName of generatedFiles) {
     const projectId = fileName.replace(/\.generated\.ts$/, "");
     const exportName = toExportName(projectId);
-    imports.push(`import { ${exportName} } from "./${projectId}.generated";`);
-    registryEntries.push(`  "${projectId}": ${exportName},`);
+    // Lazy require keeps list/detail routes from eagerly loading every project payload.
+    loaderEntries.push(
+      `  "${projectId}": () =>\n    require("./${projectId}.generated").${exportName} as ProjectAnalyzerGeneratedData,`
+    );
   }
 
   const registryContents =
-    imports.length > 0
-      ? `${imports.join("\n")}
+    loaderEntries.length > 0
+      ? `import type { ProjectAnalyzerGeneratedData } from "../types";
 
-import type { ProjectAnalyzerGeneratedData } from "../types";
+type GeneratedLoader = () => ProjectAnalyzerGeneratedData;
 
-export const generatedRegistry: Record<string, ProjectAnalyzerGeneratedData> = {
-${registryEntries.join("\n")}
+const generatedLoaders: Record<string, GeneratedLoader> = {
+${loaderEntries.join("\n")}
 };
+
+const generatedCache = new Map<string, ProjectAnalyzerGeneratedData>();
+
+export function getGeneratedAnalyzer(
+  projectId: string
+): ProjectAnalyzerGeneratedData | undefined {
+  const cached = generatedCache.get(projectId);
+  if (cached) return cached;
+
+  const loader = generatedLoaders[projectId];
+  if (!loader) return undefined;
+
+  const data = loader();
+  generatedCache.set(projectId, data);
+  return data;
+}
+
+export function hasGeneratedAnalyzer(projectId: string): boolean {
+  return projectId in generatedLoaders;
+}
+
+/** @deprecated Prefer getGeneratedAnalyzer — kept for call-site compatibility. */
+export const generatedRegistry: Record<string, ProjectAnalyzerGeneratedData> =
+  new Proxy({} as Record<string, ProjectAnalyzerGeneratedData>, {
+    get(_target, prop: string | symbol) {
+      if (typeof prop !== "string") return undefined;
+      return getGeneratedAnalyzer(prop);
+    },
+    has(_target, prop: string | symbol) {
+      return typeof prop === "string" && hasGeneratedAnalyzer(prop);
+    },
+    ownKeys() {
+      return Object.keys(generatedLoaders);
+    },
+    getOwnPropertyDescriptor(_target, prop: string | symbol) {
+      if (typeof prop !== "string" || !hasGeneratedAnalyzer(prop)) {
+        return undefined;
+      }
+      return {
+        configurable: true,
+        enumerable: true,
+        get: () => getGeneratedAnalyzer(prop),
+      };
+    },
+  });
 `
       : `import type { ProjectAnalyzerGeneratedData } from "../types";
+
+export function getGeneratedAnalyzer(
+  _projectId: string
+): ProjectAnalyzerGeneratedData | undefined {
+  return undefined;
+}
+
+export function hasGeneratedAnalyzer(_projectId: string): boolean {
+  return false;
+}
 
 export const generatedRegistry: Record<string, ProjectAnalyzerGeneratedData> =
   {};

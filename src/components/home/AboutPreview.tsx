@@ -7,7 +7,7 @@ export function AboutPreview() {
   const { label, items } = siteContent.aboutPreview;
 
   return (
-    <section className="border-t border-border-soft bg-surface/40">
+    <section className="border-t border-border-soft bg-bg-secondary/50">
       <div className="mx-auto max-w-content px-6 py-section md:px-12 lg:px-16">
         <SectionLabel withAccent>{label}</SectionLabel>
         <Divider className="mt-5 mb-7" />
@@ -27,8 +27,9 @@ export function AboutPreview() {
           ))}
         </ul>
 
-        <Link href="/about" className="enter-indicator mt-8 inline-block">
-          查看完整简历 →
+        <Link href="/about" className="enter-indicator mt-8 inline-flex">
+          查看完整简历
+          <span aria-hidden="true">→</span>
         </Link>
       </div>
     </section>

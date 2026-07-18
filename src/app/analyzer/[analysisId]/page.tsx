@@ -22,6 +22,7 @@ import { ReviewBadge } from "@/components/ProjectAnalyzer/ReviewBadge";
 import { ProjectDetailNav } from "@/components/projects/ProjectDetailNav";
 import { LinkedToPortfolioBadge } from "@/components/analyzer/LinkedToPortfolioBadge";
 import { BackToHomeLink } from "@/components/layout/BackToHomeLink";
+import { ArchivePath } from "@/components/ui/ArchivePath";
 
 interface AnalysisDetailPageProps {
   params: Promise<{ analysisId: string }>;
@@ -73,14 +74,23 @@ export default async function AnalysisDetailPage({
         showNav ? "max-w-content-wide" : "max-w-content"
       }`}
     >
-      <nav className="mt-0 flex flex-wrap items-center gap-x-5 gap-y-2">
-        <BackToHomeLink />
-        <Link
-          href="/analyzer"
-          className="enter-indicator text-muted transition-colors hover:text-accent"
-        >
-          ← {backToAnalyzer}
-        </Link>
+      <nav className="mt-0 flex flex-wrap items-center justify-between gap-x-5 gap-y-3">
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+          <BackToHomeLink />
+          <Link
+            href="/analyzer"
+            className="enter-indicator text-muted transition-colors hover:text-accent"
+          >
+            ← {backToAnalyzer}
+          </Link>
+        </div>
+        <ArchivePath
+          segments={[
+            { label: "Archive", href: "/" },
+            { label: "Analyzer", href: "/analyzer" },
+            { label: analysis.title },
+          ]}
+        />
       </nav>
 
       {showNav && (

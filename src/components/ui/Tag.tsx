@@ -12,7 +12,7 @@ export function Tag({ children, variant = "default", className = "" }: TagProps)
 
   return (
     <span
-      className={`inline-block border px-2.5 py-0.5 font-mono text-meta uppercase tracking-wider transition-colors ${variantClass} ${className}`}
+      className={`inline-block rounded-sm border px-2.5 py-0.5 font-mono text-meta uppercase tracking-wider transition-colors ${variantClass} ${className}`}
     >
       {children}
     </span>

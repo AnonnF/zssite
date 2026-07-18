@@ -20,6 +20,7 @@ import { ProjectNarrative } from "@/components/ProjectAnalyzer/ProjectNarrative"
 import { ReviewBadge } from "@/components/ProjectAnalyzer/ReviewBadge";
 import { ProjectDetailNav } from "@/components/projects/ProjectDetailNav";
 import { BackToHomeLink } from "@/components/layout/BackToHomeLink";
+import { ArchivePath } from "@/components/ui/ArchivePath";
 
 interface ProjectDetailPageProps {
   params: Promise<{ slug: string }>;
@@ -94,14 +95,23 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
         showNav ? "max-w-content-wide" : "max-w-content"
       }`}
     >
-      <nav className="mt-0 flex flex-wrap items-center gap-x-5 gap-y-2">
-        <BackToHomeLink />
-        <Link
-          href="/projects"
-          className="enter-indicator text-muted transition-colors hover:text-accent"
-        >
-          ← {backToProjects}
-        </Link>
+      <nav className="mt-0 flex flex-wrap items-center justify-between gap-x-5 gap-y-3">
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+          <BackToHomeLink />
+          <Link
+            href="/projects"
+            className="enter-indicator text-muted transition-colors hover:text-accent"
+          >
+            ← {backToProjects}
+          </Link>
+        </div>
+        <ArchivePath
+          segments={[
+            { label: "Archive", href: "/" },
+            { label: "Projects", href: "/projects" },
+            { label: project.title },
+          ]}
+        />
       </nav>
 
       {showNav && (
@@ -135,13 +145,16 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
               </p>
             ) : null}
 
-            <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 font-mono text-meta text-muted">
+            <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-meta text-muted">
               <span>
                 PERIOD{" "}
                 <span className="font-semibold text-accent">{project.period}</span>
               </span>
               <span className="uppercase">{project.type}</span>
-              <span className="uppercase">{project.status}</span>
+              <span className="status-chip">
+                <span className="status-chip__dot" aria-hidden="true" />
+                {project.status}
+              </span>
             </div>
 
             <p className="mt-3 font-mono text-meta text-muted">{project.context}</p>

@@ -52,14 +52,25 @@ export function ProjectArchitecture({
 
   return (
     <section id="project-architecture" className="scroll-mt-24 border-t border-border-soft">
-      <div className="flex items-start justify-between gap-3 px-4 py-3 md:px-5">
+      <div className="flex items-start justify-between gap-3 bg-surface/35 px-4 py-3 md:px-5">
         <div>
-          <p className="font-mono text-meta uppercase tracking-wider text-muted">
-            Project Architecture
-          </p>
+          <div className="flex items-center gap-2">
+            <span className="accent-bar" aria-hidden="true" />
+            <p className="font-mono text-meta uppercase tracking-[0.12em] text-muted">
+              Project Architecture
+            </p>
+          </div>
           <p className="mt-1 font-[family-name:var(--font-body-sc)] text-body text-muted">
-            How the main modules connect
+            主模块如何衔接 — 技术流程档案条
           </p>
+          {!expanded && activeNodeId ? (
+            <p className="mt-2 font-mono text-meta text-muted">
+              Active{" "}
+              <span className="text-accent">
+                {pipeline.find((node) => node.id === activeNodeId)?.label ?? activeNodeId}
+              </span>
+            </p>
+          ) : null}
         </div>
         <button
           type="button"
@@ -73,11 +84,11 @@ export function ProjectArchitecture({
       </div>
 
       <div
-        className="grid transition-[grid-template-rows] duration-300 ease-in-out"
+        className="grid transition-[grid-template-rows] duration-300 ease-in-out motion-reduce:transition-none"
         style={{ gridTemplateRows: expanded ? "1fr" : "0fr" }}
       >
         <div className="overflow-hidden">
-          <div className="border-t border-border-soft bg-surface/20 px-4 pb-4 pt-3 md:px-5 md:pb-5">
+          <div className="border-t border-border-soft bg-bg-secondary/30 px-4 pb-4 pt-3 md:px-5 md:pb-5">
             <div className="overflow-x-auto pb-1">
               <div className="flex min-w-min items-stretch">
                 {pipeline.map((node, index) => (
@@ -87,15 +98,21 @@ export function ProjectArchitecture({
                       className={`pipeline-node flex w-[11.5rem] shrink-0 flex-col gap-2 border px-3 py-3 text-left transition-colors duration-200 md:w-[12.5rem] ${
                         activeNodeId === node.id
                           ? "pipeline-node--active"
-                          : "border-border-soft bg-bg/50 hover:border-border-strong hover:bg-surface/60"
+                          : "border-border-soft bg-bg/50 hover:border-accent/50 hover:bg-surface/60"
                       }`}
                       onClick={() => onNodeClick(node.path)}
                     >
                       <div className="flex flex-wrap items-center gap-2">
+                        <span
+                          className={`h-1.5 w-1.5 rounded-full ${
+                            activeNodeId === node.id ? "bg-accent" : "bg-border"
+                          }`}
+                          aria-hidden="true"
+                        />
                         <span className="font-display text-body font-bold leading-tight text-text">
                           {node.label}
                         </span>
-                        <Tag variant="accent" className="shrink-0">
+                        <Tag variant={activeNodeId === node.id ? "accent" : "default"} className="shrink-0">
                           {node.language}
                         </Tag>
                       </div>

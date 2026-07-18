@@ -17,7 +17,8 @@ function AnalysisSection({
 }) {
   return (
     <section className="border-t border-border-soft pt-4 first:border-t-0 first:pt-0">
-      <h4 className="font-mono text-meta uppercase tracking-wider text-muted">
+      <h4 className="flex items-center gap-2 font-mono text-meta uppercase tracking-[0.1em] text-muted">
+        <span className="h-px w-3 bg-accent" aria-hidden="true" />
         {title}
       </h4>
       <div className="mt-2">{children}</div>
@@ -74,7 +75,7 @@ function InputOutputRow({ input, output }: { input?: string; output?: string }) 
   return (
     <div className="grid gap-3 sm:grid-cols-2">
       {input && (
-        <div className="border border-border-soft bg-bg/40 px-3 py-2.5">
+        <div className="border border-border-soft bg-bg-secondary/40 px-3 py-2.5">
           <p className="font-mono text-meta uppercase tracking-wider text-muted">
             Input
           </p>
@@ -84,7 +85,7 @@ function InputOutputRow({ input, output }: { input?: string; output?: string }) 
         </div>
       )}
       {output && (
-        <div className="border border-border-soft bg-bg/40 px-3 py-2.5">
+        <div className="border border-border-soft bg-bg-secondary/40 px-3 py-2.5">
           <p className="font-mono text-meta uppercase tracking-wider text-muted">
             Output
           </p>
