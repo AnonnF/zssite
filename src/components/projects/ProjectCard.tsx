@@ -27,6 +27,50 @@ export function ProjectCard({
   const visual = resolveTechnicalVisual(project.slug, project.type);
   const isLive = project.status === "ongoing";
 
+  if (!project.featured) {
+    return (
+      <Link href={`/projects/${project.slug}`} className="block">
+        <article className="panel-card panel-card-interactive group relative overflow-hidden">
+          <div className="flex flex-col gap-3 px-5 py-4 md:flex-row md:items-center md:gap-6 md:px-6">
+            <span className="archive-index shrink-0 text-xl md:text-2xl">
+              {displayNumber}
+            </span>
+
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                <h2 className="font-display text-h3 font-bold uppercase tracking-tight text-text">
+                  {project.title}
+                </h2>
+                {project.subtitle ? (
+                  <p className="font-[family-name:var(--font-body-sc)] text-sm text-muted">
+                    {project.subtitle}
+                  </p>
+                ) : null}
+              </div>
+              <p className="mt-1 font-mono text-meta text-muted">
+                {project.context}
+              </p>
+            </div>
+
+            <div className="flex shrink-0 flex-wrap items-center gap-x-4 gap-y-2 font-mono text-meta md:flex-col md:items-end md:gap-1">
+              <span className="font-semibold tracking-[0.04em] text-accent">
+                {project.period}
+              </span>
+              <span className="uppercase tracking-[0.04em] text-muted">
+                {project.type}
+              </span>
+              <span
+                className={`status-tag w-fit ${isLive ? "status-tag--live" : ""}`}
+              >
+                {project.status}
+              </span>
+            </div>
+          </div>
+        </article>
+      </Link>
+    );
+  }
+
   return (
     <Link href={`/projects/${project.slug}`} className="block">
       <article className="panel-card panel-card-interactive group relative overflow-hidden archive-frame">
@@ -75,7 +119,7 @@ export function ProjectCard({
                 {project.summary}
               </p>
 
-              <ul className="mt-4 space-y-1.5 font-[family-name:var(--font-body-sc)] text-body text-muted">
+              <ul className="mt-4 space-y-1.5 font-[family-name:var(--font-body-sc)] text-sm leading-relaxed text-muted">
                 {project.highlights.slice(0, 3).map((item) => (
                   <li key={item} className="flex gap-2">
                     <span className="text-accent">—</span>

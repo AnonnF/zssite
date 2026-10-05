@@ -35,7 +35,7 @@ const config: Config = {
         h1: ["2.75rem", { lineHeight: "1.05", letterSpacing: "-0.02em" }],
         h2: ["1.75rem", { lineHeight: "1.15", letterSpacing: "-0.01em" }],
         h3: ["1.125rem", { lineHeight: "1.3" }],
-        body: ["0.9375rem", { lineHeight: "1.6" }],
+        body: ["1rem", { lineHeight: "1.65" }],
         meta: ["0.75rem", { lineHeight: "1.4", letterSpacing: "0.08em" }],
       },
       maxWidth: {

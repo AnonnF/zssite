@@ -12,20 +12,19 @@ export function AboutPreview() {
         <SectionLabel withAccent>{label}</SectionLabel>
         <Divider className="mt-5 mb-7" />
 
-        <ul className="space-y-4">
-          {items.map((item, i) => (
-            <li
-              key={item}
-              className="flex items-start gap-3 font-[family-name:var(--font-body-sc)] text-body font-medium text-text md:text-lg"
-            >
-              <span
-                className={`accent-dot mt-2.5 ${i === 0 ? "opacity-100" : "opacity-40"}`}
-                aria-hidden="true"
-              />
-              {item}
-            </li>
-          ))}
-        </ul>
+        <div className="border-l-2 border-accent/60 pl-5 md:pl-6">
+          <p className="font-[family-name:var(--font-body-sc)] text-body font-medium leading-relaxed text-text md:text-lg">
+            {items[3]}
+          </p>
+          <p className="mt-4 font-mono text-meta uppercase tracking-[0.12em] text-muted">
+            {items[0]}
+            <span className="mx-2 text-border-soft">/</span>
+            {items[1]}
+          </p>
+          <p className="mt-1.5 font-mono text-meta uppercase tracking-[0.12em] text-accent">
+            {items[2]}
+          </p>
+        </div>
 
         <Link href="/about" className="enter-indicator mt-8 inline-flex">
           查看完整简历

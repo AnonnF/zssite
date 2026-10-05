@@ -9,23 +9,14 @@ export function Hero() {
 
   return (
     <section className="relative overflow-hidden border-b border-border-soft">
-      <div className="stripe-bg absolute inset-0 opacity-40" aria-hidden="true" />
-      <div
-        className="pointer-events-none absolute -right-16 top-8 hidden h-56 w-56 rounded-full border border-border-soft md:block"
-        aria-hidden="true"
-        style={{ opacity: 0.35 }}
-      />
-      <div
-        className="pointer-events-none absolute -right-6 top-20 hidden h-32 w-32 rounded-full border border-accent/30 md:block"
-        aria-hidden="true"
-      />
+      <div className="stripe-bg absolute inset-0 opacity-25" aria-hidden="true" />
 
       <span
-        className="signal-cross absolute left-4 top-4 md:left-6 md:top-6"
+        className="signal-cross absolute left-4 top-4 opacity-50 md:left-6 md:top-6"
         aria-hidden="true"
       />
       <span
-        className="signal-cross absolute bottom-4 right-4 md:bottom-6 md:right-6"
+        className="signal-cross absolute bottom-4 right-4 opacity-50 md:bottom-6 md:right-6"
         aria-hidden="true"
       />
 
@@ -36,7 +27,7 @@ export function Hero() {
         </span>
       </div>
 
-      <div className="relative mx-auto max-w-content px-6 py-16 md:px-12 md:py-24 lg:px-16 lg:py-28">
+      <div className="relative mx-auto max-w-content px-6 py-20 md:px-12 md:py-28 lg:px-16 lg:py-32">
         <SectionLabel withAccent>{label}</SectionLabel>
 
         <div className="mt-6 flex items-start gap-4 md:mt-8">

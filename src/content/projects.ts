@@ -20,6 +20,8 @@ export interface PortfolioProject {
   challenges: string[];
   skillsDemonstrated: string[];
   status: PortfolioProjectStatus;
+  /** Featured projects use the full archive card; others use a compact row. */
+  featured?: boolean;
   links?: PortfolioProjectLinks;
   analysisId?: string;
   sourceSnapshot?: string;
@@ -66,6 +68,7 @@ export const portfolioProjects: PortfolioProject[] = [
     ],
     skillsDemonstrated: ["后端 API 设计", "AI 产品化", "DevOps", "团队协作"],
     status: "completed",
+    featured: true,
     ref: "REF-004",
     sourceSnapshot: "project-experience/bridgetalk",
   },
@@ -132,6 +135,7 @@ export const portfolioProjects: PortfolioProject[] = [
     ],
     skillsDemonstrated: ["编译原理", "语言实现", "代码生成", "团队协作"],
     status: "completed",
+    featured: true,
     analysisId: "wacc-compiler",
     ref: "REF-003",
     sourceSnapshot: "project-experience/wacc-compiler",
@@ -165,6 +169,7 @@ export const portfolioProjects: PortfolioProject[] = [
     ],
     skillsDemonstrated: ["系统编程", "内核调试", "进程模型", "并发与同步"],
     status: "completed",
+    featured: true,
     ref: "REF-001",
     sourceSnapshot: "project-experience/pintos",
   },
@@ -194,6 +199,7 @@ export const portfolioProjects: PortfolioProject[] = [
     ],
     skillsDemonstrated: ["ISA 理解", "底层工具链", "C 工程化"],
     status: "completed",
+    featured: true,
     ref: "REF-002",
     sourceSnapshot: "project-experience/armv8-emulator-assembler",
   },

@@ -92,7 +92,7 @@ ZSsite 是 **施展 / Zhan Shi** 的个人网站，同时承担 **工程项目�
 | `text-h1` | 36–48px | 页面标题 |
 | `text-h2` | 24–32px | 区块标题 |
 | `text-h3` | 18–20px | 卡片标题 |
-| `text-body` | 15–16px | 正文 |
+| `text-body` | 16px | 正文 |
 | `text-meta` | 12–13px | 标签、日期、技术栈 |
 
 ### 3.4 字重
@@ -146,10 +146,12 @@ ZSsite 是 **施展 / Zhan Shi** 的个人网站，同时承担 **工程项目�
 ```
 
 - **圆角**：0–4px（默认 **0 或 2px**）
-- **阴影**：默认无；hover 可用 `border-color` 加深或 1px 位移，不用 `box-shadow: 0 8px 32px`
-- **背景**：与页面背景同系米白，或浅一档
+- **阴影**：默认无；hover 时 `border-color` 变黄、轻微上移 2px，可叠加极轻投影
+- **背景**：面板用 `#F7F3EC`，与页面背景 `#FAF8F5` 拉开轻微对比
 - **边框**：1px solid black / near-black
 - **内边距**：20–24px
+
+项目列表分两级：`featured` 项目用完整档案卡（左侧 rail + 底部条），其余用紧凑行式卡片。
 
 ### 5.2 标签（Tag / Chip）
 
@@ -257,5 +259,6 @@ ZSsite 是 **施展 / Zhan Shi** 的个人网站，同时承担 **工程项目�
 - `--color-bg`, `--color-surface`, `--color-text`, `--color-muted`, `--color-border`, `--color-accent`, `--color-card`
 - `--font-display`, `--font-body`, `--font-mono`
 - `--space-section`, `--space-panel`, `--radius-sm`（0–4px）
+- 过渡统一 `--transition-fast: 200ms ease`；卡片 hover 统一 `border-color` + `translateY(-2px)`
 
 内容层使用数据驱动（项目 JSON / MDX），样式层遵守本指南。

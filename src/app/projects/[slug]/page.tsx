@@ -137,19 +137,29 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
               </p>
             ) : null}
 
-            <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-meta text-muted">
-              <span>
-                PERIOD{" "}
-                <span className="font-semibold text-accent">{project.period}</span>
-              </span>
-              <span className="uppercase">{project.type}</span>
-              <span className="status-chip">
-                <span className="status-chip__dot" aria-hidden="true" />
-                {project.status}
-              </span>
-            </div>
-
-            <p className="mt-3 font-mono text-meta text-muted">{project.context}</p>
+            <dl className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-2 border-y border-border-soft py-3 font-mono text-meta">
+              <div className="flex items-baseline gap-2">
+                <dt className="uppercase tracking-wider text-muted">Period</dt>
+                <dd className="font-semibold text-accent">{project.period}</dd>
+              </div>
+              <div className="flex items-baseline gap-2">
+                <dt className="uppercase tracking-wider text-muted">Type</dt>
+                <dd className="uppercase text-text">{project.type}</dd>
+              </div>
+              <div className="flex items-baseline gap-2">
+                <dt className="uppercase tracking-wider text-muted">Status</dt>
+                <dd>
+                  <span className="status-chip">
+                    <span className="status-chip__dot" aria-hidden="true" />
+                    {project.status}
+                  </span>
+                </dd>
+              </div>
+              <div className="flex items-baseline gap-2">
+                <dt className="uppercase tracking-wider text-muted">Context</dt>
+                <dd className="text-muted">{project.context}</dd>
+              </div>
+            </dl>
 
             <Divider accent className="my-5" />
 
