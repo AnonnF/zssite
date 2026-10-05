@@ -10,9 +10,9 @@
 ZSsite
 ├── Home              /              个人网站入口页（功能入口卡片）
 ├── Projects          /projects      项目经历列表页
-├── Project Detail    /projects/[slug]   单个项目详情（未来）
-├── About             /about         关于（占位）
-├── Contact           /contact       联系（占位）
+├── Project Detail    /projects/[slug]   单个项目详情
+├── About             /about         关于与简历（Experience / Education / Skills / Publications / Contact）
+├── Contact           /contact       联系
 └── Future Modules    能力地图、项目分析器、学习记录、CV 等
 ```
 
@@ -56,13 +56,16 @@ ZSsite
 
 **数据来源：** `src/content/projects.ts`
 
-**第一版项目：**
+**当前项目（以 `src/content/projects.ts` 为准，按开始时间由近到远，不跟随任何求职版本 CV 的排序）：**
 
-- ARMv8 Emulator & Assembler
+- Bridge Talk
+- LangChain / LangGraph RAG Agent
 - WACC Compiler
-- BridgeTalk
-- Resume-Job Matching Agent
-- LangChain / RAG Practice
+- Pintos
+- ARMv8 Emulator & Assembler
+- Drone Pathfinding × LLM
+- PyTorch CIFAR-10
+- Unity 2D RPG
 
 ---
 
@@ -90,17 +93,22 @@ ZSsite
 
 ### 2.4 About `/about`
 
-**目的：** 个人背景与能力详细说明。
+**目的：** 个人背景与能力详细说明，网站承载完整、长期稳定的技术画像（不同于针对具体岗位压缩的 CV）。
 
-**第一版：** 占位页，后续扩展能力矩阵、时间线等面板式内容。
+**区块（自上而下）：** Experience（实习经历，不新增路由）→ Education → Coursework → Skills → Publications → Contact。
+
+**内容原则：**
+
+- 客观事实（日期、技术栈、经历、联系方式）以最新 CV 为准，并与 CV 保持一致。
+- 不写入 CV 的 `Seeking` / `Target Role`，不照搬某一版 CV 的技能顺序或项目排序。
+- 网站可以比 CV 更详细，但不得创造 CV 与项目中没有依据的经历、数据或技术栈。
+- 简历下载入口目前保持 “Coming Soon”。
 
 ---
 
 ### 2.5 Contact `/contact`
 
-**目的：** 联系渠道与说明。
-
-**第一版：** 占位页；Footer 已提供链接占位。
+**目的：** 联系渠道与说明。邮箱、GitHub、LinkedIn；不展示电话号码。
 
 ---
 
@@ -122,8 +130,11 @@ ZSsite
 
 | 文件 | 用途 |
 |------|------|
-| `src/content/site.ts` | 全站文案：导航、Hero、About Preview、Footer、Projects 页标题 |
+| `src/content/profile.ts` | 个人身份、定位（tagline / directions）、联系方式；Hero 与 About 的定位文案统一从这里派生 |
+| `src/content/site.ts` | 全站文案：导航、Hero、About Preview、SEO、Footer、Projects 页标题 |
 | `src/content/home.ts` | 首页功能入口卡片数据 |
+| `src/content/resume.ts` | About 页数据：Experience、Education、Coursework、Skills |
+| `src/content/publications.ts` | 论文发表 |
 | `src/content/projects.ts` | 项目列表数据 |
 
 组件 **不硬编码** 长段中文；后续 i18n 可将上述文件拆为 `zh` / `en` 字典。

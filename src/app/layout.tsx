@@ -2,6 +2,7 @@ import { Oswald, IBM_Plex_Sans, IBM_Plex_Mono, Noto_Sans_SC } from "next/font/go
 import type { Metadata } from "next";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { siteContent } from "@/content/site";
 import "./globals.css";
 
 const oswald = Oswald({
@@ -29,8 +30,8 @@ const notoSansSC = Noto_Sans_SC({
 });
 
 export const metadata: Metadata = {
-  title: "ZSsite — 施展",
-  description: "施展的个人网站与工程项目档案",
+  title: siteContent.seo.title,
+  description: siteContent.seo.description,
   icons: {
     icon: [{ url: "/images/zssiteIcon.png", type: "image/png" }],
     apple: "/images/zssiteIcon.png",

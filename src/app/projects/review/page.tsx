@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import {
   getProjectPublicationFlags,
   hasRepositoryAnalyzer,
@@ -9,8 +10,13 @@ import {
 import { getPortfolioProjectBySlug } from "@/content/projects";
 import { getRepositoryAnalysisByAnalyzerProjectId } from "@/content/repositoryAnalyses";
 import { SectionLabel } from "@/components/ui/SectionLabel";
+import { isPublicAnalyzerEnabled } from "@/lib/siteFeatures";
 
 export default function ProjectReviewHelperPage() {
+  if (!isPublicAnalyzerEnabled()) {
+    notFound();
+  }
+
   const projectIds = listEnabledAnalyzerProjectIds();
 
   return (

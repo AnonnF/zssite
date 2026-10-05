@@ -1,14 +1,18 @@
 import { NextResponse } from "next/server";
-import {
-  getProjectAnalyzerEntry,
-  hasProjectAnalyzer,
-} from "@/data/projects";
+import { isPublicAnalyzerEnabled } from "@/lib/siteFeatures";
 
 interface RouteContext {
   params: Promise<{ slug: string }>;
 }
 
 export async function GET(request: Request, context: RouteContext) {
+  if (!isPublicAnalyzerEnabled()) {
+    return NextResponse.json({ error: "Not found." }, { status: 404 });
+  }
+
+  const { getProjectAnalyzerEntry, hasProjectAnalyzer } = await import(
+    "@/data/projects"
+  );
   const { slug } = await context.params;
   const path = new URL(request.url).searchParams.get("path");
 

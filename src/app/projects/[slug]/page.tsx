@@ -4,13 +4,6 @@ import {
   getPortfolioProjectBySlug,
   portfolioProjects,
 } from "@/content/projects";
-import { getRepositoryAnalysisById } from "@/content/repositoryAnalyses";
-import {
-  buildProjectDetailNavSections,
-  getPortfolioWalkthroughData,
-  hasNarrativeContent,
-  hasPortfolioWalkthrough,
-} from "@/data/projects";
 import { siteContent } from "@/content/site";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { Divider } from "@/components/ui/Divider";
@@ -19,12 +12,9 @@ import {
   TechnicalThumbnail,
   resolveTechnicalVisual,
 } from "@/components/ui/TechnicalThumbnail";
-import { ProjectAnalyzer } from "@/components/ProjectAnalyzer/ProjectAnalyzer";
-import { ProjectNarrative } from "@/components/ProjectAnalyzer/ProjectNarrative";
-import { ReviewBadge } from "@/components/ProjectAnalyzer/ReviewBadge";
-import { ProjectDetailNav } from "@/components/projects/ProjectDetailNav";
 import { BackToHomeLink } from "@/components/layout/BackToHomeLink";
 import { ArchivePath } from "@/components/ui/ArchivePath";
+import { isPublicAnalyzerEnabled } from "@/lib/siteFeatures";
 
 interface ProjectDetailPageProps {
   params: Promise<{ slug: string }>;
@@ -85,19 +75,22 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
   }
 
   const visual = resolveTechnicalVisual(project.slug, project.type);
-  const walkthroughData = getPortfolioWalkthroughData(slug);
-  const linkedAnalysis = project.analysisId
-    ? getRepositoryAnalysisById(project.analysisId)
-    : undefined;
-  const navSections = buildProjectDetailNavSections(walkthroughData, "portfolio");
-  const showNav = navSections.length > 1;
-  const { backToProjects, walkthroughLabel, walkthroughUnavailable } =
-    siteContent.projectDetail;
+  const embed = isPublicAnalyzerEnabled()
+    ? await (
+        await import("@/components/projects/ProjectAnalyzerEmbed")
+      ).loadProjectAnalyzerEmbed({
+        slug,
+        analysisId: project.analysisId,
+        sourceSnapshot: project.sourceSnapshot,
+      })
+    : null;
+  const { backToProjects, caseLabel } = siteContent.projectDetail;
+  const sectionLabel = embed?.sectionLabel ?? caseLabel;
 
   return (
     <div
       className={`mx-auto px-6 py-section md:px-12 lg:px-16 ${
-        showNav ? "max-w-content-wide" : "max-w-content"
+        embed?.showNav ? "max-w-content-wide" : "max-w-content"
       }`}
     >
       <nav className="mt-0 flex flex-wrap items-center justify-between gap-x-5 gap-y-3">
@@ -119,22 +112,16 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
         />
       </nav>
 
-      {showNav && (
-        <ProjectDetailNav
-          sections={navSections}
-          variant="mobile"
-          className="mt-6"
-        />
-      )}
+      {embed?.mobileNav}
 
-      <div className={showNav ? "project-detail-body" : undefined}>
+      <div className={embed?.showNav ? "project-detail-body" : undefined}>
         <div className="project-detail-main min-w-0">
           <header
             id="project-overview"
             className="scroll-mt-24 mt-6 border-b border-border-soft pb-8 md:pb-10"
           >
             <div className="flex flex-wrap items-start justify-between gap-3">
-              <SectionLabel withAccent>{walkthroughLabel}</SectionLabel>
+              <SectionLabel withAccent>{sectionLabel}</SectionLabel>
               {project.ref && (
                 <span className="font-mono text-meta text-muted">{project.ref}</span>
               )}
@@ -166,15 +153,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
 
             <Divider accent className="my-5" />
 
-            {walkthroughData?.review?.status === "ai-draft" ? (
-              <div className="mb-5 flex flex-wrap items-center gap-3 rounded-sm border border-border-soft bg-surface/40 px-4 py-3">
-                <ReviewBadge review={walkthroughData.review} />
-                <p className="font-[family-name:var(--font-body-sc)] text-sm text-muted">
-                  {walkthroughData.review.note ??
-                    "关联的代码导读包含 AI 生成内容，尚未人工审核。"}
-                </p>
-              </div>
-            ) : null}
+            {embed?.beforeSummary}
 
             <p className="max-w-3xl font-[family-name:var(--font-body-sc)] text-body leading-relaxed text-muted md:text-lg">
               {project.summary}
@@ -198,25 +177,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
               />
             </figure>
 
-            {project.sourceSnapshot ? (
-              <p className="mt-4 font-mono text-meta text-muted">
-                SOURCE: project-snapshots/{project.sourceSnapshot}
-              </p>
-            ) : null}
-
-            {linkedAnalysis ? (
-              <div className="mt-4 flex flex-wrap items-center gap-3">
-                <span className="font-mono text-meta text-muted">
-                  Linked analysis:
-                </span>
-                <Link
-                  href={`/analyzer/${linkedAnalysis.analysisId}`}
-                  className="enter-indicator"
-                >
-                  {linkedAnalysis.analysisId} →
-                </Link>
-              </div>
-            ) : null}
+            {embed?.afterFigure}
           </header>
 
           <div className="mt-8 grid gap-5 md:grid-cols-2 md:gap-6">
@@ -229,36 +190,10 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
             />
           </div>
 
-          <div className="mt-10 md:mt-12">
-            {walkthroughData ? (
-              <>
-                <ProjectAnalyzer data={walkthroughData} mode="walkthrough" />
-                {walkthroughData.narrative &&
-                  hasNarrativeContent(walkthroughData.narrative) && (
-                    <ProjectNarrative
-                      narrative={walkthroughData.narrative}
-                      className="mt-8 md:mt-10"
-                    />
-                  )}
-              </>
-            ) : (
-              <div className="panel-card p-6 md:p-8">
-                <p className="font-[family-name:var(--font-body-sc)] text-body text-muted">
-                  {walkthroughUnavailable}
-                </p>
-                {hasPortfolioWalkthrough(slug) ? null : (
-                  <p className="mt-3 font-mono text-meta text-muted">
-                    可在 /analyzer 查看关联的公开仓库分析记录。
-                  </p>
-                )}
-              </div>
-            )}
-          </div>
+          {embed?.body}
         </div>
 
-        {showNav && (
-          <ProjectDetailNav sections={navSections} variant="desktop" />
-        )}
+        {embed?.desktopNav}
       </div>
     </div>
   );

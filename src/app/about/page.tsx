@@ -51,6 +51,62 @@ export default function AboutPage() {
       </header>
 
       <div className="mt-10 flex flex-col gap-5 md:mt-12 md:gap-6">
+        <ResumeSection id="experience" label={sectionLabels.experience}>
+          <ul className="space-y-6">
+            {resumePage.experience.map((entry) => (
+              <li
+                key={entry.id}
+                className="border-b border-border-soft pb-6 last:border-b-0 last:pb-0"
+              >
+                <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+                  <div>
+                    <h3 className="font-[family-name:var(--font-body-sc)] text-body font-bold text-text md:text-lg">
+                      {entry.organization}
+                    </h3>
+                    <p className="mt-1 font-[family-name:var(--font-body-sc)] text-body text-muted">
+                      {entry.role}
+                    </p>
+                  </div>
+                  <div className="font-mono text-meta text-muted md:text-right">
+                    <p>{entry.period}</p>
+                  </div>
+                </div>
+
+                <p className="mt-2 font-mono text-meta text-accent">
+                  {entry.context}
+                </p>
+
+                <p className="mt-4 max-w-3xl font-[family-name:var(--font-body-sc)] text-body leading-relaxed text-muted">
+                  {entry.summary}
+                </p>
+
+                <ul className="mt-4 space-y-3">
+                  {entry.highlights.map((item) => (
+                    <li
+                      key={item.title}
+                      className="flex gap-2 font-[family-name:var(--font-body-sc)] text-body leading-relaxed text-muted"
+                    >
+                      <span className="text-accent">—</span>
+                      <span>
+                        <span className="font-bold text-text">{item.title}</span>
+                        <span className="text-muted"> · {item.detail}</span>
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {entry.techStack.map((tech, index) => (
+                    <Tag key={tech} variant={index === 0 ? "accent" : "default"}>
+                      {tech}
+                    </Tag>
+                  ))}
+                </div>
+              </li>
+            ))}
+          </ul>
+        </ResumeSection>
+
         <ResumeSection id="education" label={sectionLabels.education}>
           <ul className="space-y-5">
             {resumePage.education.map((entry) => (

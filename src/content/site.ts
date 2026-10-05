@@ -1,4 +1,5 @@
 import { profile } from "./profile";
+import { isPublicAnalyzerEnabled } from "@/lib/siteFeatures";
 
 export interface NavItem {
   label: string;
@@ -33,6 +34,10 @@ export interface SiteContent {
     label: string;
     items: string[];
   };
+  seo: {
+    title: string;
+    description: string;
+  };
   footer: {
     copyright: string;
     links: FooterLink[];
@@ -42,11 +47,14 @@ export interface SiteContent {
     title: string;
     label: string;
     description: string;
+    listLabel: string;
+    listDescription: string;
     detailComingSoon: string;
     viewDetail: string;
   };
   projectDetail: {
     backToProjects: string;
+    caseLabel: string;
     walkthroughLabel: string;
     walkthroughUnavailable: string;
   };
@@ -79,7 +87,9 @@ export const siteContent: SiteContent = {
   nav: [
     { label: "首页", href: "/" },
     { label: "项目", href: "/projects" },
-    { label: "解析器", href: "/analyzer" },
+    ...(isPublicAnalyzerEnabled()
+      ? [{ label: "解析器", href: "/analyzer" }]
+      : []),
     { label: "关于", href: "/about" },
     { label: "联系", href: "/contact" },
   ],
@@ -90,19 +100,23 @@ export const siteContent: SiteContent = {
   hero: {
     title: profile.nameZh,
     nameEn: profile.nameEn,
-    subtitle: "Imperial College London · Computing",
+    subtitle: profile.identity,
     label: "PERSONAL SITE / ENGINEERING ARCHIVE",
     description: profile.tagline,
-    keywords: ["Systems", "AI Applications", "Web Products"],
+    keywords: profile.directions,
   },
   aboutPreview: {
     label: "ABOUT",
     items: [
       `${profile.nameEn} / ${profile.nameZh}`,
       profile.identity,
-      "Systems · AI Applications · Web Products",
+      profile.directions.join(" · "),
       profile.tagline,
     ],
+  },
+  seo: {
+    title: "ZSsite — 施展",
+    description: `施展（${profile.nameEn}）的个人网站与工程项目档案。${profile.identity}，聚焦系统基础、后端工程与 LLM / Agent 应用。`,
   },
   footer: {
     copyright: "© 2026 ZSsite",
@@ -118,12 +132,16 @@ export const siteContent: SiteContent = {
     title: "项目经历",
     label: "PROJECT ARCHIVE",
     description:
-      "大学阶段完成的工程项目、AI 应用与 Web 产品。这里记录每个项目的目标、技术选择、结构分析和能力成长。",
+      "系统、后端与 AI 应用方向的工程项目，包括课程团队项目与个人项目。这里记录每个项目的目标、技术选择与能力成长。",
+    listLabel: "Portfolio Projects",
+    listDescription:
+      "按开始时间由近到远排列，涵盖系统软件、编译器、后端与 AI 应用，以及部分个人探索项目。",
     detailComingSoon: "ENTER CASE →",
     viewDetail: "ENTER CASE →",
   },
   projectDetail: {
     backToProjects: "返回项目列表",
+    caseLabel: "PROJECT CASE",
     walkthroughLabel: "PROJECT WALKTHROUGH",
     walkthroughUnavailable: "该项目的代码导读尚未就绪。",
   },

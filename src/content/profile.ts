@@ -24,16 +24,15 @@ export interface Profile {
 export const profile: Profile = {
   nameZh: "施展",
   nameEn: "Zhan Shi",
-  identity: "Imperial College London · Computing",
+  identity: "Imperial College London · MEng Computing",
   tagline:
-    "系统软件、编译器与操作系统项目经验，同时持续探索 AI 应用、RAG 智能体与机器学习工程实践。",
+    "以操作系统、编译器与计算机体系结构为底层基础，专注后端工程与 LLM / Agent 应用系统的设计与实现。",
   introduction:
-    "Imperial College London Computing 学生，方向涵盖 Software Engineering、AI Engineering、Backend 与 Systems。过去几年里，我完成了从操作系统内核、指令集模拟器、编译器到 LangGraph RAG 智能体、全栈 Web 产品与深度学习实验的一系列项目，习惯把复杂系统拆成可验证的工程模块。",
+    "Imperial College London MEng Computing 学生，具备操作系统、编译器与计算机体系结构的扎实基础。2026 年夏季参与企业内部 LLM / Agent 平台从 Python 到 Java（Spring Boot、Spring AI）的迁移，处理 SSE 协议兼容、请求级取消与 Workflow 运行时等工程问题。此外完成了 Pintos 内核、WACC 编译器、ARMv8 模拟器与汇编器，以及 RAG Agent、AI 沟通练习平台等项目，习惯把复杂系统拆成可验证的工程模块。",
   directions: [
-    "Software Engineering",
-    "AI Engineering",
-    "Backend",
-    "Systems",
+    "Systems Foundations",
+    "Backend Engineering",
+    "AI Agent Systems",
   ],
   email: "briansz@126.com",
   github: {

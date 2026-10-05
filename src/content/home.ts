@@ -1,3 +1,5 @@
+import { isPublicAnalyzerEnabled } from "@/lib/siteFeatures";
+
 export interface EntryCardMeta {
   key: string;
   value: string;
@@ -29,18 +31,18 @@ export const homeContent: HomeContent = {
   entrySectionTitle: "功能入口",
   entrySectionDescription: "个人工程档案入口 — 按模块展开，后续可持续扩展",
   entryCta: "ENTER ARCHIVE",
-  placeholderLabel: "MODULE / 04+",
+  placeholderLabel: isPublicAnalyzerEnabled() ? "MODULE / 04+" : "MODULE / 03+",
   placeholderText: "更多功能入口即将添加",
   cards: [
     {
       id: "about-resume",
       title: "关于与简历",
-      subtitle: "教育背景 · 技能 · 论文发表",
+      subtitle: "实习经历 · 教育背景 · 技能 · 论文发表",
       label: "ABOUT & RESUME",
       description:
-        "查看完整简历信息：教育经历、课程、技能分类、论文发表与联系方式。",
+        "查看完整简历信息：实习经历、教育经历、课程、技能分类、论文发表与联系方式。",
       href: "/about",
-      categories: ["Profile", "Education", "Publications"],
+      categories: ["Profile", "Experience", "Education", "Publications"],
       meta: [
         { key: "MODULE", value: "01" },
         { key: "TYPE", value: "PROFILE" },
@@ -50,10 +52,10 @@ export const homeContent: HomeContent = {
     {
       id: "project-archive",
       title: "项目经历",
-      subtitle: "工程项目 · 技术决策 · 能力成长",
+      subtitle: "工程项目 · 技术选择 · 能力成长",
       label: "PROJECT ARCHIVE",
       description:
-        "系统整理我在大学阶段完成的工程项目、AI 应用、Web 产品与设计研究，并记录每个项目中的技术决策、结构分析和能力成长。",
+        "系统整理系统软件、编译器、后端与 AI 应用方向的工程项目，包括课程团队项目与个人项目，并记录每个项目的目标、技术选择与能力成长。",
       href: "/projects",
       categories: ["Projects", "Case Studies", "Engineering Notes"],
       meta: [
@@ -77,5 +79,7 @@ export const homeContent: HomeContent = {
         { key: "STATUS", value: "ACTIVE" },
       ],
     },
-  ],
+  ].filter(
+    (card) => isPublicAnalyzerEnabled() || card.id !== "repository-analyzer"
+  ),
 };
