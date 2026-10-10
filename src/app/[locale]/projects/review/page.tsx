@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import {
   getProjectPublicationFlags,
   hasRepositoryAnalyzer,
@@ -12,9 +12,17 @@ import { getRepositoryAnalysisByAnalyzerProjectId } from "@/content/repositoryAn
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { isPublicAnalyzerEnabled } from "@/lib/siteFeatures";
 
-export default function ProjectReviewHelperPage() {
+export default async function ProjectReviewHelperPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
   if (!isPublicAnalyzerEnabled()) {
     notFound();
+  }
+  if (locale !== "zh") {
+    redirect("/projects/review");
   }
 
   const projectIds = listEnabledAnalyzerProjectIds();

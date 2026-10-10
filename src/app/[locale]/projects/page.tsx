@@ -1,11 +1,25 @@
-import { siteContent } from "@/content/site";
-import { portfolioProjects } from "@/content/projects";
+import type { Metadata } from "next";
+import { getPortfolioProjects, getSiteContent } from "@/content";
+import { buildAlternates } from "@/lib/i18n/href";
+import { resolveLocale, type LocaleParams } from "@/lib/i18n/params";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { ProjectCard } from "@/components/projects/ProjectCard";
 import { BackToHomeLink } from "@/components/layout/BackToHomeLink";
 import { ArchivePath } from "@/components/ui/ArchivePath";
 
-export default function ProjectsPage() {
+export async function generateMetadata({ params }: LocaleParams): Promise<Metadata> {
+  const locale = await resolveLocale(params);
+  const { projectsPage } = getSiteContent(locale);
+  return {
+    title: `${projectsPage.title} — ZSsite`,
+    description: projectsPage.description,
+    alternates: buildAlternates(locale, "/projects"),
+  };
+}
+
+export default async function ProjectsPage({ params }: LocaleParams) {
+  const locale = await resolveLocale(params);
+  const portfolioProjects = getPortfolioProjects(locale);
   const {
     title,
     label,
@@ -14,13 +28,14 @@ export default function ProjectsPage() {
     listDescription,
     detailComingSoon,
     viewDetail,
-  } = siteContent.projectsPage;
+  } = getSiteContent(locale).projectsPage;
 
   return (
     <div className="mx-auto max-w-content px-6 py-section md:px-12 lg:px-16">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <BackToHomeLink />
+        <BackToHomeLink locale={locale} />
         <ArchivePath
+          locale={locale}
           segments={[
             { label: "Archive", href: "/" },
             { label: "Projects" },
@@ -58,6 +73,7 @@ export default function ProjectsPage() {
               index={index}
               detailComingSoon={detailComingSoon}
               viewDetail={viewDetail}
+              locale={locale}
             />
           ))}
         </div>

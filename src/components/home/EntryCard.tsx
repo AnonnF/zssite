@@ -1,6 +1,8 @@
 import Link from "next/link";
 import type { HomeEntryCard } from "@/content/home";
 import { SectionLabel } from "@/components/ui/SectionLabel";
+import type { Locale } from "@/lib/i18n/config";
+import { localizeHref } from "@/lib/i18n/href";
 import { Divider } from "@/components/ui/Divider";
 import { Tag } from "@/components/ui/Tag";
 import { ModuleTechnicalVisual } from "@/components/ui/ModuleTechnicalVisual";
@@ -8,15 +10,16 @@ import { ModuleTechnicalVisual } from "@/components/ui/ModuleTechnicalVisual";
 interface EntryCardProps {
   card: HomeEntryCard;
   ctaText: string;
+  locale: Locale;
 }
 
-export function EntryCard({ card, ctaText }: EntryCardProps) {
+export function EntryCard({ card, ctaText, locale }: EntryCardProps) {
   const moduleNumber = card.meta.find((m) => m.key === "MODULE")?.value ?? "01";
   const status = card.meta.find((m) => m.key === "STATUS")?.value;
 
   return (
     <Link
-      href={card.href}
+      href={localizeHref(locale, card.href)}
       className="panel-card panel-card-interactive group relative block overflow-hidden archive-frame"
     >
       <span className="accent-mark-corner" aria-hidden="true" />

@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import {
-  getPortfolioProjectBySlug,
-  portfolioProjects,
-} from "@/content/projects";
-import { siteContent } from "@/content/site";
+import type { Metadata } from "next";
+import { getLocalizedProjectBySlug, getSiteContent } from "@/content";
+import { portfolioProjects } from "@/content/projects";
+import { hasPortfolioWalkthrough } from "@/data/projects/analyzerAvailability";
+import { buildAlternates, localizeHref } from "@/lib/i18n/href";
+import { resolveLocale } from "@/lib/i18n/params";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { Divider } from "@/components/ui/Divider";
 import { Tag } from "@/components/ui/Tag";
@@ -17,16 +18,19 @@ import { ArchivePath } from "@/components/ui/ArchivePath";
 import { isPublicAnalyzerEnabled } from "@/lib/siteFeatures";
 
 interface ProjectDetailPageProps {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ locale: string; slug: string }>;
 }
 
 export function generateStaticParams() {
   return portfolioProjects.map((project) => ({ slug: project.slug }));
 }
 
-export async function generateMetadata({ params }: ProjectDetailPageProps) {
+export async function generateMetadata({
+  params,
+}: ProjectDetailPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const project = getPortfolioProjectBySlug(slug);
+  const locale = await resolveLocale(params);
+  const project = getLocalizedProjectBySlug(slug, locale);
 
   if (!project) {
     return { title: "Project Not Found — ZSsite" };
@@ -35,6 +39,7 @@ export async function generateMetadata({ params }: ProjectDetailPageProps) {
   return {
     title: `${project.title} — ZSsite`,
     description: project.summary,
+    alternates: buildAlternates(locale, `/projects/${slug}`),
   };
 }
 
@@ -68,14 +73,15 @@ function PortfolioSection({
 
 export default async function ProjectDetailPage({ params }: ProjectDetailPageProps) {
   const { slug } = await params;
-  const project = getPortfolioProjectBySlug(slug);
+  const locale = await resolveLocale(params);
+  const project = getLocalizedProjectBySlug(slug, locale);
 
   if (!project) {
     notFound();
   }
 
   const visual = resolveTechnicalVisual(project.slug, project.type);
-  const embed = isPublicAnalyzerEnabled()
+  const embed = isPublicAnalyzerEnabled() && locale === "zh"
     ? await (
         await import("@/components/projects/ProjectAnalyzerEmbed")
       ).loadProjectAnalyzerEmbed({
@@ -84,7 +90,12 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
         sourceSnapshot: project.sourceSnapshot,
       })
     : null;
-  const { backToProjects, caseLabel } = siteContent.projectDetail;
+  const { backToProjects, caseLabel, walkthroughZhOnly, viewChineseVersion } =
+    getSiteContent(locale).projectDetail;
+  const showZhOnlyNote =
+    locale !== "zh" &&
+    isPublicAnalyzerEnabled() &&
+    hasPortfolioWalkthrough(project.slug);
   const sectionLabel = embed?.sectionLabel ?? caseLabel;
 
   return (
@@ -95,15 +106,16 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
     >
       <nav className="mt-0 flex flex-wrap items-center justify-between gap-x-5 gap-y-3">
         <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-          <BackToHomeLink />
+          <BackToHomeLink locale={locale} />
           <Link
-            href="/projects"
+            href={localizeHref(locale, "/projects")}
             className="enter-indicator text-muted transition-colors hover:text-accent"
           >
             ← {backToProjects}
           </Link>
         </div>
         <ArchivePath
+          locale={locale}
           segments={[
             { label: "Archive", href: "/" },
             { label: "Projects", href: "/projects" },
@@ -188,6 +200,19 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
             </figure>
 
             {embed?.afterFigure}
+
+            {showZhOnlyNote ? (
+              <p className="mt-5 font-mono text-meta text-muted">
+                {walkthroughZhOnly}{" "}
+                <Link
+                  href={`/projects/${project.slug}`}
+                  hrefLang="zh-CN"
+                  className="text-accent underline-offset-4 hover:underline"
+                >
+                  {viewChineseVersion}
+                </Link>
+              </p>
+            ) : null}
           </header>
 
           <div className="mt-8 grid gap-5 md:grid-cols-2 md:gap-6">

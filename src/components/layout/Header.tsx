@@ -3,17 +3,21 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { siteContent } from "@/content/site";
+import { getSiteContent } from "@/content";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
+import { localizeHref, stripLocale, switchLocaleHref } from "@/lib/i18n/href";
 
 export function Header() {
-  const pathname = usePathname();
-  const { brand, nav, languageToggle } = siteContent;
+  const rawPathname = usePathname();
+  const locale = useLocale();
+  const pathname = stripLocale(rawPathname);
+  const { brand, nav, languageToggle } = getSiteContent(locale);
 
   return (
     <header className="sticky top-0 z-50 border-b border-border-soft bg-bg/96 backdrop-blur-[2px]">
       <div className="mx-auto flex h-14 max-w-content items-center justify-between px-6 md:h-16 md:px-12 lg:px-16">
         <Link
-          href="/"
+          href={localizeHref(locale, "/")}
           className="group flex items-center gap-2 font-display text-lg font-bold tracking-tight md:text-xl"
         >
           <Image
@@ -43,7 +47,7 @@ export function Header() {
               return (
                 <li key={item.href}>
                   <Link
-                    href={item.href}
+                    href={localizeHref(locale, item.href)}
                     className={`relative font-body text-body font-medium transition-colors hover:text-text ${
                       isActive
                         ? "nav-link-active"
@@ -64,23 +68,40 @@ export function Header() {
           </ul>
 
           <div className="hidden items-center border-l border-border-soft pl-6 font-mono text-meta md:flex">
-            <button
-              type="button"
-              className="font-semibold text-text"
-              aria-label="当前语言：中文"
-              disabled
-            >
-              {languageToggle.zh}
-            </button>
-            <span className="mx-2 text-muted">/</span>
-            <button
-              type="button"
-              className="text-muted transition-colors hover:text-accent"
-              aria-label="切换至英文（即将推出）"
-              disabled
-            >
-              {languageToggle.en}
-            </button>
+            {(["zh", "en"] as const).map((target, index) => {
+              const isCurrent = target === locale;
+              return (
+                <span key={target} className="flex items-center">
+                  {index > 0 ? <span className="mx-2 text-muted">/</span> : null}
+                  {isCurrent ? (
+                    <span
+                      className="font-semibold text-text"
+                      aria-label={
+                        target === "zh"
+                          ? languageToggle.zhLabel
+                          : languageToggle.enLabel
+                      }
+                      aria-current="true"
+                    >
+                      {languageToggle[target]}
+                    </span>
+                  ) : (
+                    <Link
+                      href={switchLocaleHref(pathname, target)}
+                      hrefLang={target === "zh" ? "zh-CN" : "en"}
+                      className="text-muted transition-colors hover:text-accent"
+                      aria-label={
+                        target === "zh"
+                          ? languageToggle.zhLabel
+                          : languageToggle.enLabel
+                      }
+                    >
+                      {languageToggle[target]}
+                    </Link>
+                  )}
+                </span>
+              );
+            })}
           </div>
         </nav>
       </div>

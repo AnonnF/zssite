@@ -1,11 +1,13 @@
-import { siteContent } from "@/content/site";
+import { getSiteContent } from "@/content";
+import type { Locale } from "@/lib/i18n/config";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { Divider } from "@/components/ui/Divider";
 import { Tag } from "@/components/ui/Tag";
 import { SystemStatus } from "@/components/ui/SystemStatus";
 
-export function Hero() {
-  const { title, nameEn, subtitle, label, description, keywords } = siteContent.hero;
+export function Hero({ locale }: { locale: Locale }) {
+  const { title, nameEn, subtitle, label, description, keywords } =
+    getSiteContent(locale).hero;
 
   return (
     <section className="relative overflow-hidden border-b border-border-soft">

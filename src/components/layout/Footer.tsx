@@ -1,8 +1,10 @@
 import Link from "next/link";
-import { siteContent } from "@/content/site";
+import { getSiteContent } from "@/content";
+import type { Locale } from "@/lib/i18n/config";
+import { localizeHref } from "@/lib/i18n/href";
 
-export function Footer() {
-  const { copyright, links } = siteContent.footer;
+export function Footer({ locale }: { locale: Locale }) {
+  const { copyright, links } = getSiteContent(locale).footer;
 
   return (
     <footer className="border-t border-border-soft bg-bg-secondary/40">
@@ -17,7 +19,7 @@ export function Footer() {
           {links.map((link) => (
             <li key={link.label}>
               <Link
-                href={link.href}
+                href={localizeHref(locale, link.href)}
                 className="font-mono text-meta font-medium uppercase tracking-wider text-text transition-colors hover:text-accent hover:underline hover:decoration-accent hover:underline-offset-4"
               >
                 {link.label}

@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { defaultLocale, type Locale } from "@/lib/i18n/config";
+import { localizeHref } from "@/lib/i18n/href";
 
 export interface ArchivePathSegment {
   label: string;
@@ -8,9 +10,14 @@ export interface ArchivePathSegment {
 interface ArchivePathProps {
   segments: ArchivePathSegment[];
   className?: string;
+  locale?: Locale;
 }
 
-export function ArchivePath({ segments, className = "" }: ArchivePathProps) {
+export function ArchivePath({
+  segments,
+  className = "",
+  locale = defaultLocale,
+}: ArchivePathProps) {
   return (
     <nav
       aria-label="Archive path"
@@ -27,7 +34,7 @@ export function ArchivePath({ segments, className = "" }: ArchivePathProps) {
             )}
             {segment.href && !isLast ? (
               <Link
-                href={segment.href}
+                href={localizeHref(locale, segment.href)}
                 className="transition-colors hover:text-accent"
               >
                 {segment.label}

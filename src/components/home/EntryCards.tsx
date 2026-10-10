@@ -1,8 +1,9 @@
-import { homeContent } from "@/content/home";
+import { getHomeContent } from "@/content";
+import type { Locale } from "@/lib/i18n/config";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { EntryCard } from "./EntryCard";
 
-export function EntryCards() {
+export function EntryCards({ locale }: { locale: Locale }) {
   const {
     entrySectionLabel,
     entrySectionTitle,
@@ -11,7 +12,7 @@ export function EntryCards() {
     placeholderLabel,
     placeholderText,
     cards,
-  } = homeContent;
+  } = getHomeContent(locale);
 
   return (
     <section className="mx-auto max-w-content px-6 py-section md:px-12 lg:px-16">
@@ -36,7 +37,12 @@ export function EntryCards() {
 
       <div className="mt-10 flex flex-col gap-6">
         {cards.map((card) => (
-          <EntryCard key={card.id} card={card} ctaText={entryCta} />
+          <EntryCard
+            key={card.id}
+            card={card}
+            ctaText={entryCta}
+            locale={locale}
+          />
         ))}
 
         <div

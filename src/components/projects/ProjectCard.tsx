@@ -1,6 +1,8 @@
 import Link from "next/link";
 import type { PortfolioProject } from "@/content/projects";
 import { hasPortfolioWalkthrough } from "@/data/projects/analyzerAvailability";
+import type { Locale } from "@/lib/i18n/config";
+import { localizeHref } from "@/lib/i18n/href";
 import { Tag } from "@/components/ui/Tag";
 import { Divider } from "@/components/ui/Divider";
 import {
@@ -13,6 +15,7 @@ interface ProjectCardProps {
   index: number;
   detailComingSoon: string;
   viewDetail: string;
+  locale: Locale;
 }
 
 export function ProjectCard({
@@ -20,6 +23,7 @@ export function ProjectCard({
   index,
   detailComingSoon,
   viewDetail,
+  locale,
 }: ProjectCardProps) {
   const displayNumber = String(index + 1).padStart(2, "0");
   const hasWalkthrough = hasPortfolioWalkthrough(project.slug);
@@ -29,7 +33,10 @@ export function ProjectCard({
 
   if (!project.featured) {
     return (
-      <Link href={`/projects/${project.slug}`} className="block">
+      <Link
+        href={localizeHref(locale, `/projects/${project.slug}`)}
+        className="block"
+      >
         <article className="panel-card panel-card-interactive group relative overflow-hidden">
           <div className="flex flex-col gap-3 px-5 py-4 md:flex-row md:items-center md:gap-6 md:px-6">
             <span className="archive-index shrink-0 text-xl md:text-2xl">
@@ -72,7 +79,10 @@ export function ProjectCard({
   }
 
   return (
-    <Link href={`/projects/${project.slug}`} className="block">
+    <Link
+        href={localizeHref(locale, `/projects/${project.slug}`)}
+        className="block"
+      >
       <article className="panel-card panel-card-interactive group relative overflow-hidden archive-frame">
         <span className="accent-mark-corner opacity-0 transition-opacity group-hover:opacity-100" />
 

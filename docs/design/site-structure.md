@@ -135,24 +135,31 @@ ZSsite
 | `src/content/home.ts` | 首页功能入口卡片数据 |
 | `src/content/resume.ts` | About 页数据：Experience、Education、Coursework、Skills |
 | `src/content/publications.ts` | 论文发表 |
-| `src/content/projects.ts` | 项目列表数据 |
+| `src/content/projects.ts` | 项目列表数据（中文源数据 + 结构字段） |
+| `src/content/en/*.ts` | 英文文案：`site`、`home`、`profile`、`resume`、`projects`（按 slug 的可翻译字段表） |
+| `src/content/index.ts` | 按 locale 取内容：`getSiteContent` / `getHomeContent` / `getProfile` / `getResumePage` / `getPortfolioProjects` / `getLocalizedProjectBySlug` |
+| `src/lib/i18n/` | locale 配置、href 本地化、`LocaleProvider`、路由参数校验 |
 
-组件 **不硬编码** 长段中文；后续 i18n 可将上述文件拆为 `zh` / `en` 字典。
+组件 **不硬编码** 长段文案；中文文件为源，`src/content/en/` 覆盖可翻译字段，结构数据（`type`、`techStack`、`ref`、`period` 等）在两种语言间共用。
 
 ---
 
 ## 4. 路由与 i18n 约定
 
-### 4.1 第一版
+### 4.1 当前实现
 
-- 默认语言：**中文（zh）**
-- URL：**不带 locale 前缀**
-- Header 预留 **中 / EN** 切换按钮（暂未启用）
+- 默认语言：**中文（zh）**，URL **不带 locale 前缀**（如 `/projects`）。
+- 英文：`/en/...`（如 `/en/projects/pintos`）。
+- `src/middleware.ts`：`/en/*` 直通；无前缀路径内部 rewrite 到 `/zh/*`；`/zh/*` 308 重定向回无前缀 URL。
+- 页面位于 `src/app/[locale]/`，`[locale]/layout.tsx` 为 root layout（设置 `<html lang>`、SEO metadata）；各页面通过 `alternates` 输出 canonical 与 hreflang。
+- Header 的 **中 / EN** 为真实链接，保持在同一页面切换语言。
+- 范围：Home、Projects、Project Detail 文案与元数据、About、Contact、Header、Footer、SEO 已双语。
+- 未翻译：Analyzer / `projects/review` 及 AI draft 生成的代码导读仅中文；`/en/analyzer`、`/en/projects/review` 重定向到中文路径；英文项目详情页在存在代码导读时提示“仅中文”。
 
 ### 4.2 后续
 
-- 推荐 `/en/...` 与中文路由并存
-- 系统 UI 与内容分文件维护
+- 如需翻译代码导读，需扩展 AI draft / analysis 数据模型以支持多语言字段。
+- 新增页面时：放入 `src/app/[locale]/`，文案进 `src/content/` 与 `src/content/en/`，内部链接使用 `localizeHref`。
 
 ---
 
@@ -212,7 +219,7 @@ src/components/
 - [x] 响应式基础
 - [x] 基础 SEO（layout metadata）
 - [ ] — 以下不在第一版 —
-- [ ] i18n 切换功能
+- [x] i18n 切换功能（zh / en，核心页面）
 - [ ] Project Analyzer
 - [ ] 其他 Future Modules 首页入口
 

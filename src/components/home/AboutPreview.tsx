@@ -1,10 +1,12 @@
 import Link from "next/link";
-import { siteContent } from "@/content/site";
+import { getSiteContent } from "@/content";
+import type { Locale } from "@/lib/i18n/config";
+import { localizeHref } from "@/lib/i18n/href";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { Divider } from "@/components/ui/Divider";
 
-export function AboutPreview() {
-  const { label, items } = siteContent.aboutPreview;
+export function AboutPreview({ locale }: { locale: Locale }) {
+  const { label, items, cta } = getSiteContent(locale).aboutPreview;
 
   return (
     <section className="border-t border-border-soft bg-bg-secondary/50">
@@ -26,8 +28,8 @@ export function AboutPreview() {
           </p>
         </div>
 
-        <Link href="/about" className="enter-indicator mt-8 inline-flex">
-          查看完整简历
+        <Link href={localizeHref(locale, "/about")} className="enter-indicator mt-8 inline-flex">
+          {cta}
           <span aria-hidden="true">→</span>
         </Link>
       </div>

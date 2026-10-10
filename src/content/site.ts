@@ -21,6 +21,9 @@ export interface SiteContent {
   languageToggle: {
     zh: string;
     en: string;
+    /** aria-labels for the two toggle targets (current / switch-to). */
+    zhLabel: string;
+    enLabel: string;
   };
   hero: {
     title: string;
@@ -33,6 +36,15 @@ export interface SiteContent {
   aboutPreview: {
     label: string;
     items: string[];
+    cta: string;
+  };
+  contactPage: {
+    label: string;
+    title: string;
+    /** Rendered as `${intro}<link>${outro}` where link points to /about. */
+    intro: string;
+    aboutLinkText: string;
+    outro: string;
   };
   seo: {
     title: string;
@@ -57,6 +69,9 @@ export interface SiteContent {
     caseLabel: string;
     walkthroughLabel: string;
     walkthroughUnavailable: string;
+    /** Shown on locales where the code walkthrough is not translated. */
+    walkthroughZhOnly: string;
+    viewChineseVersion: string;
   };
   analyzerPage: {
     title: string;
@@ -96,6 +111,8 @@ export const siteContent: SiteContent = {
   languageToggle: {
     zh: "中",
     en: "EN",
+    zhLabel: "当前语言：中文",
+    enLabel: "切换至英文",
   },
   hero: {
     title: profile.nameZh,
@@ -113,6 +130,14 @@ export const siteContent: SiteContent = {
       profile.directions.join(" · "),
       profile.tagline,
     ],
+    cta: "查看完整简历",
+  },
+  contactPage: {
+    label: "CONTACT",
+    title: "联系",
+    intro: "欢迎通过以下渠道联系我。完整简历信息请见",
+    aboutLinkText: "关于页面",
+    outro: "。",
   },
   seo: {
     title: "ZSsite — 施展",
@@ -144,6 +169,8 @@ export const siteContent: SiteContent = {
     caseLabel: "PROJECT CASE",
     walkthroughLabel: "PROJECT WALKTHROUGH",
     walkthroughUnavailable: "该项目的代码导读尚未就绪。",
+    walkthroughZhOnly: "",
+    viewChineseVersion: "",
   },
   analyzerPage: {
     title: "公开项目解析器",

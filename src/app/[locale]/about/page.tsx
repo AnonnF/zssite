@@ -1,19 +1,32 @@
 import Link from "next/link";
-import { profile } from "@/content/profile";
-import { resumePage } from "@/content/resume";
+import type { Metadata } from "next";
+import { getProfile, getResumePage } from "@/content";
+import { buildAlternates } from "@/lib/i18n/href";
+import { resolveLocale, type LocaleParams } from "@/lib/i18n/params";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { Divider } from "@/components/ui/Divider";
 import { Tag } from "@/components/ui/Tag";
 import { BackToHomeLink } from "@/components/layout/BackToHomeLink";
 import { ResumeSection } from "@/components/about/ResumeSection";
 
-export default function AboutPage() {
+export async function generateMetadata({ params }: LocaleParams): Promise<Metadata> {
+  const locale = await resolveLocale(params);
+  return {
+    title: `${getResumePage(locale).title} — ZSsite`,
+    alternates: buildAlternates(locale, "/about"),
+  };
+}
+
+export default async function AboutPage({ params }: LocaleParams) {
+  const locale = await resolveLocale(params);
+  const profile = getProfile(locale);
+  const resumePage = getResumePage(locale);
   const { label, title, subtitle, summary, directions, sectionLabels } =
     resumePage;
 
   return (
     <div className="mx-auto max-w-content px-6 py-section md:px-12 lg:px-16">
-      <BackToHomeLink className="mb-6" />
+      <BackToHomeLink className="mb-6" locale={locale} />
 
       <header className="border-b border-border-soft pb-8 md:pb-10">
         <SectionLabel withAccent>{label}</SectionLabel>
@@ -28,10 +41,10 @@ export default function AboutPage() {
 
         <div className="flex flex-wrap items-baseline gap-x-4 gap-y-2">
           <h2 className="font-[family-name:var(--font-body-sc)] text-h2 font-black tracking-tight">
-            {profile.nameZh}
+            {locale === "en" ? profile.nameEn : profile.nameZh}
           </h2>
           <span className="font-display text-h3 font-semibold uppercase tracking-wide text-muted">
-            {profile.nameEn}
+            {locale === "en" ? profile.nameZh : profile.nameEn}
           </span>
         </div>
 
